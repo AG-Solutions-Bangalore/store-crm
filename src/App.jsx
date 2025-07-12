@@ -10,14 +10,16 @@
 //     </Layout>
 //   );
 // }
-import { Routes, Route, BrowserRouter } from "react-router-dom";
-import SignIn from "./pages/auth/SignIn";
-import ProtectedLayout from "./components/ProtectedLayout";
-import Dashbord from "./pages/home/dashbord";
+import { Route, Routes } from "react-router-dom";
 import AppInitializer from "./components/AppInitializer";
+import ProtectedLayout from "./components/ProtectedLayout";
 import VersionCheck from "./components/VersionCheck";
 import ForgotPassword from "./pages/auth/ForgotPassword";
-import UserForm from "./components/user/UserForm";
+import SignIn from "./pages/auth/SignIn";
+import Dashbord from "./pages/home/dashbord";
+import UserPage from "./pages/profile/Profile";
+import UserList from "./pages/user/userList";
+import UserForm from "./pages/user/UserForm";
 
 function App() {
   return (
@@ -35,7 +37,11 @@ function App() {
             <ProtectedLayout>
               <Routes>
                 <Route path="/home" element={<Dashbord />} />
-                <Route path="/user-form" element={<UserForm />} />
+                <Route path="/user-form" element={<UserPage />} />
+                <Route path="/user" element={<UserList />} />
+                <Route path="/user-create" element={<UserForm />} />
+                <Route path="/user-edit/:id" element={<UserForm />} />
+
                 {/* Add more protected routes here */}
               </Routes>
             </ProtectedLayout>

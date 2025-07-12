@@ -1,53 +1,70 @@
 import { useEffect, useState } from "react";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import { PROFILE, UPDATE_PROFILE } from "../../api";
+import {
+  CREATE_USER_LIST,
+  PROFILE,
+  UPDATE_PROFILE,
+  GET_USER_BY_ID,
+} from "../../api";
 import usetoken from "../../api/usetoken";
 import { message, Form, Spin } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ProfileForm from "../../components/user/ProfileForm";
 
-const UserPage = () => {
+const UserForm = () => {
   const token = usetoken();
-  const { trigger: fetchTrigger, loading: fetchloading } = useApiMutation();
-  const { trigger: submitTrigger, loading: submitloading } = useApiMutation();
+  const { id } = useParams(); // 🔁 if `id` exists → Edit mode
+  const isEditMode = Boolean(id);
+
+  const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
+  const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
   const [form] = Form.useForm();
   const [initialData, setInitialData] = useState({});
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
   const [noImageUrl, setNoImageUrl] = useState("");
-  const [userId, setUserId] = useState(null);
-  const [addressForms, setAddressForms] = useState([]);
+  const [addressForms, setAddressForms] = useState([
+    { id: "", address_type: "", address: "", is_default: "No" },
+  ]);
+
   const navigate = useNavigate();
+
   const fetchProfile = async () => {
-    const res = await fetchTrigger({
-      url: PROFILE,
+    const res = await FetchTrigger({
+      url: `${GET_USER_BY_ID}/${id}`,
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    const userData = res?.data || {};
-    setInitialData(userData);
-    setUserId(userData.id);
+    if (!res || !res.data) return;
+
+    const userData = res.data;
+    setInitialData({
+      ...userData,
+      user_type: String(userData.user_type),
+    });
+    form.setFieldsValue(userData);
 
     const userImage = res.image_url?.find((i) => i.image_for == "User");
     const noImage = res.image_url?.find((i) => i.image_for == "No Image");
     setImageBaseUrl(userImage?.image_url || "");
     setNoImageUrl(noImage?.image_url || "");
+
     setAddressForms(
       Array.isArray(res.address)
         ? res.address.map((a) => ({
             id: a.id || "",
             address_type: a.address_type || "",
             address: a.address || "",
-            is_default: a.is_default || false,
+            is_default: a.is_default === "yes",
           }))
         : []
     );
   };
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (isEditMode) fetchProfile();
+  }, [id]);
 
   const handleAddressChange = (index, field, value) => {
     const updated = [...addressForms];
@@ -85,8 +102,10 @@ const UserPage = () => {
       formData.append("email", values.email);
       formData.append("mobile", values.mobile);
       formData.append("whatsapp", values.whatsapp || "");
-      formData.append("is_active", values.is_active ? "true" : "false");
-      formData.append("user_type", values.user_type);
+      formData.append("user_type", String(values.user_type));
+      if (isEditMode) {
+        formData.append("is_active", values.is_active ? "true" : "false");
+      }
       if (avatarFile) {
         formData.append("avatar_photo", avatarFile);
       } else if (form.getFieldValue("avatar_photo")) {
@@ -107,8 +126,10 @@ const UserPage = () => {
         )
       );
 
-      await submitTrigger({
-        url: `${UPDATE_PROFILE}/${values?.id || userId}?_method=PUT`,
+      await SubmitTrigger({
+        url: isEditMode
+          ? `${UPDATE_PROFILE}/${id}?_method=PUT`
+          : CREATE_USER_LIST,
         method: "post",
         data: formData,
         headers: {
@@ -117,13 +138,16 @@ const UserPage = () => {
         },
       });
 
-      message.success("Profile updated successfully!");
-      navigate("/home");
+      message.success(
+        `User ${isEditMode ? "updated" : "created"} successfully!`
+      );
+      navigate("/user");
     } catch (err) {
-      console.error("Error updating profile:", err);
-      message.error("Failed to update profile.");
+      console.error("Error submitting form:", err);
+      message.error(`Failed to ${isEditMode ? "update" : "create"} user.`);
     }
   };
+
   return (
     <>
       {fetchloading ? (
@@ -133,7 +157,7 @@ const UserPage = () => {
       ) : (
         <ProfileForm
           loading={submitloading}
-          type="updateprofile"
+          type={isEditMode ? "edituser" : "createuser"}
           form={form}
           initialValues={initialData}
           onSubmit={handleSubmit}
@@ -154,4 +178,4 @@ const UserPage = () => {
   );
 };
 
-export default UserPage;
+export default UserForm;
