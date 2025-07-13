@@ -1,4 +1,3 @@
-// components/forms/ProfileForm.jsx
 import {
   DeleteOutlined,
   PlusOutlined,
@@ -18,7 +17,7 @@ import {
 } from "antd";
 import { useEffect } from "react";
 
-const ProfileForm = ({
+const Product = ({
   type,
   form,
   initialValues = {},
@@ -41,6 +40,7 @@ const ProfileForm = ({
   const handleFinish = (values) => {
     onSubmit?.(values);
   };
+
   return (
     <Card>
       <Form
@@ -50,10 +50,12 @@ const ProfileForm = ({
         requiredMark={false}
         className="mt-4"
       >
-        {type == "createuser" ? (
+        {type == "create" ? (
           <Space className="mb-4 w-full justify-between" direction="horizontal">
             <div>
-              <h2 className="text-2xl font-bold text-[#006666]">Create User</h2>
+              <h2 className="text-2xl font-bold text-[#006666]">
+                Create Product
+              </h2>
             </div>
             <div className="flex items-center gap-4">
               <Avatar
@@ -87,11 +89,11 @@ const ProfileForm = ({
           </Space>
         ) : (
           <Space className="mb-4 w-full justify-between" direction="horizontal">
-            {type == "createuser" ? (
+            {type == "create" ? (
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-[#006666]">
-                    Create User
+                    Create Product
                   </h2>
                 </div>
                 <div className="flex items-center gap-4">
@@ -117,7 +119,7 @@ const ProfileForm = ({
                       const reader = new FileReader();
                       reader.onload = () => setAvatarPreview(reader.result);
                       reader.readAsDataURL(file);
-                      return false; // prevent auto-upload
+                      return false;
                     }}
                   >
                     <Button icon={<UploadOutlined />}>Upload Avatar</Button>
@@ -297,4 +299,4 @@ const ProfileForm = ({
   );
 };
 
-export default ProfileForm;
+export default Product;

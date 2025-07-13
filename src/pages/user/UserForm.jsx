@@ -13,7 +13,7 @@ import ProfileForm from "../../components/user/ProfileForm";
 
 const UserForm = () => {
   const token = usetoken();
-  const { id } = useParams(); // 🔁 if `id` exists → Edit mode
+  const { id } = useParams();
   const isEditMode = Boolean(id);
 
   const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
@@ -108,12 +108,6 @@ const UserForm = () => {
       }
       if (avatarFile) {
         formData.append("avatar_photo", avatarFile);
-      } else if (form.getFieldValue("avatar_photo")) {
-        const imageUrl = `${imageBaseUrl}${form.getFieldValue("avatar_photo")}`;
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], "avatar.jpg", { type: blob.type });
-        formData.append("avatar_photo", file);
       }
 
       formData.append(
@@ -147,7 +141,7 @@ const UserForm = () => {
       message.error(`Failed to ${isEditMode ? "update" : "create"} user.`);
     }
   };
-
+  console.log(avatarFile, "avatarFile");
   return (
     <>
       {fetchloading ? (

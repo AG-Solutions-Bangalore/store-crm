@@ -18,8 +18,11 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import SignIn from "./pages/auth/SignIn";
 import Dashbord from "./pages/home/dashbord";
 import UserPage from "./pages/profile/Profile";
-import UserList from "./pages/user/userList";
 import UserForm from "./pages/user/UserForm";
+import CategoryList from "./pages/category/CategoryList";
+import UserList from "./pages/user/UserList";
+import ProductList from "./pages/product/ProductList";
+import ProductForm from "./pages/product/ProductForm";
 
 function App() {
   return (
@@ -41,6 +44,9 @@ function App() {
                 <Route path="/user" element={<UserList />} />
                 <Route path="/user-create" element={<UserForm />} />
                 <Route path="/user-edit/:id" element={<UserForm />} />
+                <Route path="/category" element={<CategoryList />} />
+                <Route path="/product" element={<ProductList />} />
+                <Route path="/product-create" element={<ProductForm />} />
 
                 {/* Add more protected routes here */}
               </Routes>
