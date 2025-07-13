@@ -9,7 +9,7 @@ import { useApiMutation } from "../../hooks/useApiMutation";
 const { Search } = Input;
 import { Select } from "antd";
 const { Option } = Select;
-const UserPage = () => {
+const UserList = () => {
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
@@ -141,4 +141,4 @@ const UserPage = () => {
   );
 };
 
-export default UserPage;
+export default UserList;

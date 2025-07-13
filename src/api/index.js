@@ -20,3 +20,11 @@ export const USER_LIST = `/panel-fetch-user-list`;
 export const CREATE_USER_LIST = `/panel-create-user`;
 //GET_USER_BY_ID
 export const GET_USER_BY_ID = `/panel-fetch-user-by-id`;
+//CATEGORY_LIST
+export const CATEGORY_LIST = `/category`;
+//CATEGORY_LIST
+export const CATEGORY_ACTIVE = `/categorys/active`;
+//CATEGORY_LIST
+export const FETCH_UNIT = `/panel-fetch-unit`;
+//PRODUCT_LIST
+export const PRODUCT_LIST = `/product`;

@@ -18,8 +18,8 @@ const getMenuItems = (collapsed) => {
   if (collapsed) {
     return [
       { key: "/user", icon: <PieChartOutlined />, label: "User" },
-      { key: "2", icon: <DesktopOutlined />, label: "Analytics" },
-      { key: "3", icon: <ContainerOutlined />, label: "Projects" },
+      { key: "/category", icon: <DesktopOutlined />, label: "Category" },
+      { key: "/product", icon: <ContainerOutlined />, label: "Products" },
       {
         key: "sub1",
         icon: <MailOutlined />,
@@ -40,7 +40,8 @@ const getMenuItems = (collapsed) => {
       label: "Dashboard",
       children: [
         { key: "/user", icon: <PieChartOutlined />, label: "User" },
-        { key: "2", icon: <DesktopOutlined />, label: "Analytics" },
+        { key: "/category", icon: <DesktopOutlined />, label: "Category" },
+        { key: "/product", icon: <DesktopOutlined />, label: "Product" },
       ],
     },
     {
