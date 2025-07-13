@@ -12,11 +12,12 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
+import { useNavigate } from "react-router-dom";
 
 const getMenuItems = (collapsed) => {
   if (collapsed) {
     return [
-      { key: "1", icon: <PieChartOutlined />, label: "Overview" },
+      { key: "/user", icon: <PieChartOutlined />, label: "User" },
       { key: "2", icon: <DesktopOutlined />, label: "Analytics" },
       { key: "3", icon: <ContainerOutlined />, label: "Projects" },
       {
@@ -38,7 +39,7 @@ const getMenuItems = (collapsed) => {
       type: "group",
       label: "Dashboard",
       children: [
-        { key: "1", icon: <PieChartOutlined />, label: "Overview" },
+        { key: "/user", icon: <PieChartOutlined />, label: "User" },
         { key: "2", icon: <DesktopOutlined />, label: "Analytics" },
       ],
     },
@@ -66,6 +67,7 @@ const getMenuItems = (collapsed) => {
 export default function Sidebar({ collapsed, isMobile = false, onClose }) {
   const [selectedKeys, setSelectedKeys] = useState([""]);
   const [openKeys, setOpenKeys] = useState([""]);
+  const naviagte = useNavigate();
   const items = getMenuItems(collapsed);
   const dispatch = useDispatch();
   const [delayedCollapse, setDelayedCollapse] = useState(collapsed);
@@ -126,7 +128,10 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
           items={items}
           selectedKeys={selectedKeys}
           onOpenChange={(keys) => setOpenKeys(keys)}
-          onClick={({ key }) => setSelectedKeys([key])}
+          onClick={({ key }) => {
+            setSelectedKeys([key]);
+            naviagte(key);
+          }}
           className="custom-menu"
         />
       </div>
