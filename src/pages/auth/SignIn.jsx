@@ -5,6 +5,7 @@ import { useApiMutation } from "../../hooks/useApiMutation";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../../store/auth/authSlice";
 import { PANEL_LOGIN } from "../../api";
+import logo from "../../assets/logo.png";
 
 const { Title } = Typography;
 
@@ -63,7 +64,7 @@ const SignIn = () => {
           {/* Left Side - Login Form */}
           <div className="flex flex-col justify-center px-6 py-8">
             <div className="text-center mb-6">
-              <img src="/logo.png" alt="Logo" className="h-20 mx-auto" />
+              <img src={logo} alt="Logo" className="h-20 mx-auto" />
               <Title level={3} className="text-gray-800">
                 Sign in to your account
               </Title>

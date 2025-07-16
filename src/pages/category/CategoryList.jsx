@@ -1,5 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Input, App, Select, Spin, Pagination } from "antd";
+import { App, Button, Card, Input, Pagination, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { CATEGORY_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
@@ -7,7 +7,6 @@ import CategoryCard from "../../components/category/CategoryCard";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import CategoryForm from "./CategoryForm";
 const { Search } = Input;
-const { Option } = Select;
 const CategoryList = () => {
   const { message } = App.useApp();
 
@@ -18,17 +17,28 @@ const CategoryList = () => {
   const [pageSize, setPageSize] = useState(10);
   const [selectedId, setSelecetdId] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(null);
   const { trigger, loading: isMutating } = useApiMutation();
   const [users, setUsers] = useState([]);
   const [imageUrls, setImageUrls] = useState({
     userImageBase: "",
     noImage: "",
   });
-
   const fetchUser = async () => {
+    const queryParams = new URLSearchParams();
+    const term = searchTerm.trim().toLowerCase();
+
+    if ("inactive".startsWith(term) && term.length >= 4) {
+      queryParams.append("search", "false");
+    } else if ("active".startsWith(term) && term.length >= 4) {
+      queryParams.append("search", "true");
+    } else {
+      if (term) queryParams.append("search", term);
+    }
+
+    queryParams.append("page", pageno);
+
     const res = await trigger({
-      url: `${CATEGORY_LIST}?page=${pageno}`,
+      url: `${CATEGORY_LIST}?${queryParams.toString()}`,
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -37,7 +47,7 @@ const CategoryList = () => {
 
       setUsers(responseData?.data || []);
       setTotalPages(responseData?.last_page || 1);
-      setPageSize(responseData?.per_page || 10); 
+      setPageSize(responseData?.per_page || 10);
 
       const userImageObj = res.image_url?.find(
         (img) => img.image_for === "Category"
@@ -55,7 +65,7 @@ const CategoryList = () => {
 
   useEffect(() => {
     fetchUser();
-  }, [pageno]);
+  }, [pageno, searchTerm]);
 
   const handleToggleStatus = async (user) => {
     try {
@@ -98,29 +108,15 @@ const CategoryList = () => {
   const handleAddUser = () => {
     setopenDialog(true);
   };
-  const filteredUsers = users
-    ?.filter((user) => {
-      // Match status
-      if (statusFilter === "active" && user.is_active !== "true") return false;
-      if (statusFilter === "inactive" && user.is_active !== "false")
-        return false;
-      return true;
-    })
-    .map((user) => {
-      const flatString = Object.values(user)
-        .filter((v) => typeof v === "string" || typeof v === "number")
-        .join(" ")
-        .toLowerCase();
 
-      const matched = flatString.includes(searchTerm.toLowerCase());
-
-      return matched ? { ...user, _match: searchTerm } : null;
-    })
-    .filter(Boolean);
-
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value.toLowerCase());
+    setPageNo(1);
+  };
   return (
     <>
-      <Card className="min-h-screen">
+      <Card className="min-h-[35rem]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <h2 className="text-2xl font-bold text-[#006666]">Category List</h2>
 
@@ -128,18 +124,10 @@ const CategoryList = () => {
             <Search
               placeholder="Search category"
               allowClear
-              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+              onChange={handleSearchChange}
               className="max-w-sm"
             />
-            <Select
-              allowClear
-              placeholder="Filter by status"
-              onChange={(value) => setStatusFilter(value)}
-              className="w-40"
-            >
-              <Option value="active">Active</Option>
-              <Option value="inactive">Inactive</Option>
-            </Select>
+
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -155,20 +143,29 @@ const CategoryList = () => {
           <div className="flex justify-center py-20">
             <Spin size="large" />
           </div>
-        ) : filteredUsers.length > 0 ? (
+        ) : users.length > 0 ? (
           <>
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredUsers.map((user) => (
-                <CategoryCard
-                  imageUrls={imageUrls}
-                  key={user.id}
-                  user={user}
-                  onToggleStatus={handleToggleStatus}
-                  onEdit={handleEdit}
-                />
-              ))}
+            <div className="min-h-[22rem]">
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
+                {users.map((user) => (
+                  <CategoryCard
+                    imageUrls={imageUrls}
+                    key={user.id}
+                    user={user}
+                    onToggleStatus={handleToggleStatus}
+                    onEdit={handleEdit}
+                  />
+                ))}
+              </div>
             </div>
-
+          </>
+        ) : (
+          <div className="text-center text-gray-500 py-20">
+            No category found.
+          </div>
+        )}
+        <div className="flex justify-center mt-8">
+          {!isMutating && users.length > 0 && (
             <div className="flex justify-center mt-8">
               <Pagination
                 current={pageno}
@@ -178,12 +175,8 @@ const CategoryList = () => {
                 showSizeChanger={false}
               />
             </div>
-          </>
-        ) : (
-          <div className="text-center text-gray-500 py-20">
-            No category found.
-          </div>
-        )}
+          )}
+        </div>
       </Card>
 
       <CategoryForm

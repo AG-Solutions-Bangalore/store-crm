@@ -1,5 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Select, Spin, App } from "antd";
+import { App, Button, Card, Input, Pagination, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PRODUCT_LIST } from "../../api";
@@ -7,14 +7,15 @@ import usetoken from "../../api/usetoken";
 import ProductCard from "../../components/product/ProductCard";
 import { useApiMutation } from "../../hooks/useApiMutation";
 const { Search } = Input;
-const { Option } = Select;
 const ProductList = () => {
   const { message } = App.useApp();
 
   const token = usetoken();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageno, setPageNo] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const { trigger, loading: isMutating } = useApiMutation();
   const [users, setUsers] = useState([]);
   const [imageUrls, setImageUrls] = useState({
@@ -22,13 +23,28 @@ const ProductList = () => {
     noImage: "",
   });
   const fetchUser = async () => {
+    const queryParams = new URLSearchParams();
+    const term = searchTerm.trim().toLowerCase();
+
+    if ("inactive".startsWith(term) && term.length >= 4) {
+      queryParams.append("search", "false");
+    } else if ("active".startsWith(term) && term.length >= 4) {
+      queryParams.append("search", "true");
+    } else {
+      if (term) queryParams.append("search", term);
+    }
+
+    queryParams.append("page", pageno);
+
     const res = await trigger({
-      url: PRODUCT_LIST,
+      url: `${PRODUCT_LIST}?${queryParams.toString()}`,
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (res) {
-      setUsers(res.data);
+      setUsers(res.data.data);
+      setTotalPages(res.data?.last_page || 1);
+      setPageSize(res.data?.per_page || 10);
       const userImageObj = res.image_url?.find(
         (img) => img.image_for == "Product"
       );
@@ -45,7 +61,7 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [pageno, searchTerm]);
 
   const handleToggleStatus = async (user) => {
     try {
@@ -68,7 +84,7 @@ const ProductList = () => {
         setUsers(updatedUsers);
         message.success(
           res.message ||
-            `User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
+            Ō`User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
         );
       } else {
         message.error(res.message || "Failed to update user status.");
@@ -85,25 +101,12 @@ const ProductList = () => {
   const handleAddUser = () => {
     navigate("/product-create");
   };
-  const filteredUsers = users
-    .filter((user) => {
-      // Match status
-      if (statusFilter === "active" && user.is_active !== "true") return false;
-      if (statusFilter === "inactive" && user.is_active !== "false")
-        return false;
-      return true;
-    })
-    .map((user) => {
-      const flatString = Object.values(user)
-        .filter((v) => typeof v === "string" || typeof v === "number")
-        .join(" ")
-        .toLowerCase();
 
-      const matched = flatString.includes(searchTerm.toLowerCase());
-
-      return matched ? { ...user, _match: searchTerm } : null;
-    })
-    .filter(Boolean);
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value.toLowerCase());
+    setPageNo(1);
+  };
   return (
     <>
       <Card className="min-h-screen">
@@ -114,18 +117,10 @@ const ProductList = () => {
             <Search
               placeholder="Search product"
               allowClear
-              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+              onChange={handleSearchChange}
               className="max-w-sm"
             />
-            <Select
-              allowClear
-              placeholder="Filter by status"
-              onChange={(value) => setStatusFilter(value)}
-              className="w-40"
-            >
-              <Option value="active">Active</Option>
-              <Option value="inactive">Inactive</Option>
-            </Select>
+
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -141,23 +136,38 @@ const ProductList = () => {
           <div className="flex justify-center py-20">
             <Spin size="large" />
           </div>
-        ) : filteredUsers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredUsers.map((user) => (
-              <ProductCard
-                imageUrls={imageUrls}
-                key={user.id}
-                user={user}
-                onToggleStatus={handleToggleStatus}
-                onEdit={handleEdit}
-              />
-            ))}
+        ) : users.length > 0 ? (
+          <div className="min-h-[22rem]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {users.map((user) => (
+                <ProductCard
+                  imageUrls={imageUrls}
+                  key={user.id}
+                  user={user}
+                  onToggleStatus={handleToggleStatus}
+                  onEdit={handleEdit}
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="text-center text-gray-500 py-20">
-            No category found.
+            No product found.
           </div>
         )}
+        <div className="flex justify-center mt-8">
+          {!isMutating && users.length > 0 && (
+            <div className="flex justify-center mt-8">
+              <Pagination
+                current={pageno}
+                pageSize={pageSize}
+                total={totalPages * pageSize}
+                onChange={(page) => setPageNo(page)}
+                showSizeChanger={false}
+              />
+            </div>
+          )}
+        </div>
       </Card>
     </>
   );
