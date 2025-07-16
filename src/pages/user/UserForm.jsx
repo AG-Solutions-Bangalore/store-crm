@@ -1,15 +1,14 @@
+import { Form, message, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   CREATE_USER_LIST,
-  PROFILE,
-  UPDATE_PROFILE,
   GET_USER_BY_ID,
+  UPDATE_PROFILE
 } from "../../api";
 import usetoken from "../../api/usetoken";
-import { message, Form, Spin } from "antd";
-import { useNavigate, useParams } from "react-router-dom";
 import ProfileForm from "../../components/user/ProfileForm";
+import { useApiMutation } from "../../hooks/useApiMutation";
 
 const UserForm = () => {
   const token = usetoken();

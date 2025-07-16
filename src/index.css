@@ -84,3 +84,6 @@ body {
   transform: scale(1.2);
   transition: transform 0.2s ease;
 }
+/* .ant-message {
+  z-index: 9999 !important;
+} */

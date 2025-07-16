@@ -26,13 +26,16 @@ const CategoryCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const highlightMatch = (text, match) => {
     if (!match || !text) return text;
     const regex = new RegExp(`(${match})`, "gi");
-    return text.split(regex).map((part, index) =>
+    return text.split(regex).map((part, i) =>
       part.toLowerCase() === match.toLowerCase() ? (
-        <mark key={index} className="bg-[#006666] px-1 rounded">
+        <mark
+          key={i}
+          className="bg-[#006666]/20 text-[#006666] font-medium px-1 rounded"
+        >
           {part}
         </mark>
       ) : (
-        part
+        <span key={i}>{part}</span>
       )
     );
   };
@@ -40,69 +43,64 @@ const CategoryCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   return (
     <Card
       hoverable
-      className="rounded-2xl shadow-md border border-gray-100 transition-all duration-200 hover:shadow-lg"
-      bodyStyle={{ padding: "1rem" }}
+      className="rounded-2xl shadow-md border border-gray-100 transition-all duration-200 hover:shadow-lg p-4"
+      bodyStyle={{ padding: 0 }}
     >
-      <div className="flex justify-between items-center mb-4">
-        <span className="text-gray-600 font-medium bg-[#e6f2f2] px-3 py-1 rounded-full">
+      <div className="relative w-full overflow-hidden rounded-lg mb-3 h-[120px] bg-gray-50">
+        <div className="absolute top-2 left-2 z-10 bg-[#e6f2f2] text-[#006666] text-sm font-semibold px-3 py-1 rounded-full shadow-sm">
           {highlightMatch(category_sort_order || "", _match)}
-        </span>
-        <div className="flex gap-2">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => onEdit(id)}
-            className="bg-[#006666]"
-          />
-          <Popconfirm
-            title={`Mark user as ${isActive ? "Inactive" : "Active"}?`}
-            onConfirm={() => onToggleStatus(user)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              type="dashed"
-              size="small"
-              icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-            />
-          </Popconfirm>
         </div>
-      </div>
 
-      <div className="flex justify-center mb-4">
         <Image
-          width={200}
-          height={100}
           src={avatarSrc}
           alt="Category"
-          className="rounded object-cover border"
+          className="w-full h-full object-cover"
+          fallback={imageUrls.noImage}
         />
       </div>
 
-      <div className="flex justify-between items-center">
-        <span className="text-gray-700 font-semibold text-base">
+      <div className="px-2 mb-4">
+        <span className="text-base font-semibold text-gray-800 mb-4 block">
           {highlightMatch(category_name || "", _match)}
         </span>
 
-        <div className="flex items-center gap-2">
-          {isActive ? (
-            <Tag
-              color="green"
-              icon={<CheckCircleTwoTone twoToneColor="#52c41a" />}
-              className="px-2 py-0.5 rounded-full"
+        <div className="flex items-center justify-between gap-2 w-full">
+          <Tag
+            icon={
+              isActive ? (
+                <CheckCircleTwoTone twoToneColor="#52c41a" />
+              ) : (
+                <CloseCircleTwoTone twoToneColor="#ff4d4f" />
+              )
+            }
+            color={isActive ? "green" : "red"}
+            className="px-2 py-0.5 rounded-full text-sm"
+          >
+            {isActive ? "Active" : "Inactive"}
+          </Tag>
+          <div className="flex gap-2 w-full">
+            <Button
+              icon={<EditOutlined />}
+              size="small"
+              type="primary"
+              onClick={() => onEdit(id)}
+              className="bg-[#006666] hover:!bg-[#004d4d]"
+              block
+            />
+            <Popconfirm
+              title={`Mark category as ${isActive ? "Inactive" : "Active"}?`}
+              onConfirm={() => onToggleStatus(user)}
+              okText="Yes"
+              cancelText="No"
             >
-              Active
-            </Tag>
-          ) : (
-            <Tag
-              color="red"
-              icon={<CloseCircleTwoTone twoToneColor="#ff4d4f" />}
-              className="px-2 py-0.5 rounded-full"
-            >
-              Inactive
-            </Tag>
-          )}
+              <Button
+                icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                size="small"
+                type="dashed"
+                block
+              />
+            </Popconfirm>
+          </div>
         </div>
       </div>
     </Card>

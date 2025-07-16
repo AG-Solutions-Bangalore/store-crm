@@ -1,5 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Input, message, Select, Spin } from "antd";
+import { Button, Card, Input, Select, Spin, App } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PRODUCT_LIST } from "../../api";
@@ -9,6 +9,8 @@ import { useApiMutation } from "../../hooks/useApiMutation";
 const { Search } = Input;
 const { Option } = Select;
 const ProductList = () => {
+  const { message } = App.useApp();
+
   const token = usetoken();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,20 +47,39 @@ const ProductList = () => {
     fetchUser();
   }, []);
 
-  const handleToggleStatus = (user) => {
-    const updatedUsers = users.map((u) =>
-      u.id === user.id
-        ? { ...u, is_active: u.is_active === "true" ? "false" : "true" }
-        : u
-    );
-    setUsers(updatedUsers);
-    message.success(
-      `User marked as ${user.is_active === "true" ? "Inactive" : "Active"}`
-    );
-  };
+  const handleToggleStatus = async (user) => {
+    try {
+      const newStatus =
+        user.is_active === "true" || user.is_active === true ? "false" : "true";
 
-  const handleEdit = (user) => {
-    navigate(`/product-edit/${user.id}`);
+      const res = await trigger({
+        url: `products/${user.id}/status`,
+        method: "patch",
+        data: { is_active: newStatus },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res?.code === 200 || res?.code === 201) {
+        const updatedUsers = users.map((u) =>
+          u.id === user.id ? { ...u, is_active: newStatus } : u
+        );
+        setUsers(updatedUsers);
+        message.success(
+          res.message ||
+            `User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
+        );
+      } else {
+        message.error(res.message || "Failed to update user status.");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      message.error(error || "Error updating user status.");
+    }
+  };
+  const handleEdit = (id) => {
+    navigate(`/product-edit/${id}`);
   };
 
   const handleAddUser = () => {
@@ -83,7 +104,6 @@ const ProductList = () => {
       return matched ? { ...user, _match: searchTerm } : null;
     })
     .filter(Boolean);
-
   return (
     <>
       <Card className="min-h-screen">
@@ -122,7 +142,7 @@ const ProductList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredUsers.map((user) => (
               <ProductCard
                 imageUrls={imageUrls}

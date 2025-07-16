@@ -1,15 +1,18 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Input, message, Spin } from "antd";
+import { Button, Card, Input, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { USER_LIST } from "../../api";
+import { UPDATE_STATUS, USER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import UserCard from "../../components/user/UserCard";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { App } from "antd";
+
 const { Search } = Input;
 import { Select } from "antd";
 const { Option } = Select;
 const UserList = () => {
+  const { message } = App.useApp();
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
@@ -47,18 +50,6 @@ const UserList = () => {
     fetchUser();
   }, []);
 
-  const handleToggleStatus = (user) => {
-    const updatedUsers = users.map((u) =>
-      u.id === user.id
-        ? { ...u, is_active: u.is_active === "true" ? "false" : "true" }
-        : u
-    );
-    setUsers(updatedUsers);
-    message.success(
-      `User marked as ${user.is_active === "true" ? "Inactive" : "Active"}`
-    );
-  };
-
   const handleEdit = (user) => {
     navigate(`/user-edit/${user.id}`);
   };
@@ -68,7 +59,6 @@ const UserList = () => {
   };
   const filteredUsers = users
     .filter((user) => {
-      // Match status
       if (statusFilter === "active" && user.is_active !== "true") return false;
       if (statusFilter === "inactive" && user.is_active !== "false")
         return false;
@@ -85,7 +75,36 @@ const UserList = () => {
       return matched ? { ...user, _match: searchTerm } : null;
     })
     .filter(Boolean);
+  const handleToggleStatus = async (user) => {
+    try {
+      const newStatus =
+        user.is_active === "true" || user.is_active === true ? "false" : "true";
 
+      const res = await trigger({
+        url: `${UPDATE_STATUS}/${user.id}`,
+        method: "put",
+        data: { is_active: newStatus },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res?.code === 200 || res?.code === 201) {
+        const updatedUsers = users.map((u) =>
+          u.id === user.id ? { ...u, is_active: newStatus } : u
+        );
+        setUsers(updatedUsers);
+        message.success(
+          `User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
+        );
+      } else {
+        message.error("Failed to update user status.");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      message.error("Error updating user status.");
+    }
+  };
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
