@@ -47,6 +47,7 @@ function App() {
                 <Route path="/category" element={<CategoryList />} />
                 <Route path="/product" element={<ProductList />} />
                 <Route path="/product-create" element={<ProductForm />} />
+                <Route path="/product-edit/:id" element={<ProductForm />} />
 
                 {/* Add more protected routes here */}
               </Routes>

@@ -13,7 +13,8 @@ import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import { useNavigate } from "react-router-dom";
-
+import logo from "../assets/logo.png";
+import logo1 from "../assets/logo-1.png";
 const getMenuItems = (collapsed) => {
   if (collapsed) {
     return [
@@ -100,17 +101,19 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
         ${isMobile ? "fixed z-50 h-screen" : "relative"}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between h-14 px-4 bg-[#006666] text-white">
-        <motion.img
-          src="https://vetra.laborasyon.com/assets/images/logo-light.svg"
-          alt="Logo"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className={`object-contain transition-all duration-300 ${
-            collapsed ? "w-8" : "w-28"
-          }`}
-        />
+      <div className="flex items-center justify-center h-14 px-4 bg-[#006666]">
+   
+          <motion.img
+            src={collapsed ? logo1 :logo}
+            alt="Logo"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className={`object-contain transition-all duration-300 ${
+              collapsed ? "w-8" : "w-28"
+            }`}
+          />
+     
         {isMobile && (
           <motion.button
             whileHover={{ scale: 1.1 }}

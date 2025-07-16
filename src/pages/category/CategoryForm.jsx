@@ -18,7 +18,6 @@ import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
-
   const isEditMode = userId ? true : false;
   const [form] = Form.useForm();
   const token = usetoken();
@@ -126,45 +125,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           className="mt-4"
         >
           <Space className="mb-4 w-full justify-between" direction="horizontal">
-            {!isEditMode ? (
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-[#006666]">
-                    Create User
-                  </h2>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Avatar
-                    size={64}
-                    src={
-                      categoryFilePreview ||
-                      (initialData.category_image
-                        ? initialData.category_image.startsWith("data:image")
-                          ? `${imageBaseUrl}${initialData.category_image}`
-                          : `${imageBaseUrl}${initialData.category_image}`
-                        : noImageUrl)
-                    }
-                    icon={<UserOutlined />}
-                    className="bg-[#006666] flex-shrink-0"
-                  />
-
-                  <Upload
-                    showUploadList={false}
-                    accept="image/*"
-                    beforeUpload={(file) => {
-                      setCategoryFile(file);
-                      const reader = new FileReader();
-                      reader.onload = () =>
-                        setCategoryFilePreview(reader.result);
-                      reader.readAsDataURL(file);
-                      return false;
-                    }}
-                  >
-                    <Button icon={<UploadOutlined />}>Upload Category Image</Button>
-                  </Upload>
-                </div>
-              </div>
-            ) : (
+            {isEditMode && (
               <>
                 <div className="flex flex-col items-center gap-2">
                   <Avatar
@@ -233,7 +194,6 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
               <Form.Item
                 label={<span>Category Image</span>}
                 name="category_image"
-            
               >
                 <Upload
                   showUploadList={false}

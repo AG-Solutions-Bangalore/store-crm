@@ -4,31 +4,11 @@ import {
   EditOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
-  IdcardOutlined,
+  MailOutlined,
   PhoneOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Card, Popconfirm, Tag, Tooltip } from "antd";
-const getUserTypeColor = (type) => {
-  const map = {
-    1: "blue",
-    2: "orange",
-    3: "purple",
-    4: "cyan",
-  };
-  return map[Number(type)] || "default";
-};
-
-const getUserTypeLabel = (type) => {
-  const userTypeMap = {
-    1: "User",
-    2: "Security",
-    3: "Staff",
-    4: "Delivery",
-  };
-
-  return userTypeMap[type] || "Unknown";
-};
 
 const UserCard = ({ user, onToggleStatus, onEdit, onView, imageUrls }) => {
   const highlightMatch = (text, match) => {
@@ -36,7 +16,11 @@ const UserCard = ({ user, onToggleStatus, onEdit, onView, imageUrls }) => {
     const regex = new RegExp(`(${match})`, "gi");
     return text.split(regex).map((part, index) =>
       part.toLowerCase() === match.toLowerCase() ? (
-        <mark key={index} className="bg-yellow-200 px-1 rounded">
+        <mark
+          key={index}
+          className="bg-[#006666] text-white px-1 py-0.5 rounded not-italic"
+          style={{ backgroundColor: "#006666", color: "white" }}
+        >
           {part}
         </mark>
       ) : (
@@ -45,101 +29,107 @@ const UserCard = ({ user, onToggleStatus, onEdit, onView, imageUrls }) => {
     );
   };
 
-  const isActive = user.is_active === "true";
+  const isActive = user.is_active === "true" || user.is_active === true;
   const avatarSrc = user.avatar_photo
     ? imageUrls.userImageBase + user.avatar_photo
     : imageUrls.noImage;
+
   return (
     <Card
       hoverable
       className="rounded-2xl shadow-md border border-gray-100 transition-all duration-200 hover:shadow-lg"
-      bodyStyle={{ padding: "1.25rem" }}
+      styles={{ body: { padding: "0.75rem" } }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex gap-4 items-start mb-3">
         <Avatar
           size={64}
-          icon={<UserOutlined />}
           src={avatarSrc}
+          icon={<UserOutlined />}
           className="bg-[#006666] flex-shrink-0"
         />
+
         <div className="flex-1 min-w-0">
-          <Tooltip title={user.name}>
-            <h3 className="text-lg font-semibold truncate text-[#006666]">
-              {highlightMatch(user.name, user._match)}
+          <div className="flex justify-end items-start mb-1">
+            <Tag
+              color={isActive ? "green" : "red"}
+              icon={
+                isActive ? (
+                  <CheckCircleTwoTone twoToneColor="#52c41a" />
+                ) : (
+                  <CloseCircleTwoTone twoToneColor="#ff4d4f" />
+                )
+              }
+              className="rounded-full px-2 py-0.5 text-xs"
+            >
+              {isActive ? "Active" : "Inactive"}
+            </Tag>
+
+            <div className="flex gap-2">
+              <Tooltip title="Edit User">
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => onEdit(user)}
+                  className="bg-[#006666]"
+                  size="small"
+                />
+              </Tooltip>
+              <Popconfirm
+                title={`Mark user as ${isActive ? "Inactive" : "Active"}?`}
+                onConfirm={() => onToggleStatus(user)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Tooltip title={isActive ? "Deactivate" : "Activate"}>
+                  <Button
+                    type="default"
+                    size="small"
+                    icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                  />
+                </Tooltip>
+              </Popconfirm>
+            </div>
+          </div>
+
+          {/* Firm Name */}
+          <Tooltip title={user.firm_name}>
+            <h3 className="text-md font-semibold truncate text-[#006666]">
+              {highlightMatch(user.firm_name || "", user._match)}
             </h3>
           </Tooltip>
-          <p className="text-sm text-gray-600 truncate flex items-center gap-1">
-            <PhoneOutlined className="text-gray-400" />
-            {highlightMatch(user.mobile, user._match)}
-          </p>
         </div>
       </div>
 
-      <div className="mt-4 text-sm text-gray-700 space-y-1">
+      {/* Email Row */}
+      <div className="text-sm text-gray-700">
         <p className="flex items-center gap-2">
-          <IdcardOutlined className="text-gray-400" />
-          <span className="font-medium">User Type:</span>
-          <Tag color={getUserTypeColor(user.user_type)}>
-            {highlightMatch(getUserTypeLabel(user.user_type), user._match)}
-          </Tag>
-        </p>
-        <p>
-          <span className="font-medium">Firm Name:</span>{" "}
-          <span className="text-gray-600">
-            {highlightMatch(user.firm_name || "", user._match)}
+          <UserOutlined className="text-gray-400" />
+          <span className="truncate">
+            {highlightMatch(user.name || "", user._match)}
           </span>
         </p>
-        <p className="flex items-center gap-2">
-          <span className="font-medium">Status:</span>
-          {isActive ? (
-            <Tag
-              color="green"
-              icon={<CheckCircleTwoTone twoToneColor="#52c41a" />}
-              className="px-2 py-0.5 rounded-full"
-            >
-              Active
-            </Tag>
-          ) : (
-            <Tag
-              color="red"
-              icon={<CloseCircleTwoTone twoToneColor="#ff4d4f" />}
-              className="px-2 py-0.5 rounded-full"
-            >
-              Inactive
-            </Tag>
-          )}
+        <p className="flex items-center gap-2 truncate ">
+          <PhoneOutlined className="text-gray-400" rotate={110} />
+          {/* <Tooltip title={user.mobile}> */}
+          <a href={`tel:${user.mobile}`}>
+            <span className="text-gray-700">
+              {highlightMatch(user.mobile || "", user._match)}
+            </span>
+          </a>
+          {/* </Tooltip> */}
         </p>
-      </div>
 
-      <div className="mt-4 flex flex-col gap-2">
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => onEdit(user)}
-            className="bg-[#006666] w-full"
-            size="small"
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title={`Mark user as ${isActive ? "Inactive" : "Active"}?`}
-            onConfirm={() => onToggleStatus(user)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              type="dashed"
-              block
-              size="small"
-              icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-            >
-              {isActive ? "Set Inactive" : "Set Active"}
-            </Button>
-          </Popconfirm>
-        </div>
+        <p className="flex items-center gap-2 truncate">
+          <MailOutlined className="text-gray-400" />
+          <Tooltip title={user.email}>
+            <span className="truncate">
+              {highlightMatch(user.email || "", user._match)}
+            </span>
+          </Tooltip>
+        </p>
       </div>
     </Card>
   );
 };
+
 export default UserCard;
