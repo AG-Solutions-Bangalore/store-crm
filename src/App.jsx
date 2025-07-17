@@ -23,6 +23,12 @@ import CategoryList from "./pages/category/CategoryList";
 import UserList from "./pages/user/UserList";
 import ProductList from "./pages/product/ProductList";
 import ProductForm from "./pages/product/ProductForm";
+import CustomerList from "./pages/security/SecurityList";
+import StaffList from "./pages/staff/StaffList";
+import SecurityList from "./pages/security/SecurityList";
+import DeliveryList from "./pages/delivery/DeliveryList";
+import SliderList from "./pages/slider/SliderList";
+import Notification from "./pages/notification/Notification";
 
 function App() {
   return (
@@ -41,9 +47,15 @@ function App() {
               <Routes>
                 <Route path="/home" element={<Dashbord />} />
                 <Route path="/user-form" element={<UserPage />} />
-                <Route path="/user" element={<UserList />} />
                 <Route path="/user-create" element={<UserForm />} />
                 <Route path="/user-edit/:id" element={<UserForm />} />
+                <Route path="/user" element={<UserList />} />
+                <Route path="/security" element={<SecurityList />} />
+                <Route path="/staff" element={<StaffList />} />
+                <Route path="/delivery" element={<DeliveryList />} />
+                <Route path="/slider" element={<SliderList />} />
+                <Route path="/notification" element={<Notification />} />
+
                 <Route path="/category" element={<CategoryList />} />
                 <Route path="/product" element={<ProductList />} />
                 <Route path="/product-create" element={<ProductForm />} />

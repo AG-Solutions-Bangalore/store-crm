@@ -1,20 +1,18 @@
-import { Form, message, Spin } from "antd";
+import { Form, Spin, App } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  CREATE_USER_LIST,
-  GET_USER_BY_ID,
-  UPDATE_PROFILE
-} from "../../api";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { CREATE_USER_LIST, GET_USER_BY_ID, UPDATE_PROFILE } from "../../api";
 import usetoken from "../../api/usetoken";
 import ProfileForm from "../../components/user/ProfileForm";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const UserForm = () => {
+  const { message } = App.useApp();
   const token = usetoken();
   const { id } = useParams();
+  const location = useLocation();
+  const { user_type, title, navigatedata } = location.state;
   const isEditMode = Boolean(id);
-
   const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
   const [form] = Form.useForm();
@@ -24,7 +22,7 @@ const UserForm = () => {
   const [imageBaseUrl, setImageBaseUrl] = useState("");
   const [noImageUrl, setNoImageUrl] = useState("");
   const [addressForms, setAddressForms] = useState([
-    { id: "", address_type: "", address: "", is_default: "No" },
+    { id: "", address_type: "", address: "", is_default: false },
   ]);
 
   const navigate = useNavigate();
@@ -40,7 +38,7 @@ const UserForm = () => {
     const userData = res.data;
     setInitialData({
       ...userData,
-      user_type: String(userData.user_type),
+      // user_type: String(userData.user_type),
     });
     form.setFieldsValue(userData);
 
@@ -64,7 +62,9 @@ const UserForm = () => {
   useEffect(() => {
     if (isEditMode) fetchProfile();
   }, [id]);
-
+  useEffect(() => {
+    form.setFieldsValue({ subs: addressForms });
+  }, [addressForms]);
   const handleAddressChange = (index, field, value) => {
     const updated = [...addressForms];
     if (field === "is_default" && value === true) {
@@ -93,6 +93,47 @@ const UserForm = () => {
   };
 
   const handleSubmit = async (values) => {
+    const subs = addressForms || [];
+
+    let hasValidSub = false;
+    let hasInvalidSub = false;
+    let hasDefault = false;
+
+    subs.forEach((sub) => {
+      const address = sub?.address?.trim();
+      const addressType = sub?.address_type?.trim();
+      const is_default = sub?.is_default?.toString().toLowerCase(); // normalize
+
+      const isFilled = address && addressType;
+      const isEmpty = !address && !addressType;
+
+      if (isFilled) {
+        hasValidSub = true;
+        if (is_default === "yes" || is_default === "true") {
+          hasDefault = true;
+        }
+      } else if (!isEmpty) {
+        hasInvalidSub = true;
+      } else {
+        hasInvalidSub = true;
+      }
+    });
+
+    if (!hasValidSub) {
+      message.error("At least one valid Address sub is required.");
+      return;
+    }
+
+    if (!hasDefault) {
+      message.error("At least one Address sub must be marked as default.");
+      return;
+    }
+
+    if (hasInvalidSub) {
+      message.error("One or more Address sub rows are incomplete or empty.");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("firm_name", values.firm_name || "");
@@ -101,7 +142,7 @@ const UserForm = () => {
       formData.append("email", values.email);
       formData.append("mobile", values.mobile);
       formData.append("whatsapp", values.whatsapp || "");
-      formData.append("user_type", String(values.user_type));
+      formData.append("user_type", String(user_type));
       if (isEditMode) {
         formData.append("is_active", values.is_active ? "true" : "false");
       }
@@ -119,7 +160,7 @@ const UserForm = () => {
         )
       );
 
-      await SubmitTrigger({
+      const res = await SubmitTrigger({
         url: isEditMode
           ? `${UPDATE_PROFILE}/${id}?_method=PUT`
           : CREATE_USER_LIST,
@@ -130,17 +171,20 @@ const UserForm = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      message.success(
-        `User ${isEditMode ? "updated" : "created"} successfully!`
-      );
-      navigate("/user");
+      if (res.code == 201) {
+        message.success(
+          res.message ||
+            `User ${isEditMode ? "updated" : "created"} successfully!`
+        );
+        navigate(`${navigatedata}`);
+      } else {
+        message.error(res.message || "Error");
+      }
     } catch (err) {
       console.error("Error submitting form:", err);
       message.error(`Failed to ${isEditMode ? "update" : "create"} user.`);
     }
   };
-  console.log(avatarFile, "avatarFile");
   return (
     <>
       {fetchloading ? (
@@ -150,7 +194,8 @@ const UserForm = () => {
       ) : (
         <ProfileForm
           loading={submitloading}
-          type={isEditMode ? "edituser" : "createuser"}
+          title={isEditMode ? `Update ${title}` : `Create ${title}`}
+          // title={isEditMode ?title}
           form={form}
           initialValues={initialData}
           onSubmit={handleSubmit}

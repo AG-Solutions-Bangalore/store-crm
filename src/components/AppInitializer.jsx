@@ -1,6 +1,7 @@
 // import { DOT_ENV, PANEL_CHECK } from "@/api";
 // import { logout } from "@/redux/slices/AuthSlice";
 // import { setShowUpdateDialog } from "@/redux/slices/versionSlice";
+import { App } from "antd";
 import CryptoJS from "crypto-js";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,17 +10,15 @@ import { DOT_ENV, PANEL_CHECK } from "../api";
 import usetoken from "../api/usetoken";
 import { useApiMutation } from "../hooks/useApiMutation";
 import { logout } from "../store/auth/authSlice";
-import { persistor } from "../store/store";
-import toast from "react-hot-toast";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
-import useLogout from "../hooks/useLogout";
+import { persistor } from "../store/store";
 
 const secretKey = import.meta.env.VITE_SECRET_KEY;
 const validationKey = import.meta.env.VITE_SECRET_VALIDATION;
 
 const AppInitializer = ({ children }) => {
-  const { trigger, loading } = useApiMutation();
-
+  const { trigger } = useApiMutation();
+  const { message } = App.useApp();
   const token = usetoken();
   const navigate = useNavigate();
   const location = useLocation();
@@ -77,7 +76,7 @@ const AppInitializer = ({ children }) => {
         dispatch(logout());
         setTimeout(() => persistor.purge(), 1000);
 
-        toast.error(error.message || "Environment Error");
+        message.error(error.message || "Environment Error");
 
         if (location.pathname !== "/maintenance") {
           navigate("/maintenance");

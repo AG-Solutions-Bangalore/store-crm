@@ -1,17 +1,15 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Spin } from "antd";
+import { App, Button, Card, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UPDATE_STATUS, USER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import UserTable from "../../components/user/UserCard";
+import UserCard from "../../components/user/UserCard";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import { App } from "antd";
 
 const { Search } = Input;
-import { Select } from "antd";
 const { Option } = Select;
-const UserList = () => {
+const SecurityList = () => {
   const { message } = App.useApp();
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,26 +51,25 @@ const UserList = () => {
   const handleEdit = (user) => {
     navigate(`/user-edit/${user.id}`, {
       state: {
-        user_type: 1,
-        title: "User",
-        navigatedata: "/user",
+        user_type: 2,
+        title: "security",
+        navigatedata: "/security",
       },
     });
   };
-
   const handleAddUser = () => {
     navigate("/user-create", {
       state: {
-        user_type: 1,
-        title: "User",
-        navigatedata: "/user",
+        user_type: 2,
+        title: "security",
+        navigatedata: "/security",
       },
     });
   };
 
   const filteredUsers = users
     .filter((user) => {
-      if (user.user_type !== 1) return false;
+      if (user.user_type !== 2) return false;
       if (statusFilter === "active" && user.is_active !== "true") return false;
       if (statusFilter === "inactive" && user.is_active !== "false")
         return false;
@@ -123,7 +120,7 @@ const UserList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-[#006666]">User List</h2>
+        <h2 className="text-2xl font-bold text-[#006666]">Security List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -147,7 +144,7 @@ const UserList = () => {
             onClick={handleAddUser}
             className="bg-[#006666]"
           >
-            Add User
+            Add Security
           </Button>
         </div>
       </div>
@@ -157,8 +154,7 @@ const UserList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <UserTable
-            type="user"
+          <UserCard
             imageUrls={imageUrls}
             users={filteredUsers}
             onToggleStatus={handleToggleStatus}
@@ -172,4 +168,4 @@ const UserList = () => {
   );
 };
 
-export default UserList;
+export default SecurityList;

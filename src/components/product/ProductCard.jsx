@@ -26,23 +26,23 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const offerPrice = parseFloat(product_spl_offer_price);
   const sellingPrice = parseFloat(product_selling_price);
 
-  const highlightMatch = (text, match) => {
-    if (!match || !text) return text;
-    const regex = new RegExp(`(${match})`, "gi");
-    return text.split(regex).map((part, index) =>
-      part.toLowerCase() === match.toLowerCase() ? (
-        <mark
-          key={index}
-          className="bg-[#006666] text-white px-1 py-0.5 rounded not-italic"
-          style={{ backgroundColor: "#006666", color: "white" }}
-        >
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
+  // const highlightMatch = (text, match) => {
+  //   if (!match || !text) return text;
+  //   const regex = new RegExp(`(${match})`, "gi");
+  //   return text.split(regex).map((part, index) =>
+  //     part.toLowerCase() === match.toLowerCase() ? (
+  //       <mark
+  //         key={index}
+  //         className="bg-[#006666] text-white px-1 py-0.5 rounded not-italic"
+  //         style={{ backgroundColor: "#006666", color: "white" }}
+  //       >
+  //         {part}
+  //       </mark>
+  //     ) : (
+  //       part
+  //     )
+  //   );
+  // };
 
   const discount =
     offerPrice > 0 && sellingPrice > offerPrice
@@ -99,17 +99,20 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
       <div className="px-2 mb-2">
         {/* Product Name */}
         <h3 className="text-base font-semibold mb-2 text-[#333] leading-tight">
-          {highlightMatch(product_name || "", _match)}
+          {/* {highlightMatch(product_name || "", _match)} */}
+          {product_name || ""}
         </h3>
 
         {/* MRP and Unit */}
         <div className="flex justify-between items-center mb-2 text-sm text-gray-700">
           <div>
             <span className="font-medium mb-0">MRP:</span>{" "}
-            {highlightMatch(product_mrp || "", _match)}
+            {/* {highlightMatch(product_mrp || "", _match)} */}
+            {product_mrp || ""}
           </div>
           <span className="text-gray-600 font-medium bg-[#e6f2f2] px-2 py-0.5 rounded-full">
-            {highlightMatch(`${product_unit_value} ${unit_name}`, _match)}
+            {/* {highlightMatch(`${product_unit_value} ${unit_name}`, _match)} */}
+            {product_unit_value || ""}
           </span>
         </div>
 
@@ -123,7 +126,8 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
                   offerPrice > 0 ? "line-through text-red-600" : "text-gray-600"
                 }`}
               >
-                {highlightMatch(product_selling_price || "", _match)}
+                {/* {highlightMatch(product_selling_price || "", _match)} */}
+                {product_selling_price || ""}
               </span>
             </div>
             {discount && (
@@ -134,9 +138,10 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
             <div>
               <span className="font-medium">Offer Price:</span>{" "}
               <span className="text-gray-600">
-                {offerPrice > 0
+                {/* {offerPrice > 0
                   ? highlightMatch(product_spl_offer_price || "", _match)
-                  : "-"}
+                  : "-"} */}
+                {offerPrice > 0 ? product_spl_offer_price || "" : "-"}
               </span>
             </div>
 

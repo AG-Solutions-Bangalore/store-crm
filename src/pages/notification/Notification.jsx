@@ -2,7 +2,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Input, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UPDATE_STATUS, USER_LIST } from "../../api";
+import { NOTIFICATION_LIST, UPDATE_STATUS, USER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import UserTable from "../../components/user/UserCard";
 import { useApiMutation } from "../../hooks/useApiMutation";
@@ -10,9 +10,12 @@ import { App } from "antd";
 
 const { Search } = Input;
 import { Select } from "antd";
+import NotificationTable from "../../components/notification/NotificationTable";
+import NotificationForm from "./NotificationForm";
 const { Option } = Select;
-const UserList = () => {
-  const { message } = App.useApp();
+const Notification = () => {
+  const [selectedId, setSelecetdId] = useState(false);
+  const [open, setopenDialog] = useState(false);
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
@@ -22,18 +25,17 @@ const UserList = () => {
     userImageBase: "",
     noImage: "",
   });
-  const navigate = useNavigate();
   const fetchUser = async () => {
     const res = await trigger({
-      url: USER_LIST,
+      url: NOTIFICATION_LIST,
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (res?.code == 201 && Array.isArray(res.data)) {
+    if (Array.isArray(res.data)) {
       setUsers(res.data);
 
       const userImageObj = res.image_url?.find(
-        (img) => img.image_for === "User"
+        (img) => img.image_for === "Notification"
       );
       const noImageObj = res.image_url?.find(
         (img) => img.image_for === "No Image"
@@ -50,29 +52,18 @@ const UserList = () => {
     fetchUser();
   }, []);
 
-  const handleEdit = (user) => {
-    navigate(`/user-edit/${user.id}`, {
-      state: {
-        user_type: 1,
-        title: "User",
-        navigatedata: "/user",
-      },
-    });
+  const handleEdit = (id) => {
+    setopenDialog(true);
+    setSelecetdId(id);
   };
 
   const handleAddUser = () => {
-    navigate("/user-create", {
-      state: {
-        user_type: 1,
-        title: "User",
-        navigatedata: "/user",
-      },
-    });
+    setopenDialog(true);
+    setSelecetdId(null);
   };
 
   const filteredUsers = users
     .filter((user) => {
-      if (user.user_type !== 1) return false;
       if (statusFilter === "active" && user.is_active !== "true") return false;
       if (statusFilter === "inactive" && user.is_active !== "false")
         return false;
@@ -90,44 +81,14 @@ const UserList = () => {
     })
     .filter(Boolean);
 
-  const handleToggleStatus = async (user) => {
-    try {
-      const newStatus =
-        user.is_active === "true" || user.is_active === true ? "false" : "true";
-
-      const res = await trigger({
-        url: `${UPDATE_STATUS}/${user.id}`,
-        method: "put",
-        data: { is_active: newStatus },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res?.code === 200 || res?.code === 201) {
-        const updatedUsers = users.map((u) =>
-          u.id === user.id ? { ...u, is_active: newStatus } : u
-        );
-        setUsers(updatedUsers);
-        message.success(
-          `User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
-        );
-      } else {
-        message.error("Failed to update user status.");
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-      message.error("Error updating user status.");
-    }
-  };
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-[#006666]">User List</h2>
+        <h2 className="text-2xl font-bold text-[#006666]">Notification List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
-            placeholder="Search user name or mobile"
+            placeholder="Search"
             allowClear
             onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             className="max-w-sm"
@@ -147,7 +108,7 @@ const UserList = () => {
             onClick={handleAddUser}
             className="bg-[#006666]"
           >
-            Add User
+            Add Notification
           </Button>
         </div>
       </div>
@@ -157,19 +118,24 @@ const UserList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <UserTable
-            type="user"
+          <NotificationTable
             imageUrls={imageUrls}
             users={filteredUsers}
-            onToggleStatus={handleToggleStatus}
             onEdit={handleEdit}
           />
         ) : (
           <div className="text-center text-gray-500 py-20">No users found.</div>
         )}
       </div>
+
+      <NotificationForm
+        open={open}
+        setOpenDialog={setopenDialog}
+        userId={selectedId}
+        fetchUser={fetchUser}
+      />
     </Card>
   );
 };
 
-export default UserList;
+export default Notification;

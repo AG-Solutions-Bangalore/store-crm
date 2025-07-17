@@ -1,481 +1,3 @@
-// import {
-//   DeleteOutlined,
-//   PlusOutlined,
-//   UploadOutlined,
-//   UserOutlined,
-// } from "@ant-design/icons";
-// import {
-//   Avatar,
-//   Button,
-//   Card,
-//   Form,
-//   Input,
-//   Select,
-//   Space,
-//   Spin,
-//   Switch,
-//   Upload,
-// } from "antd";
-// import { useEffect, useState } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-// import { CATEGORY_ACTIVE, FETCH_UNIT, PRODUCT_LIST } from "../../api";
-// import usetoken from "../../api/usetoken";
-// import { useApiMutation } from "../../hooks/useApiMutation";
-// import { App } from "antd";
-
-// const ProductForm = () => {
-//   const { message } = App.useApp();
-
-//   const token = usetoken();
-//   const { id } = useParams();
-//   const isEditMode = Boolean(id);
-
-//   const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
-//   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
-//   const { trigger, loading: isMutating } = useApiMutation();
-//   const [form] = Form.useForm();
-//   const [categoryData, setCategoryData] = useState([]);
-//   const [unitData, setUnitData] = useState([]);
-//   const [productForms, setProductForms] = useState([
-//     {
-//       id: "",
-//       is_default: false,
-//       product_images: null,
-//       preview: "",
-//       is_active: false,
-//     },
-//   ]);
-//   const navigate = useNavigate();
-
-//   const fetchUser = async () => {
-//     const res = await trigger({
-//       url: CATEGORY_ACTIVE,
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-//     const resunit = await trigger({
-//       url: FETCH_UNIT,
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-
-//     if (res && resunit) {
-//       setCategoryData(res?.data);
-//       setUnitData(resunit?.data);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchUser();
-//   }, []);
-
-//   const fetchProfile = async () => {
-//     const res = await FetchTrigger({
-//       url: `${PRODUCT_LIST}/${id}`,
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-
-//     if (!res?.data) return;
-
-//     const userData = res.data;
-//     const userImage = res.image_url?.find((i) => i.image_for === "Product");
-//     const noImage = res.image_url?.find((i) => i.image_for === "No Image");
-
-//     const imageBaseUrl = userImage?.image_url || "";
-//     const noImageUrl = noImage?.image_url || "";
-//     form.setFieldsValue({
-//       ...userData,
-//       category_ids: Number(userData.category_ids),
-//       is_active: userData.is_active === "true" || userData.is_active === true,
-//     });
-//     setProductForms(
-//       Array.isArray(userData.subs)
-//         ? userData.subs.map((a) => ({
-//             id: a.id || "",
-//             product_id: a.product_id || "",
-//             product_images: a.product_images || "",
-//             is_default: a.is_default === "true",
-//             is_active: a.is_active === "true",
-//             preview: a.product_images
-//               ? `${imageBaseUrl}${a.product_images}`
-//               : noImageUrl,
-//             product_images: null,
-//           }))
-//         : []
-//     );
-//     // form.setFieldsValue({
-//     //   subs: userData.subs.map((a) => ({
-//     //     id: a.id,
-//     //     product_id: a.product_id,
-//     //     product_images: a.product_images,
-//     //     is_default: a.is_default === "yes",
-//     //     is_active: a.is_active === "true",
-//     //     preview: a.product_images
-//     //       ? `${imageBaseUrl}${a.product_images}`
-//     //       : noImageUrl,
-//     //     product_images: null,
-//     //   })),
-//     // });
-//   };
-
-//   useEffect(() => {
-//     if (isEditMode) fetchProfile();
-//   }, [id]);
-//   useEffect(() => {
-//     form.setFieldsValue({ subs: productForms });
-//   }, [productForms]);
-//   const onAddressChange = (index, field, value) => {
-//     const updated = [...productForms];
-
-//     if (field === "is_default") {
-//       if (value === true) {
-//         updated.forEach((_, i) => {
-//           updated[i].is_default = i === index;
-//         });
-//       } else {
-//         updated[index].is_default = false;
-//       }
-//     } else {
-//       // Generic change
-//       updated[index][field] = value;
-//     }
-
-//     setProductForms(updated);
-//   };
-
-//   const onProductImageChange = (index, file) => {
-//     const reader = new FileReader();
-//     reader.onload = () => {
-//       const updated = [...productForms];
-
-//       while (updated.length <= index) {
-//         updated.push({});
-//       }
-
-//       updated[index].product_images = file;
-//       updated[index].preview = reader.result;
-//       setProductForms(updated);
-//     };
-
-//     reader.readAsDataURL(file);
-//   };
-
-//   const handleFinish = async (values) => {
-//     try {
-//       const missingImage = productForms.some((p) => !p.product_images);
-//       // if (missingImage) {
-//       //   console.log(missingImage, "missingImage");
-
-//       //   return message.error("Each product must have an image.");
-//       // }
-
-//       const formData = new FormData();
-//       formData.append("category_ids", values.category_ids || "");
-//       formData.append("product_name", values.product_name || "");
-//       formData.append(
-//         "product_short_description",
-//         values.product_short_description
-//       );
-//       formData.append("product_brand", values.product_brand);
-//       formData.append("product_unit_id", values.product_unit_id);
-//       formData.append("product_unit_value", values.product_unit_value || "");
-//       formData.append("product_mrp", values.product_mrp);
-//       formData.append("product_selling_price", values.product_selling_price);
-//       formData.append(
-//         "product_spl_offer_price",
-//         values.product_spl_offer_price
-//       );
-//       if (isEditMode) {
-//         formData.append("is_active", values.is_active ? "true" : "false");
-//       }
-//       productForms.forEach((item, index) => {
-//         if (isEditMode) {
-//           formData.append(`subs[${index}][id]`, item.id ? item.id : "");
-//         }
-//         formData.append(
-//           `subs[${index}][is_default]`,
-//           item.is_default ? true : false
-//         );
-//         formData.append(
-//           `subs[${index}][is_active]`,
-//           item.is_active ? true : false
-//         );
-//         if (item.product_images instanceof File) {
-//           formData.append(
-//             `subs[${index}][product_images]`,
-//             item.product_images
-//           );
-//         }
-//       });
-
-//       await SubmitTrigger({
-//         url: isEditMode ? `${PRODUCT_LIST}/${id}?_method=PUT` : PRODUCT_LIST,
-//         method: "post",
-//         data: formData,
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//           "Content-Type": "multipart/form-data",
-//         },
-//       });
-
-//       message.success(
-//         `User ${isEditMode ? "updated" : "created"} successfully!`
-//       );
-//       navigate("/product");
-//     } catch (err) {
-//       console.error("Error submitting form:", err);
-//       message.error(`Failed to ${isEditMode ? "update" : "create"} user.`);
-//     }
-//   };
-
-//   return (
-//     <>
-//       {fetchloading || isMutating ? (
-//         <div className="flex justify-center py-20">
-//           <Spin size="large" />
-//         </div>
-//       ) : (
-//         <Card>
-//           <Form
-//             form={form}
-//             layout="vertical"
-//             onFinish={handleFinish}
-//             requiredMark={false}
-//             className="mt-4"
-//           >
-//             <div className="flex justify-between items-center mb-4 w-full">
-//               <h2 className="text-2xl font-bold text-[#006666]">
-//                 {isEditMode ? "Edit" : "Create"} Product
-//               </h2>
-//               {isEditMode && (
-//                 <Form.Item
-//                   label="Active"
-//                   name="is_active"
-//                   valuePropName="checked"
-//                   className="mb-0"
-//                 >
-//                   <Switch />
-//                 </Form.Item>
-//               )}
-//             </div>
-
-//             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-//               <Form.Item
-//                 name="category_ids"
-//                 label="Category"
-//                 rules={[
-//                   { required: true, message: "Please select a category" },
-//                 ]}
-//               >
-//                 <Select placeholder="Select Category">
-//                   {categoryData?.map((category) => (
-//                     <Select.Option key={category.id} value={category.id}>
-//                       {category.category_name}
-//                     </Select.Option>
-//                   ))}
-//                 </Select>
-//               </Form.Item>
-
-//               <Form.Item
-//                 name="product_name"
-//                 label="Product Name"
-//                 rules={[
-//                   { required: true, message: "Product Name is required" },
-//                 ]}
-//               >
-//                 <Input />
-//               </Form.Item>
-
-//               <Form.Item
-//                 label="Brand"
-//                 name="product_brand"
-//                 rules={[{ required: true, message: "Brand is required" }]}
-//               >
-//                 <Input />
-//               </Form.Item>
-//               <Form.Item
-//                 name="product_unit_id"
-//                 label="Unit"
-//                 rules={[{ required: true, message: "Please select a unit" }]}
-//               >
-//                 <Select placeholder="Select Unit">
-//                   {unitData?.map((unit) => (
-//                     <Select.Option key={unit.id} value={unit.id}>
-//                       {unit.unit}
-//                     </Select.Option>
-//                   ))}
-//                 </Select>
-//               </Form.Item>
-//               <Form.Item
-//                 className="md:col-span-4"
-//                 label="Description"
-//                 name="product_short_description"
-//                 rules={[{ required: true, message: "Description is required" }]}
-//               >
-//                 <Input.TextArea rows={3} />
-//               </Form.Item>
-
-//               <Form.Item
-//                 label="Unit Value"
-//                 name="product_unit_value"
-//                 rules={[{ required: true, message: "Unit Value is required" }]}
-//               >
-//                 <Input />
-//               </Form.Item>
-//               <Form.Item
-//                 label="MRP"
-//                 name="product_mrp"
-//                 rules={[{ required: true, message: "MRP is required" }]}
-//               >
-//                 <Input />
-//               </Form.Item>
-
-//               <Form.Item
-//                 name="product_selling_price"
-//                 label="Selling Price"
-//                 rules={[
-//                   { required: true, message: "Selling Price is required" },
-//                 ]}
-//               >
-//                 <Input />
-//               </Form.Item>
-
-//               <Form.Item
-//                 name="product_spl_offer_price"
-//                 label="Offer Price"
-//                 rules={[{ required: true, message: "Offer Price is required" }]}
-//               >
-//                 <Input />
-//               </Form.Item>
-//             </div>
-
-//             <Form.List name="subs">
-//               {(fields, { add, remove }) => (
-//                 <>
-//                   <div className="flex justify-between items-center mb-4">
-//                     <strong>Product Sub</strong>
-//                     <Button
-//                       type="dashed"
-//                       onClick={() =>
-//                         add({
-//                           is_default: false,
-//                           product_images: null,
-//                           preview: null,
-//                         })
-//                       }
-//                       icon={<PlusOutlined />}
-//                     >
-//                       Add Product
-//                     </Button>
-//                   </div>
-
-//                   {fields.map(({ key, name, ...restField }, index) => {
-//                     const current = form.getFieldValue(["subs", name]) || {};
-//                     return (
-//                       <Card
-//                         key={key}
-//                         size="small"
-//                         className="mb-4"
-//                         title={`Product ${index + 1}`}
-//                         extra={
-//                           <Button
-//                             danger
-//                             size="small"
-//                             icon={<DeleteOutlined />}
-//                             onClick={() => remove(name)}
-//                             disabled={fields.length === 1}
-//                           >
-//                             Remove
-//                           </Button>
-//                         }
-//                       >
-//                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-//                           <Form.Item
-//                             {...restField}
-//                             name={[name, "product_images"]}
-//                             label="Product Image"
-//                           >
-//                             <div className="flex items-center gap-2">
-//                               {current?.preview ? (
-//                                 <Avatar size={36} src={current.preview} />
-//                               ) : (
-//                                 <Avatar size={36} icon={<UserOutlined />} />
-//                               )}
-//                               <Upload
-//                                 showUploadList={false}
-//                                 accept="image/*"
-//                                 beforeUpload={(file) => {
-//                                   onProductImageChange(index, file);
-//                                   return false;
-//                                 }}
-//                               >
-//                                 <Button icon={<UploadOutlined />}>
-//                                   Upload Image
-//                                 </Button>
-//                               </Upload>
-//                             </div>
-//                           </Form.Item>
-
-//                           <Form.Item
-//                             name={[name, "is_default"]}
-//                             label="Default"
-//                             valuePropName="checked"
-//                             rules={[
-//                               {
-//                                 required: true,
-//                                 message: "Please select a Default",
-//                               },
-//                             ]}
-//                           >
-//                             <Switch
-//                               checked={current.is_default}
-//                               onChange={(checked) =>
-//                                 onAddressChange(index, "is_default", checked)
-//                               }
-//                               // disabled={
-//                               //   !current.is_default &&
-//                               //   productForms.some((a) => a.is_default)
-//                               // }
-//                             />
-//                           </Form.Item>
-//                           {isEditMode && (
-//                             <Form.Item
-//                               name={[name, "is_active"]}
-//                               label="Active"
-//                               valuePropName="checked"
-//                             >
-//                               <Switch
-//                                 onChange={(checked) =>
-//                                   onAddressChange(index, "is_active", checked)
-//                                 }
-//                               />
-//                             </Form.Item>
-//                           )}
-//                         </div>
-//                       </Card>
-//                     );
-//                   })}
-//                 </>
-//               )}
-//             </Form.List>
-
-//             <div className="mt-6 text-center">
-//               <Form.Item>
-//                 <Button
-//                   type="primary"
-//                   htmlType="submit"
-//                   loading={submitloading}
-//                 >
-//                   Submit
-//                 </Button>
-//               </Form.Item>
-//             </div>
-//           </Form>
-//         </Card>
-//       )}
-//     </>
-//   );
-// };
-
-// export default ProductForm;
 import {
   DeleteOutlined,
   PlusOutlined,
@@ -548,7 +70,10 @@ const ProductForm = () => {
 
     form.setFieldsValue({
       ...userData,
-      category_ids: Number(userData.category_ids),
+
+      category_ids: userData.category_ids
+        ? userData.category_ids.split(",").map((id) => Number(id))
+        : [],
       is_active: userData.is_active === "true" || userData.is_active === true,
     });
 
@@ -604,7 +129,7 @@ const ProductForm = () => {
       setProductForms(updated);
     };
     reader.readAsDataURL(file);
-    return false; // Prevent upload
+    return false;
   };
 
   const handleFinish = async (values) => {
@@ -709,10 +234,28 @@ const ProductForm = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <Form.Item
             name="category_ids"
-            label="Category"
-            rules={[{ required: true, message: "Please select a category" }]}
+            // label="Category"
+            label={
+              <span>
+                Category <span className="text-red-500">*</span>
+              </span>
+            }
+            rules={[
+              {
+                required: true,
+                message: "Please select at least one category",
+              },
+            ]}
           >
-            <Select placeholder="Select Category">
+            <Select
+              mode="multiple"
+              placeholder="Select Categories"
+              allowClear
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().includes(input.toLowerCase())
+              }
+            >
               {categoryData.map((cat) => (
                 <Select.Option key={cat.id} value={cat.id}>
                   {cat.category_name}
@@ -723,7 +266,11 @@ const ProductForm = () => {
 
           <Form.Item
             name="product_name"
-            label="Product Name"
+            label={
+              <span>
+                Product Name <span className="text-red-500">*</span>
+              </span>
+            }
             rules={[{ required: true, message: "Product name is required" }]}
           >
             <Input />
@@ -732,14 +279,28 @@ const ProductForm = () => {
           <Form.Item
             name="product_brand"
             label="Brand"
-            rules={[{ required: true, message: "Brand is required" }]}
+            // rules={[{ required: true, message: "Brand is required" }]}
           >
             <Input />
           </Form.Item>
-
+          <Form.Item
+            name="product_unit_value"
+            label={
+              <span>
+                Unit Value<span className="text-red-500">*</span>
+              </span>
+            }
+            rules={[{ required: true, message: "Unit value is required" }]}
+          >
+            <Input />
+          </Form.Item>
           <Form.Item
             name="product_unit_id"
-            label="Unit"
+            label={
+              <span>
+                Unit<span className="text-red-500">*</span>
+              </span>
+            }
             rules={[{ required: true, message: "Please select a unit" }]}
           >
             <Select placeholder="Select Unit">
@@ -752,25 +313,12 @@ const ProductForm = () => {
           </Form.Item>
 
           <Form.Item
-            name="product_short_description"
-            label="Description"
-            className="md:col-span-4"
-            rules={[{ required: true, message: "Description is required" }]}
-          >
-            <Input.TextArea rows={3} />
-          </Form.Item>
-
-          <Form.Item
-            name="product_unit_value"
-            label="Unit Value"
-            rules={[{ required: true, message: "Unit value is required" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
             name="product_mrp"
-            label="MRP"
+            label={
+              <span>
+                MRP<span className="text-red-500">*</span>
+              </span>
+            }
             rules={[{ required: true, message: "MRP is required" }]}
           >
             <Input />
@@ -778,18 +326,25 @@ const ProductForm = () => {
 
           <Form.Item
             name="product_selling_price"
-            label="Selling Price"
+            label={
+              <span>
+                Selling Price<span className="text-red-500">*</span>
+              </span>
+            }
             rules={[{ required: true, message: "Selling price is required" }]}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="product_spl_offer_price"
-            label="Offer Price"
-            rules={[{ required: true, message: "Offer price is required" }]}
-          >
+          <Form.Item name="product_spl_offer_price" label="Offer Price">
             <Input />
+          </Form.Item>
+          <Form.Item
+            name="product_short_description"
+            label="Description"
+            className="md:col-span-4"
+          >
+            <Input.TextArea rows={3} />
           </Form.Item>
         </div>
 
@@ -824,7 +379,7 @@ const ProductForm = () => {
                     key={key}
                     size="small"
                     className="mb-4"
-                    title={`Product ${index + 1}`}
+                    title={`Image ${index + 1}`}
                     extra={
                       <Button
                         danger

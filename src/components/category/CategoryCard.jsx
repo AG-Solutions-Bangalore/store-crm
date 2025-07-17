@@ -23,22 +23,22 @@ const CategoryCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
     ? imageUrls.userImageBase + category_image
     : imageUrls.noImage;
 
-  const highlightMatch = (text, match) => {
-    if (!match || !text) return text;
-    const regex = new RegExp(`(${match})`, "gi");
-    return text.split(regex).map((part, i) =>
-      part.toLowerCase() === match.toLowerCase() ? (
-        <mark
-          key={i}
-          className="bg-[#006666]/20 text-[#006666] font-medium px-1 rounded"
-        >
-          {part}
-        </mark>
-      ) : (
-        <span key={i}>{part}</span>
-      )
-    );
-  };
+  // const highlightMatch = (text, match) => {
+  //   if (!match || !text) return text;
+  //   const regex = new RegExp(`(${match})`, "gi");
+  //   return text.split(regex).map((part, i) =>
+  //     part.toLowerCase() === match.toLowerCase() ? (
+  //       <mark
+  //         key={i}
+  //         className="bg-[#006666]/20 text-[#006666] font-medium px-1 rounded"
+  //       >
+  //         {part}
+  //       </mark>
+  //     ) : (
+  //       <span key={i}>{part}</span>
+  //     )
+  //   );
+  // };
 
   return (
     <Card
@@ -48,7 +48,8 @@ const CategoryCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
     >
       <div className="relative w-full overflow-hidden rounded-lg mb-3 h-[120px] bg-gray-50">
         <div className="absolute top-2 left-2 z-10 bg-[#e6f2f2] text-[#006666] text-sm font-semibold px-3 py-1 rounded-full shadow-sm">
-          {highlightMatch(category_sort_order || "", _match)}
+          {/* {highlightMatch(category_sort_order || "", _match)} */}
+          {category_sort_order || ""}
         </div>
 
         <Image
@@ -61,7 +62,8 @@ const CategoryCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
 
       <div className="px-2 mb-4">
         <span className="text-base font-semibold text-gray-800 mb-4 block">
-          {highlightMatch(category_name || "", _match)}
+          {/* {highlightMatch(category_name || "", _match)} */}
+          {category_name || ""}
         </span>
 
         <div className="flex items-center justify-between gap-2 w-full">

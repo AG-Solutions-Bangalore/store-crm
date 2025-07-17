@@ -1,15 +1,15 @@
 import { Button, Form, Input, Typography } from "antd";
-import toast, { Toaster } from "react-hot-toast";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../../store/auth/authSlice";
 import { PANEL_LOGIN } from "../../api";
 import logo from "../../assets/logo.png";
-
+import { App } from "antd";
 const { Title } = Typography;
 
 const SignIn = () => {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -32,7 +32,6 @@ const SignIn = () => {
         method: "post",
         data: formData,
       });
-      console.log(res.code);
       if (res.code == 200 && res.UserInfo?.token) {
         const { UserInfo, company_detils, company_image, version } = res;
 
@@ -49,16 +48,15 @@ const SignIn = () => {
 
         navigate("/home");
       } else {
-        toast.error("Login Failed, Please check your credentials.");
+        message.error("Login Failed, Please check your credentials.");
       }
     } catch {
-      toast.error("An error occurred during login.");
+      message.error("An error occurred during login.");
     }
   };
 
   return (
     <>
-      <Toaster position="top-right" />
       <div className="min-h-screen flex items-center justify-center ">
         <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 backdrop-blur-md p-6 m-4 overflow-hidden">
           {/* Left Side - Login Form */}
