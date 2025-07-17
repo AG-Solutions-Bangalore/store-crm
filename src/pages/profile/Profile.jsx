@@ -89,12 +89,6 @@ const UserPage = () => {
       formData.append("user_type", values.user_type);
       if (avatarFile) {
         formData.append("avatar_photo", avatarFile);
-      } else if (form.getFieldValue("avatar_photo")) {
-        const imageUrl = `${imageBaseUrl}${form.getFieldValue("avatar_photo")}`;
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], "avatar.jpg", { type: blob.type });
-        formData.append("avatar_photo", file);
       }
 
       formData.append(

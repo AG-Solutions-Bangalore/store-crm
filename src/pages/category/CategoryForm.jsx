@@ -12,12 +12,13 @@ import {
   message,
 } from "antd";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { App } from "antd";
 import { CATEGORY_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
+  const { message } = App.useApp();
   const isEditMode = userId ? true : false;
   const [form] = Form.useForm();
   const token = usetoken();
@@ -52,7 +53,6 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       const userImage = res.image_url?.find((i) => i.image_for === "Category");
       const noImage = res.image_url?.find((i) => i.image_for === "No Image");
       setImageBaseUrl(userImage?.image_url || "");
-      categoryFile(userImage?.category_image || "");
       categoryBannerFile(userImage?.category_banner_image || "");
       setNoImageUrl(noImage?.image_url || "");
     } catch (err) {
@@ -62,7 +62,14 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   };
 
   useEffect(() => {
-    if (isEditMode) fetchProfile();
+    if (isEditMode) {
+      fetchProfile();
+    } else {
+      form.resetFields();
+      setInitialData({});
+      // categoryBannerFile(null);
+      // setCategoryFilePreview(null);
+    }
   }, [userId]);
   const handleProfileSave = async (values) => {
     try {
@@ -92,7 +99,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
         },
       });
       if (respose.code === 201) {
-        toast.success("Profile updated successfully!");
+        message.success("Profile updated successfully!");
         setOpenDialog(false);
         fetchUser();
       }

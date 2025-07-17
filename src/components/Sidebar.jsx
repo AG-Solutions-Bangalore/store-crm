@@ -1,36 +1,46 @@
 import {
-  AppstoreOutlined,
   ArrowRightOutlined,
   CloseOutlined,
   ContainerOutlined,
   DesktopOutlined,
-  MailOutlined,
-  PieChartOutlined,
+  MailOutlined
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
 import logo1 from "../assets/logo-1.png";
+import logo from "../assets/logo-black.png";
+import { setShowUpdateDialog } from "../store/auth/versionSlice";
 const getMenuItems = (collapsed) => {
   if (collapsed) {
     return [
-      { key: "/user", icon: <PieChartOutlined />, label: "User" },
+      // { key: "/user", icon: <PieChartOutlined />, label: "User" },
       { key: "/category", icon: <DesktopOutlined />, label: "Category" },
       { key: "/product", icon: <ContainerOutlined />, label: "Products" },
       {
-        key: "sub1",
-        icon: <MailOutlined />,
-        label: "Navigation One",
+        type: "group",
+        label: "Management",
         children: [
-          { key: "5", label: "Option 5" },
-          { key: "6", label: "Option 6" },
-          { key: "7", label: "Option 7" },
-          { key: "8", label: "Option 8" },
+          {
+            key: "sub1",
+            icon: <MailOutlined />,
+            label: "Management",
+            children: [
+              { key: "/user", label: "User" },
+              { key: "/security", label: "Security" },
+              { key: "/staff", label: "Staff" },
+              { key: "/delivery", label: "Delivery" },
+            ],
+          },
         ],
+      },
+      { key: "/slider", icon: <ContainerOutlined />, label: "Slider" },
+      {
+        key: "/notification",
+        icon: <ContainerOutlined />,
+        label: "Notification",
       },
     ];
   }
@@ -40,7 +50,7 @@ const getMenuItems = (collapsed) => {
       type: "group",
       label: "Dashboard",
       children: [
-        { key: "/user", icon: <PieChartOutlined />, label: "User" },
+        // { key: "/user", icon: <PieChartOutlined />, label: "User" },
         { key: "/category", icon: <DesktopOutlined />, label: "Category" },
         { key: "/product", icon: <DesktopOutlined />, label: "Product" },
       ],
@@ -49,19 +59,24 @@ const getMenuItems = (collapsed) => {
       type: "group",
       label: "Management",
       children: [
-        { key: "3", icon: <ContainerOutlined />, label: "Projects" },
         {
           key: "sub1",
-          label: "Navigation One",
           icon: <MailOutlined />,
+          label: "Management",
           children: [
-            { key: "5", label: "Option 5" },
-            { key: "6", label: "Option 6" },
-            { key: "7", label: "Option 7" },
-            { key: "8", label: "Option 8" },
+            { key: "/user", label: "User" },
+            { key: "/security", label: "Security" },
+            { key: "/staff", label: "Staff" },
+            { key: "/delivery", label: "Delivery" },
           ],
         },
       ],
+    },
+    { key: "/slider", icon: <ContainerOutlined />, label: "Slider" },
+    {
+      key: "/notification",
+      icon: <ContainerOutlined />,
+      label: "Notification",
     },
   ];
 };
@@ -102,18 +117,17 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
     >
       {/* Header */}
       <div className="flex items-center justify-center h-14 px-4 bg-[#006666]">
-   
-          <motion.img
-            src={collapsed ? logo1 :logo}
-            alt="Logo"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className={`object-contain transition-all duration-300 ${
-              collapsed ? "w-8" : "w-28"
-            }`}
-          />
-     
+        <motion.img
+          src={collapsed ? logo1 : logo}
+          alt="Logo"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className={`object-contain transition-all duration-300 ${
+            collapsed ? "w-8" : "w-28"
+          }`}
+        />
+
         {isMobile && (
           <motion.button
             whileHover={{ scale: 1.1 }}

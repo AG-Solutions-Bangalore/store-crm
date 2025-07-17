@@ -1,14 +1,15 @@
 import { Button, Form, Input, Typography } from "antd";
-import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
 import { PANEL_SEND_PASSWORD } from "../../api";
 import { useApiMutation } from "../../hooks/useApiMutation";
-
+import logo from "../../assets/logo.png";
+import { App } from "antd";
 const { Title } = Typography;
 
 const ForgotPassword = () => {
   const [form] = Form.useForm();
+  const { message } = App.useApp();
 
   const { trigger, loading } = useApiMutation();
   const token = useSelector((state) => state.auth.token);
@@ -31,24 +32,23 @@ const ForgotPassword = () => {
       });
       console.log(res.code);
       if (res.code == 200) {
-        toast.success(res.message || "Sucess");
+        message.success(res.message || "Sucess");
       } else {
-        toast.error(res.message || "An error occurred during send password.");
+        message.error(res.message || "An error occurred during send password.");
       }
     } catch {
-      toast.error("An error occurred during send password");
+      message.error("An error occurred during send password");
     }
   };
 
   return (
     <>
-      <Toaster position="top-right" />
       <div className="min-h-screen flex items-center justify-center ">
         <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 backdrop-blur-md p-6 m-4 overflow-hidden">
           {/* Left Side - Login Form */}
           <div className="flex flex-col justify-center px-6 py-8">
             <div className="text-center mb-6">
-              <img src="/logo.png" alt="Logo" className="h-20 mx-auto" />
+              <img src={logo} alt="Logo" className="h-20 mx-auto" />
               <Title level={3} className="text-gray-800">
                 Reset Your Password
               </Title>
@@ -88,7 +88,7 @@ const ForgotPassword = () => {
                 name="email"
                 rules={[{ required: true, message: "Please enter your email" }]}
               >
-                <Input size="large" placeholder="Enter Email" type="email"/>
+                <Input size="large" placeholder="Enter Email" type="email" />
               </Form.Item>
 
               <Form.Item>

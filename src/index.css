@@ -87,3 +87,15 @@ body {
 /* .ant-message {
   z-index: 9999 !important;
 } */
+/* Override Ant Design table cell padding */
+/* .ant-table-wrapper .ant-table-cell,
+.ant-table-wrapper .ant-table-thead > tr > th,
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  padding: px 4px !important; /* or padding: 0 !important; to remove completely */
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  padding: 0px 6px !important;
+}
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background-color: #e6f2f2;
+}

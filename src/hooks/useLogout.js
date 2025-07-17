@@ -1,4 +1,3 @@
-import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useApiMutation } from "./useApiMutation";
@@ -6,8 +5,10 @@ import { PANEL_LOGOUT } from "../api";
 import usetoken from "../api/usetoken";
 import { logout } from "../store/auth/authSlice";
 import { persistor } from "../store/store";
+import { App } from "antd";
 
 const useLogout = () => {
+  const { message } = App.useApp();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = usetoken();
@@ -30,7 +31,7 @@ const useLogout = () => {
       navigate("/");
       setTimeout(() => persistor.purge(), 1000);
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Logout Error");
+      message.error(error?.response?.data?.message || "Logout Error");
     }
   };
 
