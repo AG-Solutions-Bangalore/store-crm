@@ -3,7 +3,7 @@ import {
   CloseOutlined,
   ContainerOutlined,
   DesktopOutlined,
-  MailOutlined
+  MailOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -42,6 +42,16 @@ const getMenuItems = (collapsed) => {
         icon: <ContainerOutlined />,
         label: "Notification",
       },
+      {
+        key: "/guest-user",
+        icon: <ContainerOutlined />,
+        label: "Guest User",
+      },
+      {
+        key: "/guest-user-order",
+        icon: <ContainerOutlined />,
+        label: "Guest Order",
+      },
     ];
   }
 
@@ -77,6 +87,16 @@ const getMenuItems = (collapsed) => {
       key: "/notification",
       icon: <ContainerOutlined />,
       label: "Notification",
+    },
+    {
+      key: "/guest-user",
+      icon: <ContainerOutlined />,
+      label: "Guest User",
+    },
+    {
+      key: "/guest-user-order",
+      icon: <ContainerOutlined />,
+      label: "Guest Order",
     },
   ];
 };

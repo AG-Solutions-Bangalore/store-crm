@@ -30,9 +30,21 @@ export const CATEGORY_ACTIVE = `/categorys/active`;
 export const FETCH_UNIT = `/panel-fetch-unit`;
 //PRODUCT_LIST
 export const PRODUCT_LIST = `/product`;
+//PRODUCT_LIST
+export const FETCH_PRODUCTLIST = `/products/active`;
 //CUSTOMER_LIST
 export const CUSTOMER_LIST = `/panel-fetch-customer`;
 //SLIDER_LIST
 export const SLIDER_LIST = `/slider`;
 //NOTIFICATION_LIST
 export const NOTIFICATION_LIST = `/notification`;
+//GUEST_USER_LIST
+export const GUEST_USER_LIST = `/panel-fetch-guest-user-list`;
+//GUEST_USER_ORDER_LIST
+export const GUEST_USER_ORDER_LIST = `/panel-fetch-guest-user-order-list`;
+//GUEST_USER_ORDER_LIST
+export const GUEST_USER_ORDER_BY_ID = `/panel-fetch-guest-user-order-by-id`;
+//GUEST_USER_ORDER_LIST
+export const GUEST_USER_ORDER_CREATE = `/panel-create-guest-user-order`;
+//GUEST_USER_ORDER_LIST
+export const GUEST_USER_ORDER_UPDATE = `/panel-update-guest-user-order`;

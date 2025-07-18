@@ -1,15 +1,3 @@
-// import Layout from "./components/Layout";
-
-// export default function App() {
-//   return (
-//     <Layout>
-//       <h1 className="text-2xl font-bold">Welcome to the Dashboard</h1>
-//       <p className="mt-2 text-gray-600">
-//         This content is passed as children into the Layout component.
-//       </p>
-//     </Layout>
-//   );
-// }
 import { Route, Routes } from "react-router-dom";
 import AppInitializer from "./components/AppInitializer";
 import ProtectedLayout from "./components/ProtectedLayout";
@@ -29,6 +17,9 @@ import SecurityList from "./pages/security/SecurityList";
 import DeliveryList from "./pages/delivery/DeliveryList";
 import SliderList from "./pages/slider/SliderList";
 import Notification from "./pages/notification/Notification";
+import GuestUserList from "./pages/guestuser/GuestUserList";
+import GuestUserOrderList from "./pages/guestuserorder/GuestUserOrderList";
+import GuestUserOrderForm from "./pages/guestuserorder/GuestUserOrderForm";
 
 function App() {
   return (
@@ -55,6 +46,15 @@ function App() {
                 <Route path="/delivery" element={<DeliveryList />} />
                 <Route path="/slider" element={<SliderList />} />
                 <Route path="/notification" element={<Notification />} />
+                <Route path="/guest-user" element={<GuestUserList />} />
+                <Route
+                  path="/guest-user-order"
+                  element={<GuestUserOrderList />}
+                />
+                <Route
+                  path="/guest-order-form"
+                  element={<GuestUserOrderForm />}
+                />
 
                 <Route path="/category" element={<CategoryList />} />
                 <Route path="/product" element={<ProductList />} />
