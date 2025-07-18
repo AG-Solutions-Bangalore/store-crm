@@ -133,78 +133,103 @@ const ProductForm = () => {
   };
 
   const handleFinish = async (values) => {
-    const subs = values.subs || [];
-    const allHaveImages = productForms.every(
-      (item) => item.preview || item.product_images instanceof File
-    );
-    if (!allHaveImages) {
-      message.error("All product subs must have an image.");
-      return;
-    }
+    try {
+      const subs = values.subs || [];
+      const allHaveImages = productForms.every(
+        (item) => item.preview || item.product_images instanceof File
+      );
+      if (!allHaveImages) {
+        message.error("All product subs must have an image.");
+        return;
+      }
 
-    // Must have at least one sub
-    if (subs.length === 0) {
-      message.error("At least one product sub is required.");
-      return;
-    }
+      if (subs.length === 0) {
+        message.error("At least one product sub is required.");
+        return;
+      }
 
-    // Must have one default
-    const hasDefault = productForms.some((item) => item.is_default === true);
-    if (!hasDefault) {
-      message.error("Please mark one sub as default.");
-      return;
-    }
+      const hasDefault = productForms.some((item) => item.is_default === true);
+      if (!hasDefault) {
+        message.error("Please mark one sub as default.");
+        return;
+      }
 
-    // Check for image presence
+      const formData = new FormData();
+      formData.append("category_ids", values.category_ids || "");
+      formData.append("product_name", values.product_name || "");
+      formData.append(
+        "product_short_description",
+        values.product_short_description || ""
+      );
+      formData.append("product_brand", values.product_brand || "");
+      formData.append("product_unit_id", values.product_unit_id || "");
+      formData.append("product_unit_value", values.product_unit_value || "");
+      formData.append("product_mrp", values.product_mrp || "");
+      formData.append(
+        "product_selling_price",
+        values.product_selling_price || ""
+      );
+      formData.append(
+        "product_spl_offer_price",
+        values.product_spl_offer_price || ""
+      );
 
-    const formData = new FormData();
-    formData.append("category_ids", values.category_ids);
-    formData.append("product_name", values.product_name);
-    formData.append(
-      "product_short_description",
-      values.product_short_description
-    );
-    formData.append("product_brand", values.product_brand);
-    formData.append("product_unit_id", values.product_unit_id);
-    formData.append("product_unit_value", values.product_unit_value);
-    formData.append("product_mrp", values.product_mrp);
-    formData.append("product_selling_price", values.product_selling_price);
-    formData.append("product_spl_offer_price", values.product_spl_offer_price);
-    if (isEditMode) {
-      formData.append("is_active", values.is_active ? "true" : "false");
-    }
-
-    productForms.forEach((item, index) => {
       if (isEditMode) {
-        formData.append(`subs[${index}][id]`, item.id || "");
+        formData.append("is_active", values.is_active ? "true" : "false");
       }
-      formData.append(
-        `subs[${index}][is_default]`,
-        item.is_default ? "true" : "false"
-      );
-      formData.append(
-        `subs[${index}][is_active]`,
-        item.is_active ? "true" : "false"
-      );
-      if (item.product_images instanceof File) {
-        formData.append(`subs[${index}][product_images]`, item.product_images);
+
+      productForms.forEach((item, index) => {
+        if (isEditMode) {
+          formData.append(`subs[${index}][id]`, item.id || "");
+        }
+        formData.append(
+          `subs[${index}][is_default]`,
+          item.is_default ? "true" : "false"
+        );
+        formData.append(
+          `subs[${index}][is_active]`,
+          item.is_active ? "true" : "false"
+        );
+        if (item.product_images instanceof File) {
+          formData.append(
+            `subs[${index}][product_images]`,
+            item.product_images
+          );
+        }
+      });
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
       }
-    });
+      await submitTrigger({
+        // url: isEditMode ? `${PRODUCT_LIST}/${id}?_method=PUT` : PRODUCT_LIST,
+        method: "post",
+        data: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    await submitTrigger({
-      url: isEditMode ? `${PRODUCT_LIST}/${id}?_method=PUT` : PRODUCT_LIST,
-      method: "post",
-      data: formData,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+      message.success(
+        `Product ${isEditMode ? "updated" : "created"} successfully!`
+      );
+      navigate("/product");
+    } catch (error) {
+      console.error("Error submitting Product:", error);
 
-    message.success(
-      `Product ${isEditMode ? "updated" : "created"} successfully!`
-    );
-    navigate("/product");
+      const errMsg = error?.response?.data?.message;
+
+      if (typeof errMsg === "string") {
+        message.error(errMsg);
+      } else if (typeof errMsg === "object") {
+        const flatErrors = Object.values(errMsg).flat();
+        flatErrors.forEach((msg) => {
+          message.error(msg);
+        });
+      } else {
+        message.error("Something went wrong while submitting the Product.");
+      }
+    }
   };
 
   return fetchLoading ? (

@@ -53,7 +53,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       const userImage = res.image_url?.find((i) => i.image_for === "Category");
       const noImage = res.image_url?.find((i) => i.image_for === "No Image");
       setImageBaseUrl(userImage?.image_url || "");
-      categoryBannerFile(userImage?.category_banner_image || "");
+      // categoryBannerFile(userImage?.category_banner_image || "");
       setNoImageUrl(noImage?.image_url || "");
     } catch (err) {
       console.error("Error fetching category data:", err);
@@ -62,13 +62,18 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   };
 
   useEffect(() => {
+    setInitialData({});
+    setCategoryBannerFile(null);
+    setCategoryFilePreview(null);
+    setCategoryFile(null);
     if (isEditMode) {
       fetchProfile();
     } else {
       form.resetFields();
       setInitialData({});
-      // categoryBannerFile(null);
-      // setCategoryFilePreview(null);
+      setCategoryBannerFile(null);
+      setCategoryFilePreview(null);
+      setCategoryFile(null);
     }
   }, [userId]);
   const handleProfileSave = async (values) => {
@@ -98,14 +103,29 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           "Content-Type": "multipart/form-data",
         },
       });
-      if (respose.code === 201) {
-        message.success("Profile updated successfully!");
+      if (respose.code == 201) {
+        message.success(respose.message || "Category updated successfully!");
         setOpenDialog(false);
         fetchUser();
+      } else {
+        message.error(respose.message || "Category Failed ");
       }
-    } catch (err) {
-      console.error("Error updating profile:", err);
-      message.error("Failed to update profile.");
+    } catch (error) {
+      console.error("Error submitting category:", error);
+
+      const errMsg = error?.response?.data?.message;
+
+      if (typeof errMsg === "string") {
+        message.error(errMsg);
+      } else if (typeof errMsg === "object") {
+        // If message is an object with field-level errors
+        const flatErrors = Object.values(errMsg).flat(); // flatten all messages
+        flatErrors.forEach((msg) => {
+          message.error(msg);
+        });
+      } else {
+        message.error("Something went wrong while submitting the Category.");
+      }
     }
   };
   return (
@@ -173,7 +193,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
             )}
           </Space>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-3 gap-4`}>
             <Form.Item
               label={
                 <span>
@@ -216,6 +236,17 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                     Upload Category Image
                   </Button>
                 </Upload>
+                {categoryFile && (
+                  <div className="mt-2 text-sm text-gray-600 overflow-hiden">
+                    Selected file:{" "}
+                    <strong>
+                      {" "}
+                      {categoryFile.name.length > 15
+                        ? `${categoryFile.name.slice(0, 15)}...`
+                        : categoryFile.name}
+                    </strong>
+                  </div>
+                )}
               </Form.Item>
             )}
             <Form.Item
@@ -234,6 +265,18 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
               >
                 <Button icon={<UploadOutlined />}>Upload Banner Image</Button>
               </Upload>
+
+              {categoryBannerFile && (
+                <div className="mt-2 text-sm text-gray-600 overflow-hiden">
+                  Selected file:{" "}
+                  <strong>
+                    {" "}
+                    {categoryBannerFile.name.length > 15
+                      ? `${categoryBannerFile.name.slice(0, 15)}...`
+                      : categoryBannerFile.name}
+                  </strong>
+                </div>
+              )}
             </Form.Item>
           </div>
           <Form.Item

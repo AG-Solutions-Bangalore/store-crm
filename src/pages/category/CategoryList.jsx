@@ -101,11 +101,12 @@ const CategoryList = () => {
 
   const handleEdit = (id) => {
     setopenDialog(true);
-    console.log(id);
+
     setSelecetdId(id);
   };
 
   const handleAddUser = () => {
+    setSelecetdId(null);
     setopenDialog(true);
   };
 
