@@ -5,8 +5,9 @@ import {
 } from "@ant-design/icons";
 import { Button, Image, Space, Tag, Tooltip } from "antd";
 import STTable from "../STTable/STTable";
+import dayjs from "dayjs";
 
-const GuestUserTable = ({ users, onEdit }) => {
+const GuestUserOrderTable = ({ users, onEdit }) => {
   const highlightMatch = (text, match) => {
     if (!match || !text) return text;
     const regex = new RegExp(`(${match})`, "gi");
@@ -27,44 +28,57 @@ const GuestUserTable = ({ users, onEdit }) => {
 
   const columns = [
     {
+      title: "Date",
+      dataIndex: "order_date",
+      key: "order_date",
+      render: (_, user) =>
+        highlightMatch(
+          dayjs(user.order_date).format("DD-MM-YYYY"),
+          user._match
+        ),
+    },
+    {
       title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (_, user) => highlightMatch(user.name, user._match),
+      dataIndex: "guest_name",
+      key: "guest_name",
+      render: (_, user) => highlightMatch(user.guest_name, user._match),
     },
     {
-      title: "Mobile",
-      dataIndex: "mobile",
-      key: "mobile",
-      render: (_, user) => (
-        <a href={`tel:${user.mobile}`}>
-          {highlightMatch(user.mobile, user._match)}
-        </a>
-      ),
+      title: "Amount",
+      dataIndex: "total_amount",
+      key: "total_amount",
+      render: (_, user) => highlightMatch(user.total_amount, user._match),
     },
+
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      render: (_, user) => (
-        <Tooltip title={user.email}>
-          {highlightMatch(user.email, user._match)}
-        </Tooltip>
-      ),
+      title: "Status",
+      dataIndex: "order_status",
+      key: "order_status",
+      render: (_, user) => {
+        const isPending = user.order_status === "pending";
+
+        return (
+          <div className="flex justify-center">
+            <Tag color={isPending ? "orange" : "green"}>
+              {user.order_status}
+            </Tag>
+          </div>
+        );
+      },
     },
 
     {
       title: "Actions",
       key: "actions",
-      render: (_, user) => {
+      render: (_, id) => {
         return (
           <Space>
-            <Tooltip title="Edit User">
+            <Tooltip title="Edit Guest Order">
               <Button
                 type="primary"
                 icon={<EditOutlined />}
                 size="small"
-                onClick={() => onEdit(user.id)}
+                onClick={() => onEdit(id)}
                 className="bg-[#006666]"
               />
             </Tooltip>
@@ -78,4 +92,4 @@ const GuestUserTable = ({ users, onEdit }) => {
   return <STTable data={users} columns={columns} />;
 };
 
-export default GuestUserTable;
+export default GuestUserOrderTable;

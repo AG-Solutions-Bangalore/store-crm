@@ -43,6 +43,11 @@ const getMenuItems = (collapsed) => {
         label: "Notification",
       },
       {
+        key: "/order",
+        icon: <ContainerOutlined />,
+        label: "Order",
+      },
+      {
         key: "/guest-user",
         icon: <ContainerOutlined />,
         label: "Guest User",
@@ -83,10 +88,16 @@ const getMenuItems = (collapsed) => {
       ],
     },
     { key: "/slider", icon: <ContainerOutlined />, label: "Slider" },
+
     {
       key: "/notification",
       icon: <ContainerOutlined />,
       label: "Notification",
+    },
+    {
+      key: "/order",
+      icon: <ContainerOutlined />,
+      label: "Order",
     },
     {
       key: "/guest-user",

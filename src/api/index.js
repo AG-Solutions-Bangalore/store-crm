@@ -38,8 +38,18 @@ export const CUSTOMER_LIST = `/panel-fetch-customer`;
 export const SLIDER_LIST = `/slider`;
 //NOTIFICATION_LIST
 export const NOTIFICATION_LIST = `/notification`;
+//NOTIFICATION_LIST
+export const ORDER_LIST = `/order`;
+//NOTIFICATION_LIST
+export const ADDRESS_BY_ID = `/panel-fetch-address-by-id`;
+//USER_BY_ID
+export const USER_BY_ID = `/panel-fetch-user-by-id`;
 //GUEST_USER_LIST
 export const GUEST_USER_LIST = `/panel-fetch-guest-user-list`;
+//GUEST_USER_LIST
+export const GUEST_USER_BY_ID = `/panel-fetch-guest-user-by-id`;
+//GUEST_USER_LIST
+export const UPDATE_GUEST_USER = `/panel-update-guest-user`;
 //GUEST_USER_ORDER_LIST
 export const GUEST_USER_ORDER_LIST = `/panel-fetch-guest-user-order-list`;
 //GUEST_USER_ORDER_LIST

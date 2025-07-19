@@ -1,22 +1,24 @@
-import { Card, Input, Spin } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { Button, Card, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { GUEST_USER_LIST } from "../../api";
+import { useNavigate } from "react-router-dom";
+import { GUEST_USER_ORDER_LIST, ORDER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import GuestUserTable from "../../components/guestuser/GuestUserTable";
+import GuestUserOrderTable from "../../components/guestuserorderTable/GuestUserOrderTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import GuestUserForm from "./GuestUserForm";
 
 const { Search } = Input;
-const GuestUserList = () => {
-  const [selectedId, setSelecetdId] = useState(false);
-  const [open, setopenDialog] = useState(false);
+const { Option } = Select;
+const OrderList = () => {
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState(null);
   const { trigger, loading: isMutating } = useApiMutation();
   const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
   const fetchUser = async () => {
     const res = await trigger({
-      url: GUEST_USER_LIST,
+      url: ORDER_LIST,
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -29,13 +31,19 @@ const GuestUserList = () => {
     fetchUser();
   }, []);
 
-  const handleEdit = (id) => {
-    setopenDialog(true);
-    setSelecetdId(id);
+  const handleEdit = (user) => {
+    navigate(`/order-form/${user.id}`);
+  };
+
+  const handleAddUser = () => {
+    navigate("/order-form");
   };
 
   const filteredUsers = users
-
+    .filter((user) => {
+      if (!statusFilter) return true;
+      return user.order_status === statusFilter;
+    })
     .map((user) => {
       const flatString = Object.values(user)
         .filter((v) => typeof v === "string" || typeof v === "number")
@@ -43,7 +51,6 @@ const GuestUserList = () => {
         .toLowerCase();
 
       const matched = flatString.includes(searchTerm.toLowerCase());
-
       return matched ? { ...user, _match: searchTerm } : null;
     })
     .filter(Boolean);
@@ -51,7 +58,7 @@ const GuestUserList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-[#006666]">Guest User List</h2>
+        <h2 className="text-2xl font-bold text-[#006666]"> Order List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -60,6 +67,15 @@ const GuestUserList = () => {
             onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             className="max-w-sm"
           />
+
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleAddUser}
+            className="bg-[#006666]"
+          >
+            Add Order
+          </Button>
         </div>
       </div>
       <div className="min-h-[26rem]">
@@ -68,19 +84,13 @@ const GuestUserList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <GuestUserTable users={filteredUsers} onEdit={handleEdit} />
+          <GuestUserOrderTable users={filteredUsers} onEdit={handleEdit} />
         ) : (
-          <div className="text-center text-gray-500 py-20">No users found.</div>
+          <div className="text-center text-gray-500 py-20">No data found.</div>
         )}
       </div>
-      <GuestUserForm
-        userId={selectedId}
-        open={open}
-        onClose={() => setopenDialog(false)}
-        onSuccess={() => fetchUser()}
-      />
     </Card>
   );
 };
 
-export default GuestUserList;
+export default OrderList;

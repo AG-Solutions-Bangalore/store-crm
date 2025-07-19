@@ -1,27 +1,20 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Spin } from "antd";
+import { Button, Card, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GUEST_USER_ORDER_LIST, UPDATE_STATUS, USER_LIST } from "../../api";
+import { GUEST_USER_ORDER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import UserTable from "../../components/user/UserCard";
+import GuestUserOrderTable from "../../components/guestuserorderTable/GuestUserOrderTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import { App } from "antd";
 
 const { Search } = Input;
-import { Select } from "antd";
 const { Option } = Select;
 const GuestUserOrderList = () => {
-  const { message } = App.useApp();
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
   const { trigger, loading: isMutating } = useApiMutation();
   const [users, setUsers] = useState([]);
-  const [imageUrls, setImageUrls] = useState({
-    userImageBase: "",
-    noImage: "",
-  });
   const navigate = useNavigate();
   const fetchUser = async () => {
     const res = await trigger({
@@ -29,20 +22,8 @@ const GuestUserOrderList = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (res?.code == 201 && Array.isArray(res.data)) {
+    if (Array.isArray(res.data)) {
       setUsers(res.data);
-
-      const userImageObj = res.image_url?.find(
-        (img) => img.image_for === "User"
-      );
-      const noImageObj = res.image_url?.find(
-        (img) => img.image_for === "No Image"
-      );
-
-      setImageUrls({
-        userImageBase: userImageObj?.image_url || "",
-        noImage: noImageObj?.image_url || "",
-      });
     }
   };
 
@@ -60,11 +41,8 @@ const GuestUserOrderList = () => {
 
   const filteredUsers = users
     .filter((user) => {
-      if (user.user_type !== 1) return false;
-      if (statusFilter === "active" && user.is_active !== "true") return false;
-      if (statusFilter === "inactive" && user.is_active !== "false")
-        return false;
-      return true;
+      if (!statusFilter) return true; // No filter = show all
+      return user.order_status === statusFilter;
     })
     .map((user) => {
       const flatString = Object.values(user)
@@ -73,41 +51,10 @@ const GuestUserOrderList = () => {
         .toLowerCase();
 
       const matched = flatString.includes(searchTerm.toLowerCase());
-
       return matched ? { ...user, _match: searchTerm } : null;
     })
     .filter(Boolean);
 
-  const handleToggleStatus = async (user) => {
-    try {
-      const newStatus =
-        user.is_active === "true" || user.is_active === true ? "false" : "true";
-
-      const res = await trigger({
-        url: `${GUEST_USER_ORDER_LIST}/${user.id}`,
-        method: "put",
-        data: { is_active: newStatus },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res?.code === 200 || res?.code === 201) {
-        const updatedUsers = users.map((u) =>
-          u.id === user.id ? { ...u, is_active: newStatus } : u
-        );
-        setUsers(updatedUsers);
-        message.success(
-          `User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
-        );
-      } else {
-        message.error("Failed to update user status.");
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-      message.error("Error updating user status.");
-    }
-  };
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
@@ -126,8 +73,8 @@ const GuestUserOrderList = () => {
             onChange={(value) => setStatusFilter(value)}
             className="w-40"
           >
-            <Option value="active">Active</Option>
-            <Option value="inactive">Inactive</Option>
+            <Option value="pending">Pending</Option>
+            <Option value="completed">Completed</Option>
           </Select>
           <Button
             type="primary"
@@ -145,13 +92,7 @@ const GuestUserOrderList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <UserTable
-            type="user"
-            imageUrls={imageUrls}
-            users={filteredUsers}
-            onToggleStatus={handleToggleStatus}
-            onEdit={handleEdit}
-          />
+          <GuestUserOrderTable users={filteredUsers} onEdit={handleEdit} />
         ) : (
           <div className="text-center text-gray-500 py-20">No users found.</div>
         )}
