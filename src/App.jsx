@@ -20,6 +20,9 @@ import Notification from "./pages/notification/Notification";
 import GuestUserList from "./pages/guestuser/GuestUserList";
 import GuestUserOrderList from "./pages/guestuserorder/GuestUserOrderList";
 import GuestUserOrderForm from "./pages/guestuserorder/GuestUserOrderForm";
+import GuestUserForm from "./pages/guestuser/GuestUserForm";
+import OrderList from "./pages/order/OrderList";
+import OrderForm from "./pages/order/OrderForm";
 
 function App() {
   return (
@@ -46,6 +49,9 @@ function App() {
                 <Route path="/delivery" element={<DeliveryList />} />
                 <Route path="/slider" element={<SliderList />} />
                 <Route path="/notification" element={<Notification />} />
+                <Route path="/order" element={<OrderList />} />
+                <Route path="/order-form" element={<OrderForm />} />
+                <Route path="/order-form/:id" element={<OrderForm />} />
                 <Route path="/guest-user" element={<GuestUserList />} />
                 <Route
                   path="/guest-user-order"
@@ -53,6 +59,10 @@ function App() {
                 />
                 <Route
                   path="/guest-order-form"
+                  element={<GuestUserOrderForm />}
+                />
+                <Route
+                  path="/guest-order-form/:id"
                   element={<GuestUserOrderForm />}
                 />
 

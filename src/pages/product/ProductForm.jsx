@@ -201,7 +201,7 @@ const ProductForm = () => {
         console.log(`${pair[0]}:`, pair[1]);
       }
       await submitTrigger({
-        // url: isEditMode ? `${PRODUCT_LIST}/${id}?_method=PUT` : PRODUCT_LIST,
+        url: isEditMode ? `${PRODUCT_LIST}/${id}?_method=PUT` : PRODUCT_LIST,
         method: "post",
         data: formData,
         headers: {
