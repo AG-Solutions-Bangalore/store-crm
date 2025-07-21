@@ -2,9 +2,9 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GUEST_USER_ORDER_LIST, ORDER_LIST } from "../../api";
+import { ORDER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import GuestUserOrderTable from "../../components/guestuserorderTable/GuestUserOrderTable";
+import OrderTable from "../../components/order/OrderTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const { Search } = Input;
@@ -84,7 +84,7 @@ const OrderList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <GuestUserOrderTable users={filteredUsers} onEdit={handleEdit} />
+          <OrderTable users={filteredUsers} onEdit={handleEdit} />
         ) : (
           <div className="text-center text-gray-500 py-20">No data found.</div>
         )}

@@ -11,6 +11,8 @@ export const PANEL_SEND_PASSWORD = `/panel-send-password`;
 //PANEL_CHANGE_PASSWORD
 export const PANEL_CHANGE_PASSWORD = `/panel-change-password`;
 //PROFILE
+export const DASHBOARD = `/dashboard`;
+//PROFILE
 export const PROFILE = `/panel-fetch-profile`;
 //UPDATE_PROFILE
 export const UPDATE_PROFILE = `/panel-update-user`;

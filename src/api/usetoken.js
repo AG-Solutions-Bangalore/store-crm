@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 
-const usetoken = () => {
+const useToken = () => {
   return useSelector((state) => state.auth.token);
 };
-export default usetoken;
+export default useToken;

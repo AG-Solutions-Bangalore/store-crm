@@ -23,6 +23,7 @@ import GuestUserOrderForm from "./pages/guestuserorder/GuestUserOrderForm";
 import GuestUserForm from "./pages/guestuser/GuestUserForm";
 import OrderList from "./pages/order/OrderList";
 import OrderForm from "./pages/order/OrderForm";
+import MaintenancePage from "./components/common/MaintenancePage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<SignIn />} />
         <Route path="/forget-password" element={<ForgotPassword />} />
+        <Route path="/maintenance" element={<MaintenancePage />} />
 
         {/* Protected Routes: All other paths */}
         <Route

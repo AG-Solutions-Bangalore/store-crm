@@ -3,6 +3,7 @@ import {
   CloseOutlined,
   ContainerOutlined,
   DesktopOutlined,
+  HomeOutlined,
   MailOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
@@ -17,6 +18,7 @@ const getMenuItems = (collapsed) => {
   if (collapsed) {
     return [
       // { key: "/user", icon: <PieChartOutlined />, label: "User" },
+      { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
       { key: "/category", icon: <DesktopOutlined />, label: "Category" },
       { key: "/product", icon: <ContainerOutlined />, label: "Products" },
       {
@@ -65,7 +67,7 @@ const getMenuItems = (collapsed) => {
       type: "group",
       label: "Dashboard",
       children: [
-        // { key: "/user", icon: <PieChartOutlined />, label: "User" },
+        { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
         { key: "/category", icon: <DesktopOutlined />, label: "Category" },
         { key: "/product", icon: <DesktopOutlined />, label: "Product" },
       ],
