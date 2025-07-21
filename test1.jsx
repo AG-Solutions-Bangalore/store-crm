@@ -1,145 +1,351 @@
-import {
-  CheckCircleTwoTone,
-  CloseCircleTwoTone,
-  EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  IdcardOutlined,
-  PhoneOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Avatar, Button, Card, Popconfirm, Tag, Tooltip } from "antd";
-const getUserTypeColor = (type) => {
-  const map = {
-    1: "blue",
-    2: "orange",
-    3: "purple",
-    4: "cyan",
+// import { useEffect, useState } from "react";
+// import { DASHBOARD } from "../../api";
+// import { useApiMutation } from "../../hooks/useApiMutation";
+// import useToken from "../../api/usetoken";
+// import { Card, Col, Row, Table, Tag, Typography, Spin } from "antd";
+// import { Bar } from "@ant-design/plots";
+
+// const { Title } = Typography;
+
+// const Dashboard = () => {
+//   const [data, setData] = useState(null);
+//   const { trigger, loading: isMutating } = useApiMutation();
+//   const token = useToken();
+
+//   const fetchDashboard = async () => {
+//     const res = await trigger({
+//       url: DASHBOARD,
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
+//     if (res?.code === 201) {
+//       setData(res);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchDashboard();
+//   }, []);
+
+//   if (isMutating || !data) return <Spin fullscreen />;
+
+//   const cardItems = [
+//     { title: "Categories", count: data.categoryCount },
+//     { title: "Products", count: data.productCount },
+//     { title: "Orders", count: data.orderCount },
+//     { title: "Users", count: data.userCount },
+//     { title: "Guest Users", count: data.guestuserCount },
+//   ];
+
+//   const orderColumns = [
+//     {
+//       title: "Order No",
+//       dataIndex: "order_no",
+//       key: "order_no",
+//     },
+//     {
+//       title: "Order Ref",
+//       dataIndex: "order_ref_number",
+//       key: "order_ref_number",
+//     },
+//     {
+//       title: "Company",
+//       dataIndex: "company_name",
+//       key: "company_name",
+//     },
+//     {
+//       title: "Amount",
+//       dataIndex: "total_amount",
+//       key: "total_amount",
+//       render: (text) => `₹${text}`,
+//     },
+//     {
+//       title: "Date",
+//       dataIndex: "order_date",
+//       key: "order_date",
+//     },
+//     {
+//       title: "Status",
+//       dataIndex: "order_status",
+//       key: "order_status",
+//       render: (status) => (
+//         <Tag color={status === "completed" ? "green" : "orange"}>
+//           {status.toUpperCase()}
+//         </Tag>
+//       ),
+//     },
+//   ];
+
+//   const barConfig = {
+//     data: data.monthly.map((item) => ({
+//       ...item,
+//       total_amount: parseFloat(item.total_amount), // Ensure number type
+//     })),
+//     xField: "total_amount",
+//     yField: "month_name",
+//     seriesField: "month_name", // optional if only one month — you can remove this
+//     color: "#1677ff",
+//     autoFit: true,
+//     height: 300,
+//     barWidthRatio: 0.5,
+//     tooltip: {
+//       formatter: (datum) => ({
+//         name: datum.month_name,
+//         value: `₹${datum.total_amount}`,
+//       }),
+//     },
+//     xAxis: {
+//       label: {
+//         formatter: (val) => `₹${val}`,
+//         style: { fontSize: 12 },
+//       },
+//       title: {
+//         text: "Total Amount",
+//         style: { fontWeight: 500 },
+//       },
+//     },
+//     yAxis: {
+//       title: {
+//         text: "Month",
+//         style: { fontWeight: 500 },
+//       },
+//       label: {
+//         style: {
+//           fontSize: 12,
+//         },
+//       },
+//     },
+//     interactions: [
+//       {
+//         type: "element-active", // only highlight bar, no big hover box
+//       },
+//     ],
+//     label: {
+//       position: "middle",
+//       layout: [
+//         { type: "interval-adjust-position" },
+//         { type: "interval-hide-overlap" },
+//         { type: "adjust-color" },
+//       ],
+//     },
+//   };
+
+//   return (
+//     <div className="p-4 space-y-6">
+//       <Title level={3}>Dashboard</Title>
+
+//       <Row gutter={[16, 16]}>
+//         {cardItems.map((item) => (
+//           <Col key={item.title} xs={24} sm={12} md={8} lg={4}>
+//             <Card
+//               title={item.title}
+//               bordered={false}
+//               className="shadow-md text-center"
+//             >
+//               <p className="text-2xl font-semibold">{item.count}</p>
+//             </Card>
+//           </Col>
+//         ))}
+//       </Row>
+
+//       <Card title="Latest Orders" className="shadow-md">
+//         <Table
+//           dataSource={data.latestOrders}
+//           columns={orderColumns}
+//           rowKey="id"
+//           pagination={false}
+//         />
+//       </Card>
+
+//       <Card title="Monthly Order Summary" className="shadow-md">
+//         <div className="w-full max-w-full overflow-auto">
+//           <Bar {...barConfig} />
+//         </div>
+//       </Card>
+//     </div>
+//   );
+// };
+
+// export default Dashboard;
+import { useEffect, useState } from "react";
+import { Card, Col, Row, Table, Tag, Typography, Spin } from "antd";
+import { Bar } from "@ant-design/plots";
+
+const { Title } = Typography;
+
+const Dashboard = () => {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    // Simulate API delay
+    setTimeout(() => {
+      const mockData = {
+        categoryCount: 12,
+        productCount: 48,
+        orderCount: 102,
+        userCount: 21,
+        guestuserCount: 8,
+        latestOrders: [
+          {
+            id: 1,
+            order_no: "ORD-001",
+            order_ref_number: "REF-12345",
+            company_name: "ACME Corp",
+            total_amount: 1500,
+            order_date: "2025-07-20",
+            order_status: "completed",
+          },
+          {
+            id: 2,
+            order_no: "ORD-002",
+            order_ref_number: "REF-12346",
+            company_name: "Globex Ltd",
+            total_amount: 3200,
+            order_date: "2025-07-19",
+            order_status: "pending",
+          },
+        ],
+        monthly: [
+          { month_name: "Jan", total_amount: 10000 },
+          { month_name: "Feb", total_amount: 8000 },
+          { month_name: "Mar", total_amount: 9500 },
+          { month_name: "Apr", total_amount: 7200 },
+          { month_name: "May", total_amount: 10400 },
+          { month_name: "Jun", total_amount: 11800 },
+          { month_name: "Jul", total_amount: 9100 },
+        ],
+      };
+      setData(mockData);
+    }, 1000);
+  }, []);
+
+  if (!data) return <Spin fullscreen />;
+
+  const cardItems = [
+    { title: "Categories", count: data.categoryCount },
+    { title: "Products", count: data.productCount },
+    { title: "Orders", count: data.orderCount },
+    { title: "Users", count: data.userCount },
+    { title: "Guest Users", count: data.guestuserCount },
+  ];
+
+  const orderColumns = [
+    {
+      title: "Order No",
+      dataIndex: "order_no",
+      key: "order_no",
+    },
+    {
+      title: "Order Ref",
+      dataIndex: "order_ref_number",
+      key: "order_ref_number",
+    },
+    {
+      title: "Company",
+      dataIndex: "company_name",
+      key: "company_name",
+    },
+    {
+      title: "Amount",
+      dataIndex: "total_amount",
+      key: "total_amount",
+      render: (text) => `₹${text}`,
+    },
+    {
+      title: "Date",
+      dataIndex: "order_date",
+      key: "order_date",
+    },
+    {
+      title: "Status",
+      dataIndex: "order_status",
+      key: "order_status",
+      render: (status) => (
+        <Tag color={status === "completed" ? "green" : "orange"}>
+          {status.toUpperCase()}
+        </Tag>
+      ),
+    },
+  ];
+
+  const barConfig = {
+    data:
+      data.monthly,
+    xField: "total_amount",
+    yField: "month_name",
+    color: "#1677ff",
+    autoFit: true,
+    height: 300,
+    barWidthRatio: 0.4, // tighter control
+    xAxis: {
+      label: {
+        formatter: (val) => `₹${val}`,
+        style: { fontSize: 12 },
+      },
+      title: {
+        text: "Total Amount",
+        style: { fontWeight: 500 },
+      },
+    },
+    yAxis: {
+      title: {
+        text: "Month",
+        style: { fontWeight: 500 },
+      },
+      label: {
+        style: { fontSize: 12 },
+      },
+    },
+    tooltip: {
+      formatter: (datum) => ({
+        name: datum.month_name,
+        value: `₹${datum.total_amount}`,
+      }),
+    },
+    interactions: [{ type: "element-active" }],
+    label: {
+      position: "middle",
+      layout: [
+        { type: "interval-adjust-position" },
+        { type: "interval-hide-overlap" },
+        { type: "adjust-color" },
+      ],
+    },
   };
-  return map[Number(type)] || "default";
-};
 
-const getUserTypeLabel = (type) => {
-  const userTypeMap = {
-    1: "User",
-    2: "Security",
-    3: "Staff",
-    4: "Delivery",
-  };
-
-  return userTypeMap[type] || "Unknown";
-};
-
-const UserCard = ({ user, onToggleStatus, onEdit, onView, imageUrls }) => {
-  const highlightMatch = (text, match) => {
-    if (!match || !text) return text;
-    const regex = new RegExp(`(${match})`, "gi");
-    return text.split(regex).map((part, index) =>
-      part.toLowerCase() === match.toLowerCase() ? (
-        <mark key={index} className="bg-yellow-200 px-1 rounded">
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
-
-  const isActive = user.is_active === "true";
-  const avatarSrc = user.avatar_photo
-    ? imageUrls.userImageBase + user.avatar_photo
-    : imageUrls.noImage;
   return (
-    <Card
-      hoverable
-      className="rounded-2xl shadow-md border border-gray-100 transition-all duration-200 hover:shadow-lg"
-      bodyStyle={{ padding: "1.25rem" }}
-    >
-      <div className="flex items-center gap-4">
-        <Avatar
-          size={64}
-          icon={<UserOutlined />}
-          src={avatarSrc}
-          className="bg-[#006666] flex-shrink-0"
+    <div className="p-4 space-y-6">
+      <Title level={3}>Dashboard</Title>
+
+      <Row gutter={[16, 16]}>
+        {cardItems.map((item) => (
+          <Col key={item.title} xs={24} sm={12} md={8} lg={4}>
+            <Card
+              title={item.title}
+              bordered={false}
+              className="shadow-md text-center"
+            >
+              <p className="text-2xl font-semibold">{item.count}</p>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Card title="Latest Orders" className="shadow-md">
+        <Table
+          dataSource={data.latestOrders}
+          columns={orderColumns}
+          rowKey="id"
+          pagination={false}
         />
-        <div className="flex-1 min-w-0">
-          <Tooltip title={user.name}>
-            <h3 className="text-lg font-semibold truncate text-[#006666]">
-              {highlightMatch(user.name, user._match)}
-            </h3>
-          </Tooltip>
-          <p className="text-sm text-gray-600 truncate flex items-center gap-1">
-            <PhoneOutlined className="text-gray-400" />
-            {highlightMatch(user.mobile, user._match)}
-          </p>
-        </div>
-      </div>
+      </Card>
 
-      <div className="mt-4 text-sm text-gray-700 space-y-1">
-        <p className="flex items-center gap-2">
-          <IdcardOutlined className="text-gray-400" />
-          <span className="font-medium">User Type:</span>
-          <Tag color={getUserTypeColor(user.user_type)}>
-            {highlightMatch(getUserTypeLabel(user.user_type), user._match)}
-          </Tag>
-        </p>
-        <p>
-          <span className="font-medium">Firm Name:</span>{" "}
-          <span className="text-gray-600">
-            {highlightMatch(user.firm_name || "", user._match)}
-          </span>
-        </p>
-        <p className="flex items-center gap-2">
-          <span className="font-medium">Status:</span>
-          {isActive ? (
-            <Tag
-              color="green"
-              icon={<CheckCircleTwoTone twoToneColor="#52c41a" />}
-              className="px-2 py-0.5 rounded-full"
-            >
-              Active
-            </Tag>
-          ) : (
-            <Tag
-              color="red"
-              icon={<CloseCircleTwoTone twoToneColor="#ff4d4f" />}
-              className="px-2 py-0.5 rounded-full"
-            >
-              Inactive
-            </Tag>
-          )}
-        </p>
-      </div>
-
-      <div className="mt-4 flex flex-col gap-2">
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => onEdit(user)}
-            className="bg-[#006666] w-full"
-            size="small"
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title={`Mark user as ${isActive ? "Inactive" : "Active"}?`}
-            onConfirm={() => onToggleStatus(user)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              type="dashed"
-              block
-              size="small"
-              icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-            >
-              {isActive ? "Set Inactive" : "Set Active"}
-            </Button>
-          </Popconfirm>
+      <Card title="Monthly Order Summary" className="shadow-md">
+        <div className="w-full max-w-full overflow-auto">
+          <Bar {...barConfig} />
         </div>
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 };
-export default UserCard;
+
+export default Dashboard;

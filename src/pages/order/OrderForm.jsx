@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ADDRESS_BY_ID,
+  CUSTOMER_LIST,
   FETCH_PRODUCTLIST,
   GUEST_USER_ORDER_BY_ID,
   ORDER_LIST,
@@ -34,7 +35,7 @@ const OrderForm = () => {
   const naviagte = useNavigate();
   const [ProductData, setProductData] = useState([]);
   const [UserData, setUserData] = useState([]);
-
+  const [orderData, setOrderData] = useState(null);
   const [ProductForms, setProductForms] = useState([
     {
       id: "",
@@ -60,7 +61,7 @@ const OrderForm = () => {
   const fetchuserData = async () => {
     try {
       const productRes = await FetchTrigger({
-        url: `${USER_BY_ID}/6`,
+        url: CUSTOMER_LIST,
         headers: { Authorization: `Bearer ${token}` },
       });
       if (productRes?.data) {
@@ -70,27 +71,13 @@ const OrderForm = () => {
       console.error("Error fetching product data:", err);
     }
   };
-  const fetchData = async () => {
-    try {
-      const productRes = await FetchTrigger({
-        url: `${ADDRESS_BY_ID}/6`,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (productRes?.data) {
-        setAddressData(productRes.data);
-      }
-    } catch (err) {
-      console.error("Error fetching product data:", err);
-    }
-  };
 
   useEffect(() => {
-    fetchData();
     fetchProductData();
     fetchuserData();
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchOrder = async () => {
     const res = await FetchTrigger({
       url: `${GUEST_USER_ORDER_BY_ID}/${id}`,
       headers: { Authorization: `Bearer ${token}` },
@@ -101,8 +88,11 @@ const OrderForm = () => {
     const guestUser = res.data?.[0] ?? {};
     const order = res.order ?? {};
     const orderSubs = res.orderSub ?? [];
+    setOrderData(order);
+    if (order?.user_id) {
+      await handleUserChange(order?.user_id);
+    }
 
-    // Format subs
     const processedSubs = Array.isArray(orderSubs)
       ? orderSubs.map((p) => ({
           id: p.id || "",
@@ -113,9 +103,7 @@ const OrderForm = () => {
         }))
       : [];
 
-    // Set form values
     form.setFieldsValue({
-      // Guest user fields
       firm_name: guestUser.firm_name || "",
       gstin: guestUser.gstin || "",
       name: guestUser.name || "",
@@ -124,8 +112,9 @@ const OrderForm = () => {
       email: guestUser.email || "",
       address: guestUser.address || "",
 
-      // Order fields
       order_date: order.order_date ? dayjs(order.order_date) : null,
+      user_id: order.user_id || "",
+      delivery_address_id: order?.delivery_address_id || "",
       delivery_instructions: order.delivery_instructions || "",
       order_status: order.order_status || false,
       delivery_charges: order.delivery_charges
@@ -135,43 +124,54 @@ const OrderForm = () => {
         ? parseFloat(order.discount_amount)
         : 0,
 
-      // Order items
       subs: processedSubs,
     });
 
     setProductForms(processedSubs);
   };
-  useEffect(() => {
-    if (isEditMode) fetchProfile();
-  }, [id]);
 
+  useEffect(() => {
+    if (isEditMode) fetchOrder();
+  }, [id]);
+  console.log(orderData?.delivery_address_id, "id");
+
+  const handleUserChange = async (userId) => {
+    form.setFieldsValue({ delivery_address_id: undefined });
+    if (!userId) {
+      setAddressData([]);
+      return;
+    }
+
+    try {
+      const res = await FetchTrigger({
+        url: `${ADDRESS_BY_ID}/${userId}`,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res?.data) {
+        setAddressData(res.data);
+      }
+      if (isEditMode) {
+        console.log(orderData?.delivery_address_id, "id dd");
+        const matchedAddress = res.data.find(
+          (addr) => addr.id == orderData?.delivery_address_id
+        );
+
+        if (matchedAddress) {
+          form.setFieldsValue({
+            delivery_address_id: matchedAddress.id,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch address data:", err);
+      message.error("Failed to load address.");
+      setAddressData([]);
+    }
+  };
   const handleProductChange = (index, field, value) => {
     const updatedForms = [...ProductForms];
     updatedForms[index][field] = value;
-
-    if (field === "product_id") {
-      const selectedProduct = addressData.find((prod) => prod.id === value);
-
-      if (selectedProduct) {
-        const price =
-          Number(selectedProduct.product_selling_price) !== 0
-            ? Number(selectedProduct.product_selling_price)
-            : Number(selectedProduct.product_spl_offer_price) !== 0
-            ? Number(selectedProduct.product_spl_offer_price)
-            : Number(selectedProduct.product_mrp);
-
-        updatedForms[index].product_price = price;
-
-        // ✅ Update AntD Form value as well
-        form.setFieldsValue({
-          subs: {
-            [index]: {
-              product_price: price,
-            },
-          },
-        });
-      }
-    }
 
     setProductForms(updatedForms);
   };
@@ -179,7 +179,12 @@ const OrderForm = () => {
   const addRow = () => {
     setProductForms((prev) => [
       ...prev,
-      { id: "", product_id, product_qnty, is_default: false },
+      {
+        id: "",
+        product_id: "",
+        product_qnty: "",
+        order_sub_status: false,
+      },
     ]);
   };
 
@@ -196,7 +201,6 @@ const OrderForm = () => {
     let hasValidSub = false;
     let hasInvalidSub = false;
     let hasDefault = false;
-
     subs.forEach((sub) => {
       const { product_id, product_qnty, order_sub_status } = sub;
 
@@ -274,7 +278,6 @@ const OrderForm = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(res);
       if (res.code == 201) {
         message.success(
           res.message ||
@@ -317,112 +320,112 @@ const OrderForm = () => {
             </Space>
 
             <div
-              className={`grid gap-4 ${
-                isEditMode
-                  ? "grid-cols-1 md:grid-cols-3 lg:grid-cols-5"
-                  : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-              }`}
+              className={
+                "grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 "
+              }
             >
-              {" "}
-              <>
-                <Form.Item
-                  label={
-                    <span>
-                      Order Date <span className="text-red-500">*</span>
-                    </span>
+              {/* Order Date */}
+              <Form.Item
+                label={
+                  <span>
+                    Order Date <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="order_date"
+                rules={[
+                  { required: true, message: "Please select order date" },
+                ]}
+              >
+                <DatePicker format="DD-MM-YYYY" className="w-full" />
+              </Form.Item>
+
+              {/* User */}
+              <Form.Item
+                name="user_id"
+                label={
+                  <span>
+                    User <span className="text-red-500">*</span>
+                  </span>
+                }
+                rules={[{ required: true, message: "Please select a User" }]}
+              >
+                <Select
+                  placeholder="Select User"
+                  allowClear
+                  showSearch
+                  filterOption={(input, option) =>
+                    option?.children
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase())
                   }
-                  name="order_date"
-                  rules={[
-                    { required: true, message: "Please select order date" },
-                  ]}
+                  onChange={handleUserChange}
                 >
-                  <DatePicker format="DD-MM-YYYY" className="w-full" />
-                </Form.Item>
-{/* 
-                <Form.Item
-                  name="user_id"
-                  label={
-                    <span>
-                      User <span className="text-red-500">*</span>
-                    </span>
+                  {UserData.map((cat) => (
+                    <Select.Option key={cat.id} value={cat.id}>
+                      {cat.firm_name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              {/* Address */}
+              <Form.Item
+                name="delivery_address_id"
+                label={
+                  <span>
+                    Address <span className="text-red-500">*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: "Please select an address" },
+                ]}
+              >
+                <Select
+                  placeholder="Select Address"
+                  allowClear
+                  showSearch
+                  filterOption={(input, option) =>
+                    option?.children
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase())
                   }
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select a User",
-                    },
-                  ]}
                 >
-                  <Select
-                    placeholder="Select User"
-                    allowClear
-                    showSearch
-                    filterOption={(input, option) =>
-                      option?.children
-                        ?.toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                  >
-                    {UserData.map((cat) => (
-                      <Select.Option key={cat.id} value={cat.id}>
-                        {cat.address}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item> */}
-                <Form.Item
-                  name="delivery_address_id"
-                  label={
-                    <span>
-                      Address <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select a address",
-                    },
-                  ]}
-                >
-                  <Select
-                    placeholder="Select Address"
-                    allowClear
-                    showSearch
-                    filterOption={(input, option) =>
-                      option?.children
-                        ?.toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                  >
-                    {addressData.map((cat) => (
-                      <Select.Option key={cat.id} value={cat.id}>
-                        {cat.address}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-                <Form.Item
-                  label="Delivery Instruction"
-                  name="delivery_instructions"
-                >
-                  <Input />
-                </Form.Item>
-                <Form.Item label="Delivery Charge" name="delivery_charges">
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="Discount Amount"
-                  name="discount_amount"
-                  rules={[
-                    {
-                      pattern: /^[0-9]+$/,
-                      message: "Enter a valid numeric amount",
-                    },
-                  ]}
-                >
-                  <Input maxLength={10} />
-                </Form.Item>
-              </>
+                  {addressData.map((addr) => (
+                    <Select.Option key={addr.id} value={addr.id}>
+                      {addr.address_type} - {addr.address}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              {/* Delivery Instruction */}
+              <Form.Item
+                label="Delivery Instruction"
+                name="delivery_instructions"
+              >
+                <Input />
+              </Form.Item>
+
+              {/* Delivery Charges */}
+              <Form.Item label="Delivery Charge" name="delivery_charges">
+                <Input />
+              </Form.Item>
+
+              {/* Discount Amount */}
+              <Form.Item
+                label="Discount Amount"
+                name="discount_amount"
+                rules={[
+                  {
+                    pattern: /^[0-9]+$/,
+                    message: "Enter a valid numeric amount",
+                  },
+                ]}
+              >
+                <Input maxLength={10} />
+              </Form.Item>
+
+              {/* Order Status (Only in Edit Mode) */}
               {isEditMode && (
                 <Form.Item label="Status" name="order_status">
                   <Select placeholder="Select Status" allowClear>
@@ -431,7 +434,12 @@ const OrderForm = () => {
                   </Select>
                 </Form.Item>
               )}
-              <Form.Item label="Address" className="md:col-span-4">
+
+              {/* Full-width Address Field */}
+              <Form.Item
+                label="Address"
+                className="md:col-span-3 lg:col-span-4"
+              >
                 <Input.TextArea rows={3} />
               </Form.Item>
             </div>

@@ -239,24 +239,24 @@ const GuestUserOrderForm = () => {
         formData.append("order_status", values.order_status);
       }
 
-      // formData.append(
-      //   "subs",
-      //   JSON.stringify(
-      //     subs.map((item) => {
-      //       const sub = {
-      //         product_id: item.product_id,
-      //         product_price: item.product_price,
-      //         product_qnty: item.product_qnty,
-      //       };
+      formData.append(
+        "subs",
+        JSON.stringify(
+          subs.map((item) => {
+            const sub = {
+              product_id: item.product_id,
+              product_price: item.product_price,
+              product_qnty: item.product_qnty,
+            };
 
-      //       if (isEditMode) {
-      //         sub.order_sub_status = item.order_sub_status ? "yes" : "no";
-      //       }
+            if (isEditMode) {
+              sub.order_sub_status = item.order_sub_status ? "yes" : "no";
+            }
 
-      //       return sub;
-      //     })
-      //   )
-      // );
+            return sub;
+          })
+        )
+      );
       subs.forEach((item, index) => {
         formData.append(`subs[${index}][id]`, item.id);
         formData.append(`subs[${index}][product_id]`, item.product_id);
@@ -288,7 +288,6 @@ const GuestUserOrderForm = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(res);
       if (res.code == 201) {
         message.success(
           res.message ||
