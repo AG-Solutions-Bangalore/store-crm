@@ -1,26 +1,25 @@
 import { Card, Input, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { GUEST_USER_LIST } from "../../api";
+import { WEBSITE_ENQUIRY } from "../../api";
 import usetoken from "../../api/usetoken";
-import GuestUserTable from "../../components/guestuser/GuestUserTable";
+import WebsiteTable from "../../components/websiteenquiry/WebsiteTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const { Search } = Input;
-const GuestUserList = () => {
-  const [selectedId, setSelecetdId] = useState(false);
-  const [open, setopenDialog] = useState(false);
+const WebsiteEnquiry = () => {
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const { trigger, loading: isMutating } = useApiMutation();
-  const [users, setUsers] = useState([]);
+  const [website, setWebsite] = useState([]);
+
   const fetchUser = async () => {
     const res = await trigger({
-      url: GUEST_USER_LIST,
+      url: WEBSITE_ENQUIRY,
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (Array.isArray(res.data)) {
-      setUsers(res.data);
+      setWebsite(res.data);
     }
   };
 
@@ -28,13 +27,7 @@ const GuestUserList = () => {
     fetchUser();
   }, []);
 
-  const handleEdit = (id) => {
-    setopenDialog(true);
-    setSelecetdId(id);
-  };
-
-  const filteredUsers = users
-
+  const filteredUsers = website
     .map((user) => {
       const flatString = Object.values(user)
         .filter((v) => typeof v === "string" || typeof v === "number")
@@ -50,7 +43,7 @@ const GuestUserList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-[#006666]">Guest User List</h2>
+        <h2 className="text-2xl font-bold text-[#006666]">Website Enquiry</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -67,19 +60,13 @@ const GuestUserList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <GuestUserTable users={filteredUsers} onEdit={handleEdit} />
+          <WebsiteTable website={filteredUsers} />
         ) : (
           <div className="text-center text-gray-500 py-20">No users found.</div>
         )}
       </div>
-      {/* <GuestUserForm
-        userId={selectedId}
-        open={open}
-        onClose={() => setopenDialog(false)}
-        onSuccess={() => fetchUser()}
-      /> */}
     </Card>
   );
 };
 
-export default GuestUserList;
+export default WebsiteEnquiry;

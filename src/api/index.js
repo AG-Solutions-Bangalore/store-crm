@@ -11,15 +11,19 @@ export const PANEL_SEND_PASSWORD = `/panel-send-password`;
 //PANEL_CHANGE_PASSWORD
 export const PANEL_CHANGE_PASSWORD = `/panel-change-password`;
 //PROFILE
+export const COMPANY_DATA = `/web-fetch-company`;
+//PROFILE
 export const DASHBOARD = `/dashboard`;
 //PROFILE
 export const PROFILE = `/panel-fetch-profile`;
 //UPDATE_PROFILE
-export const UPDATE_PROFILE = `/panel-update-user`;
+export const UPDATE_PROFILE = `/panel-update-profile`;
 //USER_LIST
 export const USER_LIST = `/panel-fetch-user-list`;
 //CREATE_USER_LIST
 export const CREATE_USER_LIST = `/panel-create-user`;
+export const UPDATE_USER = `/panel-update-user`;
+
 //UPDATE_STATUS
 export const UPDATE_STATUS = `/panel-update-user-status`;
 //GET_USER_BY_ID
@@ -48,15 +52,28 @@ export const ADDRESS_BY_ID = `/panel-fetch-address-by-id`;
 export const USER_BY_ID = `/panel-fetch-user-by-id`;
 //GUEST_USER_LIST
 export const GUEST_USER_LIST = `/panel-fetch-guest-user-list`;
-//GUEST_USER_LIST
+//GUEST_USER_BY_ID
 export const GUEST_USER_BY_ID = `/panel-fetch-guest-user-by-id`;
-//GUEST_USER_LIST
+//UPDATE_GUEST_USER
 export const UPDATE_GUEST_USER = `/panel-update-guest-user`;
 //GUEST_USER_ORDER_LIST
 export const GUEST_USER_ORDER_LIST = `/panel-fetch-guest-user-order-list`;
-//GUEST_USER_ORDER_LIST
+//GUEST_USER_ORDER_BY_ID
 export const GUEST_USER_ORDER_BY_ID = `/panel-fetch-guest-user-order-by-id`;
-//GUEST_USER_ORDER_LIST
+//GUEST_USER_ORDER_CREATE
 export const GUEST_USER_ORDER_CREATE = `/panel-create-guest-user-order`;
-//GUEST_USER_ORDER_LIST
+//GUEST_USER_ORDER_UPDATE
 export const GUEST_USER_ORDER_UPDATE = `/panel-update-guest-user-order`;
+//WEBSITE_ENQUIRY
+export const WEBSITE_ENQUIRY = `/panel-fetch-website-contact`;
+// ..........................ORDERS..............................
+//ORDER_REPORT
+export const ORDER_REPORT = `/order-report`;
+//ORDER_PRODUCT_REPORT
+export const ORDER_PRODUCT_REPORT = `/order-product-report`;
+//CATEGORY_REPORT
+export const CATEGORY_REPORT = `/category-report`;
+//PRODUCT_REPORT
+export const PRODUCT_REPORT = `/product-report`;
+//PRODUCT_CATEGORY_REPORT
+export const PRODUCT_CATEGORY_REPORT = `/product-category-report`;

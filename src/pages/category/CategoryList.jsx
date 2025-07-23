@@ -119,7 +119,7 @@ const CategoryList = () => {
     <>
       <Card className="min-h-[35rem]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-[#006666]">Category List</h2>
+          <h2 className="text-2xl font-bold text-[#006666]">Category</h2>
 
           <div className="flex-1 flex gap-4 sm:justify-end">
             <Search

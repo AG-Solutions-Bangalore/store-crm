@@ -24,6 +24,9 @@ import GuestUserForm from "./pages/guestuser/GuestUserForm";
 import OrderList from "./pages/order/OrderList";
 import OrderForm from "./pages/order/OrderForm";
 import MaintenancePage from "./components/common/MaintenancePage";
+import WebsiteEnquiry from "./pages/websiteenquiry/WebsiteEnquiry";
+import Orderreport from "./pages/report/orderreport/orderreport";
+import CategoryReport from "./pages/report/CategoryReport/CategoryReport";
 
 function App() {
   return (
@@ -72,6 +75,9 @@ function App() {
                 <Route path="/product" element={<ProductList />} />
                 <Route path="/product-create" element={<ProductForm />} />
                 <Route path="/product-edit/:id" element={<ProductForm />} />
+                <Route path="/website-enquiry" element={<WebsiteEnquiry />} />
+                <Route path="/report-order" element={<Orderreport />} />
+                <Route path="/report-category" element={<CategoryReport />} />
 
                 {/* Add more protected routes here */}
               </Routes>

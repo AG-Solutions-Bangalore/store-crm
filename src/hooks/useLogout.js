@@ -12,7 +12,7 @@ const useLogout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = usetoken();
-  const { trigger, loading } = useApiMutation();
+  const { trigger } = useApiMutation();
 
   const handleLogout = async () => {
     try {
@@ -25,7 +25,7 @@ const useLogout = () => {
       });
 
       await persistor.flush();
-      localStorage.clear();
+      // localStorage.clear();
       dispatch(logout());
 
       navigate("/");

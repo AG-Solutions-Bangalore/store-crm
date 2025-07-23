@@ -1,9 +1,4 @@
-import {
-  EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import { Button, Image, Space, Tag, Tooltip } from "antd";
+import { Tooltip } from "antd";
 import STTable from "../STTable/STTable";
 
 const GuestUserTable = ({ users, onEdit }) => {
@@ -26,6 +21,12 @@ const GuestUserTable = ({ users, onEdit }) => {
   };
 
   const columns = [
+    {
+      title: "Firm Name",
+      dataIndex: "firm_name",
+      key: "firm_name",
+      render: (_, user) => highlightMatch(user.firm_name, user._match),
+    },
     {
       title: "Name",
       dataIndex: "name",
@@ -51,27 +52,6 @@ const GuestUserTable = ({ users, onEdit }) => {
           {highlightMatch(user.email, user._match)}
         </Tooltip>
       ),
-    },
-
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, user) => {
-        return (
-          <Space>
-            <Tooltip title="Edit User">
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                size="small"
-                onClick={() => onEdit(user.id)}
-                className="bg-[#006666]"
-              />
-            </Tooltip>
-          </Space>
-        );
-      },
-      width: 130,
     },
   ];
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { PROFILE, UPDATE_PROFILE } from "../../api";
-import usetoken from "../../api/usetoken";
 import { message, Form, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import ProfileForm from "../../components/user/ProfileForm";
+import useToken from "../../api/usetoken";
 
 const UserPage = () => {
-  const token = usetoken();
+  const token = useToken();
   const { trigger: fetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: submitTrigger, loading: submitloading } = useApiMutation();
   const [form] = Form.useForm();
@@ -16,7 +16,6 @@ const UserPage = () => {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
   const [noImageUrl, setNoImageUrl] = useState("");
-  const [userId, setUserId] = useState(null);
   const [addressForms, setAddressForms] = useState([]);
   const navigate = useNavigate();
   const fetchProfile = async () => {
@@ -26,8 +25,13 @@ const UserPage = () => {
     });
 
     const userData = res?.data || {};
-    setInitialData(userData);
-    setUserId(userData.id);
+    const formattedData = {
+      ...userData,
+      is_email_required: userData.is_email_required === "true",
+      is_whatsapp_required: userData.is_whatsapp_required === "true",
+    };
+
+    setInitialData(formattedData);
 
     const userImage = res.image_url?.find((i) => i.image_for == "User");
     const noImage = res.image_url?.find((i) => i.image_for == "No Image");
@@ -39,7 +43,7 @@ const UserPage = () => {
             id: a.id || "",
             address_type: a.address_type || "",
             address: a.address || "",
-            is_default: a.is_default || false,
+            is_default: a.is_default === "yes",
           }))
         : []
     );
@@ -49,6 +53,17 @@ const UserPage = () => {
     fetchProfile();
   }, []);
 
+  // const handleAddressChange = (index, field, value) => {
+  //   const updated = [...addressForms];
+  //   if (field === "is_default" && value === true) {
+  //     updated.forEach((_, i) => {
+  //       updated[i].is_default = i === index;
+  //     });
+  //   } else {
+  //     updated[index][field] = value;
+  //   }
+  //   setAddressForms(updated);
+  // };
   const handleAddressChange = (index, field, value) => {
     const updated = [...addressForms];
     if (field === "is_default" && value === true) {
@@ -81,12 +96,21 @@ const UserPage = () => {
       const formData = new FormData();
       formData.append("firm_name", values.firm_name || "");
       formData.append("gstin", values.gstin || "");
-      formData.append("name", values.name);
-      formData.append("email", values.email);
-      formData.append("mobile", values.mobile);
+      formData.append("name", values.name || "");
+      formData.append("email", values.email || "");
+      formData.append("mobile", values.mobile || "");
       formData.append("whatsapp", values.whatsapp || "");
       formData.append("is_active", values.is_active ? "true" : "false");
-      formData.append("user_type", values.user_type);
+
+      formData.append(
+        "is_email_required",
+        values.is_email_required ? "true" : "false"
+      );
+      formData.append(
+        "is_whatsapp_required",
+        values.is_whatsapp_required ? "true" : "false"
+      );
+      formData.append("user_type", values.user_type || "");
       if (avatarFile) {
         formData.append("avatar_photo", avatarFile);
       }
@@ -102,8 +126,10 @@ const UserPage = () => {
       );
 
       await submitTrigger({
-        url: `${UPDATE_PROFILE}/${values?.id || userId}?_method=PUT`,
+        url: `${UPDATE_PROFILE}?_method=PUT`,
+        // url: `${UPDATE_PROFILE}`,
         method: "post",
+        // method: "put",
         data: formData,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -142,6 +168,7 @@ const UserPage = () => {
           onAddressChange={handleAddressChange}
           onAddAddress={addRow}
           onRemoveAddress={removeRow}
+          submititle="Update"
         />
       )}
     </>
