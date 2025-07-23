@@ -1,11 +1,10 @@
-import { Button, Form, Input, Typography } from "antd";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { App, Button, Form, Input, Typography } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { setCredentials } from "../../store/auth/authSlice";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { PANEL_LOGIN } from "../../api";
-import logo from "../../assets/logo.png";
-import { App } from "antd";
+import useFinalUserImage from "../../components/common/Logo";
+import { useApiMutation } from "../../hooks/useApiMutation";
+import { setCredentials } from "../../store/auth/authSlice";
 const { Title } = Typography;
 
 const SignIn = () => {
@@ -14,8 +13,9 @@ const SignIn = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { trigger, loading } = useApiMutation();
+  const auth = useSelector((state) => state.auth);
   const token = useSelector((state) => state.auth.token);
-
+  const finalUserImage = useFinalUserImage();
   if (token) {
     return <Navigate to="/home" replace />;
   }
@@ -40,8 +40,8 @@ const SignIn = () => {
             token: UserInfo.token,
             tokenExpireAt: UserInfo.token_expires_at,
             user: UserInfo.user,
-            companyDetails: company_detils,
-            companyImage: company_image,
+            userDetails: company_detils,
+            userImage: company_image,
             version: version?.version_panel,
           })
         );
@@ -62,7 +62,11 @@ const SignIn = () => {
           {/* Left Side - Login Form */}
           <div className="flex flex-col justify-center px-6 py-8">
             <div className="text-center mb-6">
-              <img src={logo} alt="Logo" className="h-20 mx-auto" />
+              <img
+                src={finalUserImage || ""}
+                alt="Logo"
+                className="h-20 mx-auto"
+              />
               <Title level={3} className="text-gray-800">
                 Sign in to your account
               </Title>

@@ -1,15 +1,15 @@
-import { Button, Form, Input, Typography } from "antd";
+import { App, Button, Form, Input, Typography } from "antd";
 import { useSelector } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
 import { PANEL_SEND_PASSWORD } from "../../api";
+import useFinalUserImage from "../../components/common/Logo";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import logo from "../../assets/logo.png";
-import { App } from "antd";
 const { Title } = Typography;
 
 const ForgotPassword = () => {
   const [form] = Form.useForm();
   const { message } = App.useApp();
+  const finalUserImage = useFinalUserImage();
 
   const { trigger, loading } = useApiMutation();
   const token = useSelector((state) => state.auth.token);
@@ -48,7 +48,11 @@ const ForgotPassword = () => {
           {/* Left Side - Login Form */}
           <div className="flex flex-col justify-center px-6 py-8">
             <div className="text-center mb-6">
-              <img src={logo} alt="Logo" className="h-20 mx-auto" />
+              <img
+                src={finalUserImage || ""}
+                alt="Logo"
+                className="h-20 mx-auto"
+              />
               <Title level={3} className="text-gray-800">
                 Reset Your Password
               </Title>

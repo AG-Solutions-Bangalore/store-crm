@@ -1,10 +1,20 @@
 import {
   ArrowRightOutlined,
+  BarChartOutlined,
+  BellOutlined,
+  CarOutlined,
   CloseOutlined,
-  ContainerOutlined,
-  DesktopOutlined,
   HomeOutlined,
+  LockOutlined,
   MailOutlined,
+  MessageOutlined,
+  PictureOutlined,
+  ProfileOutlined,
+  ShoppingCartOutlined,
+  ShoppingOutlined,
+  SolutionOutlined,
+  TagsOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -12,52 +22,66 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import logo1 from "../assets/logo-1.png";
-import logo from "../assets/logo-black.png";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
+import useFinalUserImage from "./common/Logo";
+
 const getMenuItems = (collapsed) => {
+  const dashboardItems = [
+    { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
+    { key: "/category", icon: <TagsOutlined />, label: "Category" },
+    { key: "/product", icon: <ShoppingOutlined />, label: "Products" },
+  ];
+  const generalItems = [
+    { key: "/user", icon: <UserOutlined />, label: "App User" },
+    { key: "/guest-user", icon: <UserOutlined />, label: "Guest User" },
+    { key: "/order", icon: <ShoppingCartOutlined />, label: "Order" },
+    {
+      key: "/guest-user-order",
+      icon: <ShoppingCartOutlined />,
+      label: "Guest Order",
+    },
+  ];
+
+  const managementChildren = [
+    { key: "/security", icon: <LockOutlined />, label: "Security" },
+    { key: "/staff", icon: <SolutionOutlined />, label: "Staff" },
+    { key: "/delivery", icon: <CarOutlined />, label: "Delivery" },
+  ];
+
+  const otherItems = [
+    { key: "/slider", icon: <PictureOutlined />, label: "Slider" },
+    { key: "/notification", icon: <BellOutlined />, label: "Notification" },
+    {
+      key: "/website-enquiry",
+      icon: <MessageOutlined />,
+      label: "Website Enquiry",
+    },
+  ];
+  const reportItemsChildren = [
+    {
+      key: "/report-category",
+      icon: <ProfileOutlined />,
+      label: "Category Report",
+    },
+    { key: "/report-order", icon: <ProfileOutlined />, label: "Order Report" },
+  ];
+
   if (collapsed) {
     return [
-      // { key: "/user", icon: <PieChartOutlined />, label: "User" },
-      { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-      { key: "/category", icon: <DesktopOutlined />, label: "Category" },
-      { key: "/product", icon: <ContainerOutlined />, label: "Products" },
+      ...dashboardItems,
+      ...generalItems,
       {
-        type: "group",
+        key: "sub1",
+        icon: <MailOutlined />,
         label: "Management",
-        children: [
-          {
-            key: "sub1",
-            icon: <MailOutlined />,
-            label: "Management",
-            children: [
-              { key: "/user", label: "User" },
-              { key: "/security", label: "Security" },
-              { key: "/staff", label: "Staff" },
-              { key: "/delivery", label: "Delivery" },
-            ],
-          },
-        ],
+        children: managementChildren,
       },
-      { key: "/slider", icon: <ContainerOutlined />, label: "Slider" },
+      ...otherItems,
       {
-        key: "/notification",
-        icon: <ContainerOutlined />,
-        label: "Notification",
-      },
-      {
-        key: "/order",
-        icon: <ContainerOutlined />,
-        label: "Order",
-      },
-      {
-        key: "/guest-user",
-        icon: <ContainerOutlined />,
-        label: "Guest User",
-      },
-      {
-        key: "/guest-user-order",
-        icon: <ContainerOutlined />,
-        label: "Guest Order",
+        key: "sub2",
+        icon: <BarChartOutlined />,
+        label: "Report",
+        children: reportItemsChildren,
       },
     ];
   }
@@ -66,11 +90,12 @@ const getMenuItems = (collapsed) => {
     {
       type: "group",
       label: "Dashboard",
-      children: [
-        { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-        { key: "/category", icon: <DesktopOutlined />, label: "Category" },
-        { key: "/product", icon: <DesktopOutlined />, label: "Product" },
-      ],
+      children: dashboardItems,
+    },
+    {
+      type: "group",
+      label: "General",
+      children: generalItems,
     },
     {
       type: "group",
@@ -80,36 +105,27 @@ const getMenuItems = (collapsed) => {
           key: "sub1",
           icon: <MailOutlined />,
           label: "Management",
-          children: [
-            { key: "/user", label: "User" },
-            { key: "/security", label: "Security" },
-            { key: "/staff", label: "Staff" },
-            { key: "/delivery", label: "Delivery" },
-          ],
+          children: managementChildren,
         },
       ],
     },
-    { key: "/slider", icon: <ContainerOutlined />, label: "Slider" },
 
     {
-      key: "/notification",
-      icon: <ContainerOutlined />,
-      label: "Notification",
+      type: "group",
+      label: "Others",
+      children: otherItems,
     },
     {
-      key: "/order",
-      icon: <ContainerOutlined />,
-      label: "Order",
-    },
-    {
-      key: "/guest-user",
-      icon: <ContainerOutlined />,
-      label: "Guest User",
-    },
-    {
-      key: "/guest-user-order",
-      icon: <ContainerOutlined />,
-      label: "Guest Order",
+      type: "group",
+      label: "Report",
+      children: [
+        {
+          key: "sub2",
+          icon: <BarChartOutlined />,
+          label: "Report",
+          children: reportItemsChildren,
+        },
+      ],
     },
   ];
 };
@@ -120,6 +136,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
   const naviagte = useNavigate();
   const items = getMenuItems(collapsed);
   const dispatch = useDispatch();
+  const finalUserImage = useFinalUserImage();
   const [delayedCollapse, setDelayedCollapse] = useState(collapsed);
   const localVersion = useSelector((state) => state.auth?.version);
   const serverVersion = useSelector((state) => state?.version?.version);
@@ -140,18 +157,20 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
       })
     );
   };
+  const rootSubmenuKeys = ["sub1", "sub2"];
+
   return (
     <motion.aside
-      initial={{ width: collapsed ? 80 : 260 }}
-      animate={{ width: collapsed ? 80 : 260 }}
+      initial={{ width: collapsed ? 95 : 260 }}
+      animate={{ width: collapsed ? 95 : 260 }}
       transition={{ duration: 0.3 }}
       className={`h-full bg-white shadow-xl rounded-r-2xl overflow-hidden flex flex-col font-[Inter] transition-all duration-300
         ${isMobile ? "fixed z-50 h-screen" : "relative"}`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-center h-14 px-4 bg-[#006666]">
+      {/* Header bg-[#006666]*/}
+      <div className="flex items-center justify-center h-14 px-4 bg-[#e6f2f2]">
         <motion.img
-          src={collapsed ? logo1 : logo}
+          src={collapsed ? logo1 : finalUserImage}
           alt="Logo"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -172,15 +191,37 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#006666] py-2">
+      <div className="flex-1  py-2 scrollbar-custom">
         <Menu
           mode="inline"
           inlineCollapsed={delayedCollapse}
           items={items}
+          openKeys={openKeys}
           selectedKeys={selectedKeys}
-          onOpenChange={(keys) => setOpenKeys(keys)}
-          onClick={({ key }) => {
+          // onOpenChange={(keys) => setOpenKeys(keys)}
+          onOpenChange={(keys) => {
+            const latestOpenKey = keys.find(
+              (key) => openKeys.indexOf(key) === -1
+            );
+            if (rootSubmenuKeys.includes(latestOpenKey)) {
+              setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+            } else {
+              setOpenKeys(keys);
+            }
+          }}
+          // onClick={({ key }) => {
+          //   setSelectedKeys([key]);
+          //   naviagte(key);
+          // }}
+          onClick={({ key, keyPath }) => {
             setSelectedKeys([key]);
+            if (isMobile && onClose) {
+              onClose();
+            }
+            if (keyPath.length === 1) {
+              setOpenKeys([]);
+            }
+
             naviagte(key);
           }}
           className="custom-menu"

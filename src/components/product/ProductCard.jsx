@@ -6,7 +6,6 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Carousel, Image, Popconfirm, Tag } from "antd";
-import React from "react";
 
 const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const {
@@ -25,24 +24,6 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const isActive = is_active == "true";
   const offerPrice = parseFloat(product_spl_offer_price);
   const sellingPrice = parseFloat(product_selling_price);
-
-  // const highlightMatch = (text, match) => {
-  //   if (!match || !text) return text;
-  //   const regex = new RegExp(`(${match})`, "gi");
-  //   return text.split(regex).map((part, index) =>
-  //     part.toLowerCase() === match.toLowerCase() ? (
-  //       <mark
-  //         key={index}
-  //         className="bg-[#006666] text-white px-1 py-0.5 rounded not-italic"
-  //         style={{ backgroundColor: "#006666", color: "white" }}
-  //       >
-  //         {part}
-  //       </mark>
-  //     ) : (
-  //       part
-  //     )
-  //   );
-  // };
 
   const discount =
     offerPrice > 0 && sellingPrice > offerPrice
@@ -113,39 +94,31 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
           <span className="text-gray-600 font-medium bg-[#e6f2f2] px-2 py-0.5 rounded-full">
             {/* {highlightMatch(`${product_unit_value} ${unit_name}`, _match)} */}
             {product_unit_value || ""}
+            {unit_name}
           </span>
         </div>
 
-        {/* Prices */}
         <div className="text-sm text-gray-700 ">
           <div className="flex justify-between items-center mb-2">
             <div>
               <span className="font-medium">Selling:</span>{" "}
-              <span
-                className={`${
-                  offerPrice > 0 ? "line-through text-red-600" : "text-gray-600"
-                }`}
-              >
-                {/* {highlightMatch(product_selling_price || "", _match)} */}
+              <span className="text-gray-600">
                 {product_selling_price || ""}
               </span>
             </div>
-            {discount && (
-              <span className="text-green-600 font-semibold">-{discount}</span>
-            )}
-          </div>
-          <div className="flex justify-between items-center mb-2">
             <div>
-              <span className="font-medium">Offer Price:</span>{" "}
+              <span className="font-medium">Offer:</span>{" "}
               <span className="text-gray-600">
-                {/* {offerPrice > 0
-                  ? highlightMatch(product_spl_offer_price || "", _match)
-                  : "-"} */}
-                {offerPrice > 0 ? product_spl_offer_price || "" : "-"}
+                {offerPrice > 0 ? (
+                  product_spl_offer_price || ""
+                ) : (
+                  <span className="text-red-400">0</span>
+                )}
               </span>
             </div>
-
-            <div className="flex gap-2 items-center">
+          </div>
+          <div className="flex items-center justify-between gap-2 w-full">
+            <div className="flex gap-2 items-center j">
               <Tag
                 color={isActive ? "green" : "red"}
                 icon={
@@ -159,28 +132,30 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
               >
                 {isActive ? "Active" : "Inactive"}
               </Tag>
-
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                size="small"
-                onClick={() => onEdit(user?.id)}
-                className="bg-[#006666]"
-              />
-
-              <Popconfirm
-                title={`Mark user as ${isActive ? "Inactive" : "Active"}?`}
-                onConfirm={() => onToggleStatus(user)}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button
-                  type="dashed"
-                  size="small"
-                  icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                />
-              </Popconfirm>
             </div>
+
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              size="small"
+              onClick={() => onEdit(user?.id)}
+              className="bg-[#006666]"
+              block
+            />
+
+            <Popconfirm
+              title={`Mark user as ${isActive ? "Inactive" : "Active"}?`}
+              onConfirm={() => onToggleStatus(user)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                type="dashed"
+                size="small"
+                block
+                icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              />
+            </Popconfirm>
           </div>
         </div>
 

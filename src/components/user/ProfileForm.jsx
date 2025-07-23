@@ -5,7 +5,17 @@ import {
   UploadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Card, Form, Input, Space, Switch, Upload } from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Checkbox,
+  Form,
+  Input,
+  Space,
+  Switch,
+  Upload,
+} from "antd";
 import { useEffect } from "react";
 
 const ProfileForm = ({
@@ -23,6 +33,7 @@ const ProfileForm = ({
   onAddressChange,
   onAddAddress,
   onRemoveAddress,
+  submititle,
   loading = false,
 }) => {
   useEffect(() => {
@@ -32,6 +43,7 @@ const ProfileForm = ({
   const handleFinish = (values) => {
     onSubmit?.(values);
   };
+
   return (
     <Card>
       <Form
@@ -43,44 +55,6 @@ const ProfileForm = ({
       >
         {type == "updateprofile" ? (
           <Space className="mb-4 w-full justify-between" direction="horizontal">
-            {/* {type == "createuser" ? (
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-[#006666]">
-                    Create User
-                  </h2>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Avatar
-                    size={64}
-                    src={
-                      avatarPreview ||
-                      (initialValues.avatar_photo
-                        ? initialValues.avatar_photo.startsWith("data:image")
-                          ? initialValues.avatar_photo
-                          : `${imageBaseUrl}${initialValues.avatar_photo}`
-                        : noImageUrl)
-                    }
-                    icon={<UserOutlined />}
-                    className="bg-[#006666] flex-shrink-0"
-                  />
-
-                  <Upload
-                    showUploadList={false}
-                    accept="image/*"
-                    beforeUpload={(file) => {
-                      setAvatarFile(file);
-                      const reader = new FileReader();
-                      reader.onload = () => setAvatarPreview(reader.result);
-                      reader.readAsDataURL(file);
-                      return false; // prevent auto-upload
-                    }}
-                  >
-                    <Button icon={<UploadOutlined />}>Upload Avatar</Button>
-                  </Upload>
-                </div>
-              </div>
-            ) : ( */}
             <>
               <div className="flex flex-col items-center gap-2">
                 <Avatar
@@ -215,24 +189,31 @@ const ProfileForm = ({
           >
             <Input maxLength={10} />
           </Form.Item>
-          {/* {type != "updateprofile" && (
-            <Form.Item
-              name="user_type"
-              label={
-                <span>
-                  User type <span className="text-red-500">*</span>
-                </span>
-              }
-              rules={[{ required: true, message: "Please select a user type" }]}
-            >
-              <Select placeholder="Select user type">
-                <Select.Option value="1">User</Select.Option>
-                <Select.Option value="2">Security</Select.Option>
-                <Select.Option value="3">Staff</Select.Option>
-                <Select.Option value="4">Delivery</Select.Option>
-              </Select>
-            </Form.Item>
-          )} */}
+          <div className="flex col-span-2">
+            {type === "updateprofile" && (
+              <>
+                <Form.Item
+                  label="                
+                      Email Notification "
+                  name="is_email_required"
+                  valuePropName="checked"
+                  className="mb-2"
+                >
+                  <Checkbox />
+                </Form.Item>
+
+                <Form.Item
+                  label="                
+                      WhatsApp Notification "
+                  name="is_whatsapp_required"
+                  valuePropName="checked"
+                  className="mb-2"
+                >
+                  <Checkbox />
+                </Form.Item>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-between items-center mb-4">
@@ -279,7 +260,7 @@ const ProfileForm = ({
                     }
                   />
                 </Form.Item>
-                <Form.Item label="Default">
+                {/* <Form.Item label="Default">
                   <Switch
                     checked={addr.is_default}
                     onChange={(checked) =>
@@ -287,6 +268,14 @@ const ProfileForm = ({
                     }
                     disabled={
                       !addr.is_default && addressForms.some((a) => a.is_default)
+                    }
+                  />
+                </Form.Item> */}
+                <Form.Item label="Default">
+                  <Switch
+                    checked={addr.is_default}
+                    onChange={(checked) =>
+                      onAddressChange(idx, "is_default", checked)
                     }
                   />
                 </Form.Item>
@@ -297,7 +286,7 @@ const ProfileForm = ({
         <div className=" mt-6">
           <Form.Item className="text-center">
             <Button type="primary" htmlType="submit" loading={loading}>
-              Submit
+              {submititle || ""}
             </Button>
           </Form.Item>
         </div>

@@ -4,6 +4,7 @@ import storage from "redux-persist/lib/storage";
 import { encryptTransform } from "redux-persist-transform-encrypt";
 import authReducer from "./auth/authSlice";
 import versionReducer from "./auth/versionSlice";
+import companyReducer from "./auth/companySlice";
 
 const secretKey = import.meta.env.VITE_SECRET_KEY;
 
@@ -25,13 +26,14 @@ if (!secretKey) {
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth"],
+  whitelist: ["auth", "company"],
   transforms,
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
   version: versionReducer,
+  company: companyReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

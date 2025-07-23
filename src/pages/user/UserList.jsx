@@ -64,7 +64,7 @@ const UserList = () => {
     navigate("/user-create", {
       state: {
         user_type: 1,
-        title: "User",
+        title: "App User",
         navigatedata: "/user",
       },
     });
@@ -123,7 +123,7 @@ const UserList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-[#006666]">User List</h2>
+        <h2 className="text-2xl font-bold text-[#006666]">App User</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -147,7 +147,7 @@ const UserList = () => {
             onClick={handleAddUser}
             className="bg-[#006666]"
           >
-            Add User
+            Add App User
           </Button>
         </div>
       </div>

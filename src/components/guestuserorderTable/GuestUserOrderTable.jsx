@@ -28,6 +28,12 @@ const GuestUserOrderTable = ({ users, onEdit }) => {
 
   const columns = [
     {
+      title: "Order No",
+      dataIndex: "order_no",
+      key: "order_no",
+      render: (_, user) => highlightMatch(user.order_no, user._match),
+    },
+    {
       title: "Date",
       dataIndex: "order_date",
       key: "order_date",

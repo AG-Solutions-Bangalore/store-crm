@@ -1,7 +1,12 @@
 import { Form, Spin, App } from "antd";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { CREATE_USER_LIST, GET_USER_BY_ID, UPDATE_PROFILE } from "../../api";
+import {
+  CREATE_USER_LIST,
+  GET_USER_BY_ID,
+  UPDATE_PROFILE,
+  UPDATE_USER,
+} from "../../api";
 import usetoken from "../../api/usetoken";
 import ProfileForm from "../../components/user/ProfileForm";
 import { useApiMutation } from "../../hooks/useApiMutation";
@@ -161,9 +166,7 @@ const UserForm = () => {
       );
 
       const res = await SubmitTrigger({
-        url: isEditMode
-          ? `${UPDATE_PROFILE}/${id}?_method=PUT`
-          : CREATE_USER_LIST,
+        url: isEditMode ? `${UPDATE_USER}/${id}?_method=PUT` : CREATE_USER_LIST,
         method: "post",
         data: formData,
         headers: {
@@ -210,6 +213,7 @@ const UserForm = () => {
           onAddressChange={handleAddressChange}
           onAddAddress={addRow}
           onRemoveAddress={removeRow}
+          submititle={isEditMode ? "Update" : "submit"}
         />
       )}
     </>

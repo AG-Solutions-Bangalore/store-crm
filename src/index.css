@@ -79,23 +79,30 @@ body {
   border-radius: 100px !important;
 }
 
-/* Optional: Scale icon on hover */
 .ant-menu-submenu-popup .ant-menu-item:hover .anticon {
   transform: scale(1.2);
   transition: transform 0.2s ease;
 }
-/* .ant-message {
-  z-index: 9999 !important;
-} */
-/* Override Ant Design table cell padding */
-/* .ant-table-wrapper .ant-table-cell,
-.ant-table-wrapper .ant-table-thead > tr > th,
-.ant-table-wrapper .ant-table-tbody > tr > td {
-  padding: px 4px !important; /* or padding: 0 !important; to remove completely */
 
-/* .ant-table-wrapper .ant-table-tbody > tr > td {
-  padding: 0px 6px !important;
-} */
 .ant-table-wrapper .ant-table-thead > tr > th {
   background-color: #e6f2f2;
+}
+.scrollbar-custom {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e6f2f2 transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: #e6f2f2;
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
 }
