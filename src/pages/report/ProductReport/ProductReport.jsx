@@ -1,26 +1,24 @@
-import { Button, Card, Image, Select, Spin, Tooltip } from "antd";
+import {
+  FileExcelOutlined,
+  FilePdfOutlined,
+  PrinterOutlined,
+} from "@ant-design/icons";
+import { Button, Card, Select, Spin, Tooltip } from "antd";
 import printJS from "print-js";
 import { useEffect, useState } from "react";
-import { CATEGORY_REPORT } from "../../../api";
+import { PRODUCT_REPORT } from "../../../api";
 import useToken from "../../../api/usetoken";
-import { useApiMutation } from "../../../hooks/useApiMutation";
-import { downloadPDF } from "../../../components/pdfExport/pdfExport";
-import {
-  PrinterOutlined,
-  FilePdfOutlined,
-  FileExcelOutlined,
-} from "@ant-design/icons";
 import { exportCategoryReportToExcel } from "../../../components/exportCategoryToExcel/exportCategoryToExcel";
+import { downloadPDF } from "../../../components/pdfExport/pdfExport";
+import { useApiMutation } from "../../../hooks/useApiMutation";
 const { Option } = Select;
 
-const CategoryReport = () => {
+const ProductReport = () => {
   const token = useToken();
 
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
   const [filterStatus, setFilterStatus] = useState("all");
-  const [imageBaseUrl, setImageBaseUrl] = useState("");
-  const [noImageUrl, setNoImageUrl] = useState("");
 
   const { trigger: fetchCategoryReport, loading: isMutating } =
     useApiMutation();
@@ -29,7 +27,7 @@ const CategoryReport = () => {
     const getReport = async () => {
       try {
         const res = await fetchCategoryReport({
-          url: CATEGORY_REPORT,
+          url: PRODUCT_REPORT,
           method: "post",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -37,17 +35,11 @@ const CategoryReport = () => {
         });
 
         if (res.code === 201) {
-          const images = res.image_url || [];
-          const imgUrlObj = Object.fromEntries(
-            images.map((i) => [i.image_for, i.image_url])
-          );
-          setImageBaseUrl(imgUrlObj["Category"] || "");
-          setNoImageUrl(imgUrlObj["No Image"] || "");
           setCategory(res.data);
           setFilteredCategory(res.data);
         }
       } catch (error) {
-        console.error("Failed to fetch category report:", error);
+        console.error("Failed to fetch product report:", error);
       }
     };
 
@@ -73,21 +65,10 @@ const CategoryReport = () => {
       targetStyles: ["*"],
     });
   };
-
-  const categoryColumns = [
-  { header: "Name", key: "category_name", width: 25 },
-  { header: "Description", key: "category_description", width: 40 },
-  { header: "Sort Order", key: "category_sort_order", width: 15 },
-  {
-    header: "Status",
-    key: "is_active",
-    width: 15,
-  },
-];
   return (
     <>
       <Card
-        title="Category Report"
+        title="Product Report"
         bordered={false}
         className="shadow-md rounded-lg"
         extra={
@@ -129,7 +110,7 @@ const CategoryReport = () => {
                 onClick={() =>
                   exportCategoryReportToExcel(
                     filteredCategory,
-                    "Category Report"
+                    "Product Report"
                   )
                 }
               />
@@ -137,8 +118,9 @@ const CategoryReport = () => {
           </div>
         }
       >
+        {/* Only this part will be printed */}
         <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
-          <h2 className="text-xl font-semibold">Category Report</h2>
+          <h2 className="text-xl font-semibold">Product Report</h2>
 
           {isMutating ? (
             <div className="flex justify-center py-20">
@@ -146,15 +128,20 @@ const CategoryReport = () => {
             </div>
           ) : filteredCategory.length > 0 ? (
             <table
-              className="w-full border rounded-md table-fixed text-[14px]"
+              className="w-full border rounded-md table-fixed"
               style={{ width: "100%", borderCollapse: "collapse" }}
             >
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-3 py-2 text-left w-[100px]">Image</th>
-                  <th className="px-3 py-2 text-left w-[150px]">Name</th>
-                  <th className="px-3 py-2 text-left w-[250px]">Description</th>
-                  <th className="px-3 py-2 text-center w-[10px]">Sort Order</th>
+                  <th className="px-3 py-2 text-center w-[200px]">Name</th>
+                  <th className="px-3 py-2 text-center w-[80px]">Unit</th>
+                  <th className="px-3 py-2 text-center w-[100px]">MRP</th>
+                  <th className="px-3 py-2 text-center w-[100px]">
+                    Selling Price
+                  </th>
+                  <th className="px-3 py-2 text-center w-[100px]">
+                    Special Offer
+                  </th>
                   <th className="px-3 py-2 text-center w-[100px]">Status</th>
                 </tr>
               </thead>
@@ -162,35 +149,32 @@ const CategoryReport = () => {
               <tbody>
                 {filteredCategory.map((item) => (
                   <tr
-                    key={item.category_name}
+                    key={item.product_name}
                     className="border-t"
                     style={{ pageBreakInside: "avoid" }}
                   >
-                    <td className="px-3 py-2">
-                      <div className="w-[60px] h-[60px] rounded overflow-hidden">
-                        <Image
-                          width={60}
-                          height={60}
-                          src={`${imageBaseUrl}${item.category_image}`}
-                          fallback={noImageUrl}
-                          alt="Category"
-                          style={{ objectFit: "cover", borderRadius: 8 }}
-                        />
+                    <td className="px-3 py-2 font-medium">
+                      {item.product_name}
+                    </td>
+
+                    <td className="px-3 py-2 text-center">
+                      {item.product_unit_value}-{item.unit}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      {item.product_mrp}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      {item.product_selling_price}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      {item.product_spl_offer_price}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <div>
+                        <span className="mx-2 my-1">
+                          {item.is_active == "true" ? "Active" : "Inactive"}
+                        </span>
                       </div>
-                    </td>
-                    <td className="px-3 py-2 font-medium break-words">
-                      {item.category_name}
-                    </td>
-                    <td className="px-3 py-2 break-words whitespace-pre-wrap min-w-0">
-                      {item.category_description}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {item.category_sort_order}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      <span className="mx-2 my-1">
-                        {item.is_active == "true" ? "Active" : "Inactive"}
-                      </span>
                     </td>
                   </tr>
                 ))}
@@ -206,4 +190,4 @@ const CategoryReport = () => {
     </>
   );
 };
-export default CategoryReport;
+export default ProductReport;

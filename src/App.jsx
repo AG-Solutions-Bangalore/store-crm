@@ -27,6 +27,7 @@ import MaintenancePage from "./components/common/MaintenancePage";
 import WebsiteEnquiry from "./pages/websiteenquiry/WebsiteEnquiry";
 import Orderreport from "./pages/report/orderreport/orderreport";
 import CategoryReport from "./pages/report/CategoryReport/CategoryReport";
+import ProductReport from "./pages/report/ProductReport/ProductReport";
 
 function App() {
   return (
@@ -78,6 +79,7 @@ function App() {
                 <Route path="/website-enquiry" element={<WebsiteEnquiry />} />
                 <Route path="/report-order" element={<Orderreport />} />
                 <Route path="/report-category" element={<CategoryReport />} />
+                <Route path="/report-product" element={<ProductReport />} />
 
                 {/* Add more protected routes here */}
               </Routes>
