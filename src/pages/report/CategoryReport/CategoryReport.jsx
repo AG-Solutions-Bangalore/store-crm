@@ -10,7 +10,7 @@ import {
   FilePdfOutlined,
   FileExcelOutlined,
 } from "@ant-design/icons";
-import { exportCategoryReportToExcel } from "../../../components/exportCategoryToExcel/exportCategoryToExcel";
+import { exportCategoryReportToExcel } from "../../../components/exportExcel/exportCategoryToExcel";
 const { Option } = Select;
 
 const CategoryReport = () => {
@@ -74,16 +74,7 @@ const CategoryReport = () => {
     });
   };
 
-  const categoryColumns = [
-  { header: "Name", key: "category_name", width: 25 },
-  { header: "Description", key: "category_description", width: 40 },
-  { header: "Sort Order", key: "category_sort_order", width: 15 },
-  {
-    header: "Status",
-    key: "is_active",
-    width: 15,
-  },
-];
+
   return (
     <>
       <Card
