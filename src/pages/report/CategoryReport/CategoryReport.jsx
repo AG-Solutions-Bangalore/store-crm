@@ -74,7 +74,6 @@ const CategoryReport = () => {
     });
   };
 
-
   return (
     <>
       <Card
@@ -107,7 +106,7 @@ const CategoryReport = () => {
                 shape="circle"
                 icon={<FilePdfOutlined />}
                 onClick={() =>
-                  downloadPDF("printable-section", "my-report.pdf")
+                  downloadPDF("printable-section", "Category Report.pdf")
                 }
               />
             </Tooltip>
@@ -145,8 +144,9 @@ const CategoryReport = () => {
                   <th className="px-3 py-2 text-left w-[100px]">Image</th>
                   <th className="px-3 py-2 text-left w-[150px]">Name</th>
                   <th className="px-3 py-2 text-left w-[250px]">Description</th>
-                  <th className="px-3 py-2 text-center w-[10px]">Sort Order</th>
-                  <th className="px-3 py-2 text-center w-[100px]">Status</th>
+                  <th className="px-3 py-2 text-center w-[100px]">
+                    Sort Order
+                  </th>
                 </tr>
               </thead>
 
@@ -155,7 +155,11 @@ const CategoryReport = () => {
                   <tr
                     key={item.category_name}
                     className="border-t"
-                    style={{ pageBreakInside: "avoid" }}
+                    style={{
+                      pageBreakInside: "avoid",
+                      backgroundColor:
+                        item.is_active === "false" ? "#ffe5e5" : "transparent",
+                    }}
                   >
                     <td className="px-3 py-2">
                       <div className="w-[60px] h-[60px] rounded overflow-hidden">
@@ -177,11 +181,6 @@ const CategoryReport = () => {
                     </td>
                     <td className="px-3 py-2 text-center">
                       {item.category_sort_order}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      <span className="mx-2 my-1">
-                        {item.is_active == "true" ? "Active" : "Inactive"}
-                      </span>
                     </td>
                   </tr>
                 ))}

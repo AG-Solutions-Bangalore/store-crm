@@ -97,7 +97,7 @@ const ProductReport = () => {
                 shape="circle"
                 icon={<FilePdfOutlined />}
                 onClick={() =>
-                  downloadPDF("printable-section", "my-report.pdf")
+                  downloadPDF("printable-section", "Product Report.pdf")
                 }
               />
             </Tooltip>
@@ -108,10 +108,7 @@ const ProductReport = () => {
                 shape="circle"
                 icon={<FileExcelOutlined />}
                 onClick={() =>
-                  exportProductTOExcel(
-                    filteredCategory,
-                    "Product Report"
-                  )
+                  exportProductTOExcel(filteredCategory, "Product Report")
                 }
               />
             </Tooltip>
@@ -142,7 +139,6 @@ const ProductReport = () => {
                   <th className="px-3 py-2 text-center w-[100px]">
                     Special Offer
                   </th>
-                  <th className="px-3 py-2 text-center w-[100px]">Status</th>
                 </tr>
               </thead>
 
@@ -151,7 +147,11 @@ const ProductReport = () => {
                   <tr
                     key={item.product_name}
                     className="border-t"
-                    style={{ pageBreakInside: "avoid" }}
+                    style={{
+                      pageBreakInside: "avoid",
+                      backgroundColor:
+                        item.is_active === "false" ? "#ffe5e5" : "transparent",
+                    }}
                   >
                     <td className="px-3 py-2 font-medium">
                       {item.product_name}
@@ -169,13 +169,7 @@ const ProductReport = () => {
                     <td className="px-3 py-2 text-center">
                       {item.product_spl_offer_price}
                     </td>
-                    <td className="px-3 py-2 text-center">
-                      <div>
-                        <span className="mx-2 my-1">
-                          {item.is_active == "true" ? "Active" : "Inactive"}
-                        </span>
-                      </div>
-                    </td>
+             
                   </tr>
                 ))}
               </tbody>

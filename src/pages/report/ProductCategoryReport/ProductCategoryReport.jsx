@@ -11,6 +11,7 @@ import useToken from "../../../api/usetoken";
 import { exportProductTOExcel } from "../../../components/exportExcel/exportProductTOExcel";
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
+import { exportProductCategoryExcel } from "../../../components/exportExcel/exportProductCategoryExcel";
 const { Option } = Select;
 
 const ProductCategoryReport = () => {
@@ -65,6 +66,7 @@ const ProductCategoryReport = () => {
       targetStyles: ["*"],
     });
   };
+
   return (
     <>
       <Card
@@ -108,7 +110,7 @@ const ProductCategoryReport = () => {
                 shape="circle"
                 icon={<FileExcelOutlined />}
                 onClick={() =>
-                  exportProductTOExcel(
+                  exportProductCategoryExcel(
                     filteredCategory,
                     "Product Category Report"
                   )
@@ -118,11 +120,10 @@ const ProductCategoryReport = () => {
           </div>
         }
       >
-        {/* Only this part will be printed */}
         <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
-          <h2 className="text-xl font-semibold mb-4">
+          <h1 className="text-xl font-semibold mb-4 text-center">
             Product Category Report
-          </h2>
+          </h1>
 
           {isMutating ? (
             <div className="flex justify-center py-20">
@@ -136,8 +137,8 @@ const ProductCategoryReport = () => {
                 return acc;
               }, {})
             ).map(([categoryName, items]) => (
-              <div key={categoryName} className="mb-8 break-inside-avoid">
-                <h3 className="text-lg font-semibold mb-2">{categoryName}</h3>
+              <div key={categoryName} className="mb-8">
+                <h2 className="text-xl font-semibold mb-2">{categoryName}</h2>
                 <table
                   className="w-full border rounded-md table-fixed"
                   style={{ borderCollapse: "collapse" }}
@@ -153,9 +154,7 @@ const ProductCategoryReport = () => {
                       <th className="px-3 py-2 text-center w-[100px]">
                         Special Offer
                       </th>
-                      <th className="px-3 py-2 text-center w-[100px]">
-                        Status
-                      </th>
+                
                     </tr>
                   </thead>
 
@@ -164,7 +163,13 @@ const ProductCategoryReport = () => {
                       <tr
                         key={item.id}
                         className="border-t"
-                        style={{ pageBreakInside: "avoid" }}
+                        style={{
+                          pageBreakInside: "avoid",
+                          backgroundColor:
+                            item.is_active === "false"
+                              ? "#ffe5e5"
+                              : "transparent",
+                        }}
                       >
                         <td className="px-3 py-2 font-medium">
                           {item.product_name}
@@ -181,9 +186,7 @@ const ProductCategoryReport = () => {
                         <td className="px-3 py-2 text-center">
                           {item.product_spl_offer_price}
                         </td>
-                        <td className="px-3 py-2 text-center">
-                          {item.is_active === "true" ? "Active" : "Inactive"}
-                        </td>
+                 
                       </tr>
                     ))}
                   </tbody>

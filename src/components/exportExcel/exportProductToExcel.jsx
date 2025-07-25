@@ -7,13 +7,12 @@ export const exportProductTOExcel = async (data, title = "Product Report") => {
 
   // Define columns
   const columns = [
-    { header: "Product Name", key: "product_name", width: 25 },
-    { header: "Brand", key: "product_brand", width: 20 },
+    { header: "Product Name", key: "product_name", width: 30 },
+    { header: "Brand", key: "product_brand", width: 30 },
     { header: "Unit", key: "unit_combined", width: 15 },
     { header: "MRP", key: "product_mrp", width: 15 },
     { header: "Selling Price", key: "product_selling_price", width: 15 },
     { header: "Offer Price", key: "product_spl_offer_price", width: 15 },
-    { header: "Status", key: "is_active", width: 15 },
   ];
   worksheet.columns = columns;
 
@@ -24,7 +23,7 @@ export const exportProductTOExcel = async (data, title = "Product Report") => {
   const titleCell = worksheet.getCell("A1");
   titleCell.value = title;
   titleCell.font = { size: 16, bold: true };
-  titleCell.alignment = { horizontal: "center", vertical: "middle" };
+  titleCell.alignment = { horizontal: "center", vertical: "middle", indent: 1 };
   titleCell.fill = {
     type: "pattern",
     pattern: "solid",
@@ -43,25 +42,45 @@ export const exportProductTOExcel = async (data, title = "Product Report") => {
       pattern: "solid",
       fgColor: { argb: "f3f4f6" },
     };
-    cell.alignment = { horizontal: "center" };
+    cell.alignment = { horizontal: "center", vertical: "middle", indent: 1 };
     worksheet.getColumn(index + 1).width = col.width;
   });
   headerRow.commit();
 
-  // ----- DATA ROWS (from Row 3) -----
+  // ----- DATA ROWS -----
   data.forEach((item, i) => {
     const row = worksheet.getRow(i + 3);
-    row.values = [
+    const values = [
       item.product_name,
       item.product_brand,
-
       `${item.product_unit_value} ${item.unit}`,
       item.product_mrp,
       item.product_selling_price,
       item.product_spl_offer_price,
-      item.is_active === "true" ? "Active" : "Inactive",
     ];
-    row.alignment = { vertical: "middle" };
+
+    values.forEach((val, colIndex) => {
+      const cell = row.getCell(colIndex + 1);
+      cell.value = val ?? "";
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: colIndex >= 3 ? "right" : "left", // right-align prices
+        indent: 1,
+        wrapText: true,
+      };
+    });
+
+    // Optional: highlight inactive rows
+    if (item.is_active === "false") {
+      row.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "ffe5e5" }, // light red
+        };
+      });
+    }
+
     row.commit();
   });
 
