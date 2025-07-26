@@ -28,6 +28,7 @@ import WebsiteEnquiry from "./pages/websiteenquiry/WebsiteEnquiry";
 import Orderreport from "./pages/report/orderreport/orderreport";
 import CategoryReport from "./pages/report/CategoryReport/CategoryReport";
 import ProductReport from "./pages/report/ProductReport/ProductReport";
+import ProductCategoryReport from "./pages/report/ProductCategoryReport/ProductCategoryReport";
 
 function App() {
   return (
@@ -80,6 +81,10 @@ function App() {
                 <Route path="/report-order" element={<Orderreport />} />
                 <Route path="/report-category" element={<CategoryReport />} />
                 <Route path="/report-product" element={<ProductReport />} />
+                <Route
+                  path="/report-product-category"
+                  element={<ProductCategoryReport />}
+                />
 
                 {/* Add more protected routes here */}
               </Routes>

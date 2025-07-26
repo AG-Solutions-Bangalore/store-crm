@@ -6,14 +6,15 @@ import {
 import { Button, Card, Select, Spin, Tooltip } from "antd";
 import printJS from "print-js";
 import { useEffect, useState } from "react";
-import { PRODUCT_REPORT } from "../../../api";
+import { PRODUCT_CATEGORY_REPORT } from "../../../api";
 import useToken from "../../../api/usetoken";
 import { exportProductTOExcel } from "../../../components/exportExcel/exportProductTOExcel";
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
+import { exportProductCategoryExcel } from "../../../components/exportExcel/exportProductCategoryExcel";
 const { Option } = Select;
 
-const ProductReport = () => {
+const ProductCategoryReport = () => {
   const token = useToken();
 
   const [category, setCategory] = useState([]);
@@ -27,7 +28,7 @@ const ProductReport = () => {
     const getReport = async () => {
       try {
         const res = await fetchCategoryReport({
-          url: PRODUCT_REPORT,
+          url: PRODUCT_CATEGORY_REPORT,
           method: "post",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -39,7 +40,7 @@ const ProductReport = () => {
           setFilteredCategory(res.data);
         }
       } catch (error) {
-        console.error("Failed to fetch product report:", error);
+        console.error("Failed to fetch product category report:", error);
       }
     };
 
@@ -65,10 +66,11 @@ const ProductReport = () => {
       targetStyles: ["*"],
     });
   };
+
   return (
     <>
       <Card
-        title="Product Report"
+        title="Product Category Report"
         bordered={false}
         className="shadow-md rounded-lg"
         extra={
@@ -97,7 +99,7 @@ const ProductReport = () => {
                 shape="circle"
                 icon={<FilePdfOutlined />}
                 onClick={() =>
-                  downloadPDF("printable-section", "Product Report.pdf")
+                  downloadPDF("printable-section", "my-report.pdf")
                 }
               />
             </Tooltip>
@@ -108,72 +110,89 @@ const ProductReport = () => {
                 shape="circle"
                 icon={<FileExcelOutlined />}
                 onClick={() =>
-                  exportProductTOExcel(filteredCategory, "Product Report")
+                  exportProductCategoryExcel(
+                    filteredCategory,
+                    "Product Category Report"
+                  )
                 }
               />
             </Tooltip>
           </div>
         }
       >
-        {/* Only this part will be printed */}
         <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
-          <h2 className="text-xl font-semibold">Product Report</h2>
+          <h1 className="text-xl font-semibold mb-4 text-center">
+            Product Category Report
+          </h1>
 
           {isMutating ? (
             <div className="flex justify-center py-20">
               <Spin size="large" />
             </div>
           ) : filteredCategory.length > 0 ? (
-            <table
-              className="w-full border rounded-md table-fixed"
-              style={{ width: "100%", borderCollapse: "collapse" }}
-            >
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-3 py-2 text-center w-[200px]">Name</th>
-                  <th className="px-3 py-2 text-center w-[80px]">Unit</th>
-                  <th className="px-3 py-2 text-center w-[100px]">MRP</th>
-                  <th className="px-3 py-2 text-center w-[100px]">
-                    Selling Price
-                  </th>
-                  <th className="px-3 py-2 text-center w-[100px]">
-                    Special Offer
-                  </th>
-                </tr>
-              </thead>
+            Object.entries(
+              filteredCategory.reduce((acc, item) => {
+                if (!acc[item.category_names]) acc[item.category_names] = [];
+                acc[item.category_names].push(item);
+                return acc;
+              }, {})
+            ).map(([categoryName, items]) => (
+              <div key={categoryName} className="mb-8">
+                <h2 className="text-xl font-semibold mb-2">{categoryName}</h2>
+                <table
+                  className="w-full border rounded-md table-fixed"
+                  style={{ borderCollapse: "collapse" }}
+                >
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-3 py-2 text-center w-[200px]">Name</th>
+                      <th className="px-3 py-2 text-center w-[80px]">Unit</th>
+                      <th className="px-3 py-2 text-center w-[100px]">MRP</th>
+                      <th className="px-3 py-2 text-center w-[100px]">
+                        Selling Price
+                      </th>
+                      <th className="px-3 py-2 text-center w-[100px]">
+                        Special Offer
+                      </th>
+                
+                    </tr>
+                  </thead>
 
-              <tbody>
-                {filteredCategory.map((item) => (
-                  <tr
-                    key={item.product_name}
-                    className="border-t"
-                    style={{
-                      pageBreakInside: "avoid",
-                      backgroundColor:
-                        item.is_active === "false" ? "#ffe5e5" : "transparent",
-                    }}
-                  >
-                    <td className="px-3 py-2 font-medium">
-                      {item.product_name}
-                    </td>
-
-                    <td className="px-3 py-2 text-center">
-                      {item.product_unit_value}-{item.unit}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {item.product_mrp}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {item.product_selling_price}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {item.product_spl_offer_price}
-                    </td>
-             
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  <tbody>
+                    {items.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="border-t"
+                        style={{
+                          pageBreakInside: "avoid",
+                          backgroundColor:
+                            item.is_active === "false"
+                              ? "#ffe5e5"
+                              : "transparent",
+                        }}
+                      >
+                        <td className="px-3 py-2 font-medium">
+                          {item.product_name}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          {item.product_unit_value} {item.unit_name}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          {item.product_mrp}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          {item.product_selling_price}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          {item.product_spl_offer_price}
+                        </td>
+                 
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))
           ) : (
             <div className="text-center text-gray-500 py-20">
               No data found.
@@ -184,4 +203,4 @@ const ProductReport = () => {
     </>
   );
 };
-export default ProductReport;
+export default ProductCategoryReport;

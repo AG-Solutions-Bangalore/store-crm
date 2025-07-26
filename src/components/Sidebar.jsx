@@ -64,6 +64,11 @@ const getMenuItems = (collapsed) => {
       label: "Category",
     },
     { key: "/report-product", icon: <ProfileOutlined />, label: "Product" },
+    {
+      key: "/report-product-category",
+      icon: <ProfileOutlined />,
+      label: "Product Category",
+    },
   ];
 
   if (collapsed) {
