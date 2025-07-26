@@ -1,27 +1,27 @@
 import {
-  Card,
-  DatePicker,
-  Form,
-  Button,
-  Select,
-  Tooltip,
-  Spin,
-  App,
-} from "antd";
-import dayjs from "dayjs";
-import { useApiMutation } from "../../../hooks/useApiMutation";
-import { ORDER_REPORT, ORDER_STATUS } from "../../../api";
-import useToken from "../../../api/usetoken";
-import {
   FileExcelOutlined,
   FilePdfOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import {
+  App,
+  Button,
+  Card,
+  DatePicker,
+  Form,
+  Select,
+  Spin,
+  Tooltip,
+} from "antd";
+import dayjs from "dayjs";
 import printJS from "print-js";
+import { useEffect, useState } from "react";
+import { ORDER_PRODUCT_REPORT, ORDER_STATUS } from "../../../api";
+import useToken from "../../../api/usetoken";
+import { exportOrderProductExcel } from "../../../components/exportExcel/exportOrderProductExcel";
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
-import { expotOrderToExcel } from "../../../components/exportExcel/expotOrderToExcel";
-const OrderReport = () => {
+import { useApiMutation } from "../../../hooks/useApiMutation";
+const OrderProductReport = () => {
   const { message } = App.useApp();
   const token = useToken();
   const [form] = Form.useForm();
@@ -56,7 +56,7 @@ const OrderReport = () => {
     };
     try {
       const res = await submitTrigger({
-        url: ORDER_REPORT,
+        url: ORDER_PRODUCT_REPORT,
         method: "post",
         data: payload,
         headers: {
@@ -89,7 +89,7 @@ const OrderReport = () => {
   };
   return (
     <Card
-      title="Order Report"
+      title="Order Product Report"
       bordered={false}
       className="shadow-md rounded-lg"
       extra={
@@ -123,8 +123,7 @@ const OrderReport = () => {
               shape="circle"
               icon={<FilePdfOutlined />}
               onClick={() =>
-                // downloadPDF("printable-section", "Order Report.pdf")
-                downloadPDF("printable-section", "Order Report.pdf", message)
+                downloadPDF("printable-section", "Order Product.pdf", message)
               }
             />
           </Tooltip>
@@ -134,7 +133,7 @@ const OrderReport = () => {
               type="default"
               shape="circle"
               icon={<FileExcelOutlined />}
-              onClick={() => expotOrderToExcel(filteredOrder)}
+              onClick={() => exportOrderProductExcel(filteredOrder)}
             />
           </Tooltip>
         </div>
@@ -180,57 +179,81 @@ const OrderReport = () => {
           </div>
         </div>
       </Form>
-      {isMutating ? (
-        <div className="flex justify-center py-20">
-          <Spin size="large" />
-        </div>
-      ) : filteredOrder.length > 0 ? (
-        <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
-          <h2 className="text-xl font-semibold capitalize">Order Report</h2>
+      <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
+        <h1 className="text-xl font-semibold mb-4 text-center">
+          Order Product Report
+        </h1>
 
-          <table
-            className="w-full border rounded-md table-fixed"
-            style={{ width: "100%", borderCollapse: "collapse" }}
-          >
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-3 py-2 text-center w-[100px]">Date</th>
-                <th className="px-3 py-2 text-center w-[40px]">Order No</th>
-                <th className="px-3 py-2 text-center w-[80px]">Company Name</th>
-                <th className="px-3 py-2 text-center w-[50px]">Amount </th>
-                <th className="px-3 py-2 text-center w-[50px]">Status </th>
-              </tr>
-            </thead>
+        {isMutating ? (
+          <div className="flex justify-center py-20">
+            <Spin size="large" />
+          </div>
+        ) : filteredOrder.length > 0 ? (
+          Object.entries(
+            filteredOrder.reduce((acc, item) => {
+              if (!acc[item.product_name]) acc[item.product_name] = [];
+              acc[item.product_name].push(item);
+              return acc;
+            }, {})
+          ).map(([productName, items]) => (
+            <div key={productName} className="mb-8">
+              <h2 className="text-xl font-semibold mb-2  capitalize">
+                {productName}
+              </h2>
 
-            <tbody>
-              {filteredOrder.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-t"
-                  style={{
-                    pageBreakInside: "avoid",
-                  }}
-                >
-                  <td className="px-3 py-2 text-center">
-                    {item.order_date
-                      ? dayjs(item.order_date).format("DD-MM-YYYY")
-                      : ""}
-                  </td>
+              <table
+                className="w-full border rounded-md table-fixed"
+                style={{ width: "100%", borderCollapse: "collapse" }}
+              >
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-3 py-2 text-center ">Date</th>
+                    <th className="px-3 py-2 text-center ">Unit</th>
 
-                  <td className="px-3 py-2 text-center">{item.order_no}</td>
-                  <td className="px-3 py-2 text-center">{item.company_name}</td>
-                  <td className="px-3 py-2 text-center">{item.total_amount}</td>
-                  <td className="px-3 py-2 text-center">{item.order_status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="text-center text-gray-500 py-20">No data found.</div>
-      )}
+                    <th className="px-3 py-2 text-center ">Price </th>
+                    <th className="px-3 py-2 text-center ">Quantity </th>
+                    <th className="px-3 py-2 text-center">Status </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {items.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="border-t"
+                      style={{
+                        pageBreakInside: "avoid",
+                      }}
+                    >
+                      <td className="px-3 py-2 text-center">
+                        {item.order_date
+                          ? dayjs(item.order_date).format("DD-MM-YYYY")
+                          : ""}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {item.product_unit_value} {item.unit}
+                      </td>{" "}
+                      <td className="px-3 py-2 text-center">
+                        {item.product_price}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {item.product_qnty}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {item.order_status}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 py-20">No data found.</div>
+        )}
+      </div>
     </Card>
   );
 };
 
-export default OrderReport;
+export default OrderProductReport;

@@ -1,19 +1,20 @@
+import dayjs from "dayjs";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
-export const exportProductCategoryExcel = async (
+export const exportOrderProductExcel = async (
   data,
-  title = "Product Report"
+  title = "Order Product Report"
 ) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Product Report");
 
   const columns = [
-    { header: "Product Name", key: "product_name", width: 25 },
+    { header: "Date", key: "order_date", width: 25 },
     { header: "Unit", key: "unit_combined", width: 15 },
-    { header: "MRP", key: "product_mrp", width: 15 },
-    { header: "Selling Price", key: "product_selling_price", width: 15 },
-    { header: "Offer Price", key: "product_spl_offer_price", width: 15 },
+    { header: "Price", key: "product_price", width: 15 },
+    { header: "Quantity", key: "product_qnty", width: 15 },
+    { header: "Status", key: "order_status", width: 15 },
   ];
   worksheet.columns = columns;
   const columnCount = columns.length;
@@ -35,18 +36,18 @@ export const exportProductCategoryExcel = async (
 
   // Group by category
   const grouped = data.reduce((acc, item) => {
-    const cat = item.category_names || "Uncategorized";
+    const cat = item.product_name || "Uncategorized";
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
     return acc;
   }, {});
 
   Object.entries(grouped).forEach(([categoryName, items]) => {
+    // Category sub-header
     const capitalizedCategoryName = categoryName
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
-    // Category sub-header
     const categoryRow = worksheet.getRow(currentRowIndex++);
     const catCell = categoryRow.getCell(1);
     catCell.value = capitalizedCategoryName;
@@ -82,16 +83,16 @@ export const exportProductCategoryExcel = async (
     // Data rows
     items.forEach((item) => {
       const row = worksheet.getRow(currentRowIndex++);
-      const unit = `${item.product_unit_value ?? ""} ${
-        item.unit_name ?? ""
-      }`.trim();
-
+      const unit = `${item.product_unit_value ?? ""} ${item.unit ?? ""}`.trim();
+      const orderdate = item.order_date
+        ? dayjs(item.order_date).format("DD-MM-YYYY")
+        : "";
       // Set cells explicitly with indent
-      row.getCell(1).value = item.product_name ?? "";
+      row.getCell(1).value = orderdate ?? "";
       row.getCell(2).value = unit;
-      row.getCell(3).value = item.product_mrp ?? "";
-      row.getCell(4).value = item.product_selling_price ?? "";
-      row.getCell(5).value = item.product_spl_offer_price ?? "";
+      row.getCell(3).value = item.product_price ?? "";
+      row.getCell(4).value = item.product_qnty ?? "";
+      row.getCell(5).value = item.order_status ?? "";
 
       for (let i = 1; i <= columnCount; i++) {
         const cell = row.getCell(i);

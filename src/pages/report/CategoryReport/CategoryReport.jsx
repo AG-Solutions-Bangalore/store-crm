@@ -18,7 +18,6 @@ const CategoryReport = () => {
 
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
-  const [filterStatus, setFilterStatus] = useState("all");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
   const [noImageUrl, setNoImageUrl] = useState("");
 
@@ -55,7 +54,7 @@ const CategoryReport = () => {
   }, []);
 
   const handleFilterChange = (value) => {
-    setFilterStatus(value);
+    // setFilterStatus(value);
     if (value === "all") {
       setFilteredCategory(category);
     } else {

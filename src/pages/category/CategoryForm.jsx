@@ -1,5 +1,6 @@
 import { UploadOutlined, UserOutlined } from "@ant-design/icons";
 import {
+  App,
   Avatar,
   Button,
   Card,
@@ -8,13 +9,12 @@ import {
   Modal,
   Space,
   Switch,
-  Upload,
-  message,
+  Upload
 } from "antd";
 import { useEffect, useState } from "react";
-import { App } from "antd";
 import { CATEGORY_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
+import CropImageModal from "../../components/common/CropImageModal";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
@@ -30,6 +30,11 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const [categoryBannerFile, setCategoryBannerFile] = useState(null);
   const [noImageUrl, setNoImageUrl] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
+  const [cropModalVisible, setCropModalVisible] = useState(false);
+  const [croppingImage, setCroppingImage] = useState(null);
+  const [bannerCroppingImage, setBannerCroppingImage] = useState(null);
+  const [bannerCropModalVisible, setBannerCropModalVisible] = useState(false);
+
   const fetchProfile = async () => {
     try {
       const res = await FetchTrigger({
@@ -128,6 +133,33 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       }
     }
   };
+
+  const openCropper = (file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCroppingImage(reader.result);
+      setCropModalVisible(true);
+    };
+    reader.readAsDataURL(file);
+  };
+  const openBannerCropper = (file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setBannerCroppingImage(reader.result);
+      setBannerCropModalVisible(true);
+    };
+    reader.readAsDataURL(file);
+  };
+  const handleCroppedBannerImage = ({ blob, fileUrl }) => {
+    setCategoryBannerFile(blob);
+    setBannerCropModalVisible(false);
+  };
+
+  const handleCroppedImage = ({ blob, fileUrl }) => {
+    setCategoryFile(blob);
+    setCategoryFilePreview(fileUrl);
+    setCropModalVisible(false);
+  };
   return (
     <Modal
       open={open}
@@ -171,7 +203,8 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                     showUploadList={false}
                     accept="image/*"
                     beforeUpload={(file) => {
-                      setCategoryFile(file);
+                      // setCategoryFile(file);
+                      openCropper(file);
                       const reader = new FileReader();
                       reader.onload = () =>
                         setCategoryFilePreview(reader.result);
@@ -226,7 +259,8 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                   showUploadList={false}
                   accept="image/*"
                   beforeUpload={(file) => {
-                    setCategoryFile(file);
+                    openCropper(file);
+                    // setCategoryFile(file);
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     return false;
@@ -257,7 +291,8 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 showUploadList={false}
                 accept="image/*"
                 beforeUpload={(file) => {
-                  setCategoryBannerFile(file);
+                  // setCategoryBannerFile(file);
+                  openBannerCropper(file);
                   const reader = new FileReader();
                   reader.readAsDataURL(file);
                   return false;
@@ -270,8 +305,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 <div className="mt-2 text-sm text-gray-600 overflow-hiden">
                   Selected file:{" "}
                   <strong>
-                    {" "}
-                    {categoryBannerFile.name.length > 15
+                    {categoryBannerFile.name?.length > 15
                       ? `${categoryBannerFile.name.slice(0, 15)}...`
                       : categoryBannerFile.name}
                   </strong>
@@ -299,6 +333,22 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           </div>
         </Form>
       </Card>
+      <CropImageModal
+        open={cropModalVisible}
+        imageSrc={croppingImage}
+        onCancel={() => setCropModalVisible(false)}
+        onCropComplete={handleCroppedImage}
+        cropSize={{ width: 400, height: 400 }}
+        title="Crop Category Image"
+      />
+      <CropImageModal
+        open={bannerCropModalVisible}
+        imageSrc={bannerCroppingImage}
+        onCancel={() => setBannerCropModalVisible(false)}
+        onCropComplete={handleCroppedBannerImage}
+        cropSize={{ width: 400, height: 400 }}
+        title="Crop Banner Image"
+      />
     </Modal>
   );
 };

@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import logo1 from "../assets/logo-1.png";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import useFinalUserImage from "./common/Logo";
+import OrderProductReport from "../pages/report/OrderProductReport/OrderProductReport";
 
 const getMenuItems = (collapsed) => {
   const dashboardItems = [
@@ -68,6 +69,16 @@ const getMenuItems = (collapsed) => {
       key: "/report-product-category",
       icon: <ProfileOutlined />,
       label: "Product Category",
+    },
+    {
+      key: "/report-order",
+      icon: <ProfileOutlined />,
+      label: "Orders",
+    },
+    {
+      key: "/report-order-product",
+      icon: <ProfileOutlined />,
+      label: "Orders Product",
     },
   ];
 
