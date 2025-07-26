@@ -21,12 +21,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { CATEGORY_ACTIVE, FETCH_UNIT, PRODUCT_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import CropImageModal from "../../components/common/CropImageModal";
 
 const ProductForm = () => {
   const { message } = App.useApp();
   const token = usetoken();
   const { id } = useParams();
   const isEditMode = Boolean(id);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropIndex, setCropIndex] = useState(null);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
 
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
@@ -120,16 +124,36 @@ const ProductForm = () => {
     setProductForms(updated);
   };
 
+  // const handleImageUpload = (index, file) => {
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     const updated = [...productForms];
+  //     updated[index].product_images = file;
+  //     updated[index].preview = reader.result;
+  //     setProductForms(updated);
+  //   };
+  //   reader.readAsDataURL(file);
+  //   return false;
+  // };
   const handleImageUpload = (index, file) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const updated = [...productForms];
-      updated[index].product_images = file;
-      updated[index].preview = reader.result;
-      setProductForms(updated);
+      setCropImageSrc(reader.result);
+      setCropIndex(index);
+      setCropModalOpen(true);
     };
     reader.readAsDataURL(file);
-    return false;
+    return false; // Prevent default upload
+  };
+  const handleCropComplete = ({ file, preview }) => {
+    const updated = [...productForms];
+    updated[cropIndex] = {
+      ...updated[cropIndex],
+      product_images: file,
+      preview,
+    };
+    setProductForms(updated);
+    setCropModalOpen(false);
   };
 
   const handleFinish = async (values) => {
@@ -613,6 +637,15 @@ const ProductForm = () => {
           </Form.Item>
         </div>
       </Form>
+
+      <CropImageModal
+        open={cropModalOpen}
+        imageSrc={cropImageSrc}
+        onCancel={() => setCropModalOpen(false)}
+        onCropComplete={handleCropComplete}
+        cropSize={{ width: 1000, height: 1000 }}
+        title="Crop Product Image"
+      />
     </Card>
   );
 };

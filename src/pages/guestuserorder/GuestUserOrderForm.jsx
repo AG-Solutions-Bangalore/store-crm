@@ -20,6 +20,7 @@ import {
   GUEST_USER_ORDER_BY_ID,
   GUEST_USER_ORDER_CREATE,
   GUEST_USER_ORDER_UPDATE,
+  ORDER_STATUS,
 } from "../../api";
 import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
@@ -34,6 +35,7 @@ const GuestUserOrderForm = () => {
   const [form] = Form.useForm();
   const [ProductData, setProductData] = useState([]);
   const naviagte = useNavigate();
+  const [ordersstatus, setOrdersSatus] = useState([]);
   const [ProductForms, setProductForms] = useState([
     {
       id: "",
@@ -43,6 +45,19 @@ const GuestUserOrderForm = () => {
       order_sub_status: false,
     },
   ]);
+  const fetchOrderStatus = async () => {
+    const res = await FetchTrigger({
+      url: `${ORDER_STATUS}`,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.code === 201) {
+      const responseData = res.data;
+
+      setOrdersSatus(responseData || []);
+    }
+  };
+
   const fetchData = async () => {
     try {
       const productRes = await FetchTrigger({
@@ -59,6 +74,7 @@ const GuestUserOrderForm = () => {
 
   useEffect(() => {
     fetchData();
+    fetchOrderStatus();
   }, []);
 
   const fetchProfile = async () => {
@@ -116,11 +132,6 @@ const GuestUserOrderForm = () => {
     if (isEditMode) fetchProfile();
   }, [id]);
 
-  // const handleProductChange = (index, field, value) => {
-  //   const updatedForms = [...ProductForms];
-  //   updatedForms[index][field] = value;
-  //   setProductForms(updatedForms);
-  // };
   const handleProductChange = (index, field, value) => {
     const updatedForms = [...ProductForms];
     updatedForms[index][field] = value;
@@ -467,8 +478,11 @@ const GuestUserOrderForm = () => {
               </Form.Item>
               <Form.Item label="Status" name="order_status">
                 <Select placeholder="Select Status" allowClear>
-                  <Select.Option value="pending">Pending</Select.Option>
-                  <Select.Option value="completed">Completed</Select.Option>
+                  {ordersstatus.map((status) => (
+                    <Option key={status.id} value={status.status}>
+                      {status.status}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
               <Form.Item label="Address" className="md:col-span-4">

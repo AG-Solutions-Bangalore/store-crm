@@ -26,6 +26,7 @@
     "print-js": "^1.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-easy-crop": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.3",
     "react-to-print": "^3.1.1",

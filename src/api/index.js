@@ -23,6 +23,7 @@ export const USER_LIST = `/panel-fetch-user-list`;
 //CREATE_USER_LIST
 export const CREATE_USER_LIST = `/panel-create-user`;
 export const UPDATE_USER = `/panel-update-user`;
+export const ORDER_STATUS = `/panel-fetch-status`;
 
 //UPDATE_STATUS
 export const UPDATE_STATUS = `/panel-update-user-status`;
