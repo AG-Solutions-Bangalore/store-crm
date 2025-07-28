@@ -1,7 +1,7 @@
 import { Tooltip } from "antd";
 import STTable from "../STTable/STTable";
 
-const GuestUserTable = ({ users, onEdit }) => {
+const GuestUserTable = ({ users }) => {
   const highlightMatch = (text, match) => {
     if (!match || !text) return text;
     const regex = new RegExp(`(${match})`, "gi");

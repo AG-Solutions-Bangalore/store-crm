@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { COMPANY_DATA, DOT_ENV, PANEL_CHECK } from "../api";
 import usetoken from "../api/usetoken";
 import { useApiMutation } from "../hooks/useApiMutation";
-import { logout, setCredentials } from "../store/auth/authSlice";
+import { logout } from "../store/auth/authSlice";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import { persistor } from "../store/store";
 import useLogout from "../hooks/useLogout";

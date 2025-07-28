@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UPDATE_STATUS, USER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import UserCard from "../../components/user/UserCard";
+import UserTable from "../../components/user/UserTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const { Search } = Input;
@@ -154,7 +154,7 @@ const SecurityList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <UserCard
+          <UserTable
             imageUrls={imageUrls}
             users={filteredUsers}
             onToggleStatus={handleToggleStatus}

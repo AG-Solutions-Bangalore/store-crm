@@ -18,7 +18,6 @@ const ProductReport = () => {
 
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
-  const [filterStatus, setFilterStatus] = useState("all");
 
   const { trigger: fetchCategoryReport, loading: isMutating } =
     useApiMutation();
@@ -47,7 +46,6 @@ const ProductReport = () => {
   }, []);
 
   const handleFilterChange = (value) => {
-    setFilterStatus(value);
     if (value === "all") {
       setFilteredCategory(category);
     } else {

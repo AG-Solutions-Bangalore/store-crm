@@ -77,7 +77,6 @@ const CategoryReport = () => {
     <>
       <Card
         title="Category Report"
-        bordered={false}
         className="shadow-md rounded-lg"
         extra={
           <div className="flex  items-center gap-2">

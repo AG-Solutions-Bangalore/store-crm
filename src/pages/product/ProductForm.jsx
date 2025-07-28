@@ -124,17 +124,6 @@ const ProductForm = () => {
     setProductForms(updated);
   };
 
-  // const handleImageUpload = (index, file) => {
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     const updated = [...productForms];
-  //     updated[index].product_images = file;
-  //     updated[index].preview = reader.result;
-  //     setProductForms(updated);
-  //   };
-  //   reader.readAsDataURL(file);
-  //   return false;
-  // };
   const handleImageUpload = (index, file) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -143,18 +132,36 @@ const ProductForm = () => {
       setCropModalOpen(true);
     };
     reader.readAsDataURL(file);
-    return false; // Prevent default upload
+    return false;
   };
-  const handleCropComplete = ({ file, preview }) => {
+  const handleCropComplete = async ({ blob, fileUrl }) => {
+    console.log(blob, "blob");
+    console.log(fileUrl, "previewUrl");
+
+    const file = new File([blob], "cropped-image.jpg", {
+      type: blob.type || "image/jpeg",
+    });
+
     const updated = [...productForms];
     updated[cropIndex] = {
       ...updated[cropIndex],
       product_images: file,
-      preview,
+      preview: fileUrl,
     };
+
     setProductForms(updated);
     setCropModalOpen(false);
   };
+
+  useEffect(() => {
+    return () => {
+      productForms.forEach((form) => {
+        if (form.preview) {
+          URL.revokeObjectURL(form.preview);
+        }
+      });
+    };
+  }, []);
 
   const handleFinish = async (values) => {
     try {
@@ -288,7 +295,6 @@ const ProductForm = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <Form.Item
             name="category_ids"
-            // label="Category"
             label={
               <span>
                 Category <span className="text-red-500">*</span>
@@ -330,11 +336,7 @@ const ProductForm = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="product_brand"
-            label="Brand"
-            // rules={[{ required: true, message: "Brand is required" }]}
-          >
+          <Form.Item name="product_brand" label="Brand">
             <Input />
           </Form.Item>
           <Form.Item
@@ -542,89 +544,108 @@ const ProductForm = () => {
                 </Button>
               </div>
 
-              {fields.map(({ key, name, ...restField }, index) => {
-                const current = productForms[index] || {};
-                return (
-                  <Card
-                    key={key}
-                    size="small"
-                    className="mb-4"
-                    title={`Image ${index + 1}`}
-                    extra={
-                      <Button
-                        danger
-                        size="small"
-                        icon={<DeleteOutlined />}
-                        onClick={() => {
-                          const updated = [...productForms];
-                          updated.splice(index, 1);
-                          setProductForms(updated);
-                          remove(name);
-                        }}
-                        disabled={fields.length === 1}
-                      >
-                        Remove
-                      </Button>
-                    }
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <Form.Item
-                        {...restField}
-                        name={[name, "product_images"]}
-                        label="Product Image"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Avatar
-                            size={36}
-                            src={current.preview}
-                            icon={<UserOutlined />}
-                          />
-                          <Upload
+                {fields.map(({ key, name, ...restField }, index) => {
+                  const current = productForms[index] || {};
+                  return (
+                    <Card
+                      key={key}
+                      size="small"
+                      style={{ marginBottom: "10px" }}
+                      title={`Image ${index + 1}`}
+                      extra={
+                        <Button
+                          danger
+                          size="small"
+                          icon={<DeleteOutlined />}
+                          onClick={() => {
+                            const updated = [...productForms];
+                            updated.splice(index, 1);
+                            setProductForms(updated);
+                            remove(name);
+                          }}
+                          disabled={fields.length === 1}
+                        >
+                          Remove
+                        </Button>
+                      }
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Form.Item
+                          {...restField}
+                          name={[name, "product_images"]}
+                          label="Product Image"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Avatar
+                              size={36}
+                              src={current.preview}
+                              // src={
+                              //   current.preview
+                              //     ? `${current.preview}?v=${Math.random()}`
+                              //     : ""
+                              // }
+                              icon={<UserOutlined />}
+                            />
+                            {/* <Upload
                             showUploadList={false}
                             accept="image/*"
                             beforeUpload={(file) =>
                               handleImageUpload(index, file)
                             }
-                          >
-                            <Button icon={<UploadOutlined />}>Upload</Button>
-                          </Upload>
-                        </div>
-                      </Form.Item>
+                          > */}
+                            <Upload
+                              showUploadList={false}
+                              accept="image/*"
+                              beforeUpload={(file) => {
+                                // setCategoryFile(file);
+                                handleImageUpload(index, file);
+                                const reader = new FileReader();
+                                // reader.onload = () =>
+                                //   setCategoryFilePreview(reader.result);
+                                reader.readAsDataURL(file);
+                                return false;
+                              }}
+                            >
+                              <Button icon={<UploadOutlined />}>Upload</Button>
+                            </Upload>
+                          </div>
+                        </Form.Item>
 
-                      <Form.Item
-                        name={[name, "is_default"]}
-                        label="Default"
-                        valuePropName="checked"
-                      >
-                        <Switch
-                          checked={current.is_default}
-                          onChange={(checked) =>
-                            updateProductField(index, "is_default", checked)
-                          }
-                        />
-                      </Form.Item>
-
-                      {isEditMode && (
                         <Form.Item
-                          name={[name, "is_active"]}
-                          label="Active"
+                          name={[name, "is_default"]}
+                          label="Default"
                           valuePropName="checked"
                         >
                           <Switch
-                            checked={current.is_active}
+                            checked={current.is_default}
                             onChange={(checked) =>
-                              updateProductField(index, "is_active", checked)
+                              updateProductField(index, "is_default", checked)
                             }
                           />
                         </Form.Item>
-                      )}
-                    </div>
-                  </Card>
-                );
-              })}
-              <Form.Item name="is_default_error" style={{ display: "none" }}>
-                <div />
-              </Form.Item>
+
+                        {isEditMode && (
+                          <Form.Item
+                            name={[name, "is_active"]}
+                            label="Active"
+                            valuePropName="checked"
+                          >
+                            <Switch
+                              checked={current.is_active}
+                              onChange={(checked) =>
+                                updateProductField(index, "is_active", checked)
+                              }
+                            />
+                          </Form.Item>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+                <Form.Item name="is_default_error" style={{ display: "none" }}>
+                  <div />
+                </Form.Item>
+           
             </>
           )}
         </Form.List>
@@ -637,14 +658,14 @@ const ProductForm = () => {
           </Form.Item>
         </div>
       </Form>
-
       <CropImageModal
         open={cropModalOpen}
         imageSrc={cropImageSrc}
         onCancel={() => setCropModalOpen(false)}
         onCropComplete={handleCropComplete}
-        cropSize={{ width: 1000, height: 1000 }}
+        maxCropSize={{ width: 600, height: 600 }}
         title="Crop Product Image"
+        cropstucture={false}
       />
     </Card>
   );

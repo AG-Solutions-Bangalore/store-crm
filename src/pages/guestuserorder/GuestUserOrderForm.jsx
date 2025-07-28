@@ -188,7 +188,7 @@ const GuestUserOrderForm = () => {
     const subs = ProductForms || [];
     let hasValidSub = false;
     let hasInvalidSub = false;
-    let hasDefault = false;
+    // let hasDefault = false;
 
     subs.forEach((sub) => {
       const { product_id, product_price, product_qnty, order_sub_status } = sub;
@@ -206,9 +206,9 @@ const GuestUserOrderForm = () => {
       if (isFilled) {
         hasValidSub = true;
 
-        if (isEditMode && order_sub_status === true) {
-          hasDefault = true;
-        }
+        // if (isEditMode && order_sub_status === true) {
+        //   hasDefault = true;
+        // }
       } else if (!isEmpty) {
         hasInvalidSub = true;
       }

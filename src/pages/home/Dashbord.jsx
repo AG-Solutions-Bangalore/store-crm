@@ -95,10 +95,22 @@ const Dashboard = () => {
           <Title level={3}>Dashboard</Title>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {cardItems.map((item) => (
+            {/* {cardItems.map((item, index) => (
               <Card
+                key={index}
                 title={item.title}
                 bordered={false}
+                  variant="outlined"
+                className="shadow-md text-center"
+              >
+                <p className="text-2xl font-semibold">{item.count}</p>
+              </Card>
+            ))} */}
+            {cardItems.map((item, index) => (
+              <Card
+                key={index}
+                title={item.title}
+                variant="filled"
                 className="shadow-md text-center"
               >
                 <p className="text-2xl font-semibold">{item.count}</p>

@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { NOTIFICATION_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import CropImageModal from "../../components/common/CropImageModal";
 
 const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const { message } = App.useApp();
@@ -23,12 +24,20 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const [form] = Form.useForm();
   const token = usetoken();
   const [initialData, setInitialData] = useState({});
-  const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
+  const { trigger: FetchTrigger } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
-  const [notificationFile, setNotificationFile] = useState(null);
-  const [notificationFilePreview, setNotificationFilePreview] = useState(null);
+  // const [notificationFile, setNotificationFile] = useState(null);
+  // const [notificationFilePreview, setNotificationFilePreview] = useState(null);
   const [noImageUrl, setNoImageUrl] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
+  const [notificationImageData, setNotificationImageData] = useState({
+    cropModalVisible: false,
+    file: null,
+    preview: null,
+    imageSrc: null,
+    tempFileName: "",
+    fileName: "",
+  });
   const fetchNotification = async () => {
     try {
       const res = await FetchTrigger({
@@ -65,8 +74,12 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
     } else {
       form.resetFields();
       setInitialData({});
-      setNotificationFile(null);
-      setNotificationFilePreview(null);
+
+      setNotificationImageData({
+        cropModalVisible: false,
+        file: null,
+        preview: null,
+      });
     }
   }, [userId]);
   const handleProfileSave = async (values) => {
@@ -81,8 +94,8 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
         values.notification_description || ""
       );
 
-      if (notificationFile) {
-        formData.append("notification_images", notificationFile);
+      if (notificationImageData.file) {
+        formData.append("notification_images", notificationImageData.file);
       }
 
       if (isEditMode) {
@@ -111,6 +124,23 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       message.error(err || "Failed to update Notification.");
     }
   };
+  const handleCroppedImage = ({ blob, fileUrl }) => {
+    if (!blob) return;
+
+    setNotificationImageData((prev) => ({
+      ...prev,
+      file: blob,
+      preview: fileUrl,
+      fileName: prev.tempFileName,
+      cropModalVisible: false,
+    }));
+  };
+  const handleClose = () => {
+    setOpenDialog(false);
+    form.resetFields();
+    setInitialData({});
+    setNotificationImageData({ file: null, fileName: "", preview: "" });
+  };
   return (
     <Modal
       open={open}
@@ -118,7 +148,7 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       footer={null}
       centered
       maskClosable={false}
-      onCancel={() => setOpenDialog(false)}
+      onCancel={handleClose}
       width={800}
     >
       <h2 className="text-2xl font-bold text-[#006666]">
@@ -141,7 +171,7 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                   <div className="relative w-full h-[200px] border rounded-md overflow-hidden">
                     <Image
                       src={
-                        notificationFilePreview ||
+                        notificationImageData.preview ||
                         (initialData.notification_images
                           ? initialData.notification_images.startsWith(
                               "data:image"
@@ -194,10 +224,15 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 showUploadList={false}
                 accept="image/*"
                 beforeUpload={(file) => {
-                  setNotificationFile(file);
                   const reader = new FileReader();
-                  reader.onload = () =>
-                    setNotificationFilePreview(reader.result);
+                  reader.onload = () => {
+                    setNotificationImageData((prev) => ({
+                      ...prev,
+                      tempFileName: file.name,
+                      imageSrc: reader.result,
+                      cropModalVisible: true,
+                    }));
+                  };
                   reader.readAsDataURL(file);
                   return false;
                 }}
@@ -206,6 +241,16 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                   Upload Image
                 </Button>
               </Upload>
+              {notificationImageData.file && (
+                <div className="mt-2 text-sm text-gray-600 overflow-hidden">
+                  Selected file:{" "}
+                  <strong>
+                    {notificationImageData.fileName.length > 15
+                      ? `${notificationImageData.fileName.slice(0, 15)}...`
+                      : notificationImageData.fileName}
+                  </strong>
+                </div>
+              )}
             </Form.Item>
           </div>
 
@@ -224,6 +269,20 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           </div>
         </Form>
       </Card>
+      <CropImageModal
+        open={notificationImageData.cropModalVisible}
+        imageSrc={notificationImageData.imageSrc}
+        onCancel={() =>
+          setNotificationImageData((prev) => ({
+            ...prev,
+            cropModalVisible: false,
+          }))
+        }
+        onCropComplete={handleCroppedImage}
+        maxCropSize={{ width: 800, height: 400 }}
+        title="Crop Notification Image"
+        cropstucture={true}
+      />
     </Modal>
   );
 };

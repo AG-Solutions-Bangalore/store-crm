@@ -73,7 +73,6 @@ const NotificationTable = ({ users, onEdit, imageUrls }) => {
           <div className="flex justify-center">
             <Tag
               color={isActive ? "green" : "red"}
-              icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
             >
               {isActive ? "Active" : "Inactive"}
             </Tag>

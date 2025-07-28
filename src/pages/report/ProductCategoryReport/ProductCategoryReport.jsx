@@ -8,7 +8,6 @@ import printJS from "print-js";
 import { useEffect, useState } from "react";
 import { PRODUCT_CATEGORY_REPORT } from "../../../api";
 import useToken from "../../../api/usetoken";
-import { exportProductTOExcel } from "../../../components/exportExcel/exportProductTOExcel";
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
 import { exportProductCategoryExcel } from "../../../components/exportExcel/exportProductCategoryExcel";
@@ -19,7 +18,6 @@ const ProductCategoryReport = () => {
 
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
-  const [filterStatus, setFilterStatus] = useState("all");
 
   const { trigger: fetchCategoryReport, loading: isMutating } =
     useApiMutation();
@@ -48,7 +46,7 @@ const ProductCategoryReport = () => {
   }, []);
 
   const handleFilterChange = (value) => {
-    setFilterStatus(value);
+    // setFilterStatus(value);
     if (value === "all") {
       setFilteredCategory(category);
     } else {
@@ -154,7 +152,6 @@ const ProductCategoryReport = () => {
                       <th className="px-3 py-2 text-center w-[100px]">
                         Special Offer
                       </th>
-                
                     </tr>
                   </thead>
 
@@ -186,7 +183,6 @@ const ProductCategoryReport = () => {
                         <td className="px-3 py-2 text-center">
                           {item.product_spl_offer_price}
                         </td>
-                 
                       </tr>
                     ))}
                   </tbody>

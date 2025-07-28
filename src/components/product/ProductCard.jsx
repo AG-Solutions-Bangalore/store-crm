@@ -9,7 +9,7 @@ import { Button, Card, Carousel, Image, Popconfirm, Tag } from "antd";
 
 const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const {
-    id,
+    // id,
     product_name,
     product_unit_value,
     unit_name,
@@ -25,18 +25,19 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const offerPrice = parseFloat(product_spl_offer_price);
   const sellingPrice = parseFloat(product_selling_price);
 
-  const discount =
-    offerPrice > 0 && sellingPrice > offerPrice
-      ? (sellingPrice - offerPrice).toFixed(2)
-      : null;
+  // const discount =
+  //   offerPrice > 0 && sellingPrice > offerPrice
+  //     ? (sellingPrice - offerPrice).toFixed(2)
+  //     : null;
   return (
     <Card
       hoverable
       className="relative rounded-xl shadow border border-gray-100 transition-all duration-200 hover:shadow-lg"
       styles={{ body: { padding: "0rem" } }}
     >
+  
       {offerPrice > 0 && (
-        <div className="absolute left-0 top-5 rotate-[-45deg] bg-red-500 text-white px-4 py-1 text-xs font-bold shadow-md z-10">
+        <div className="absolute left-0 top-5 rotate-[-45deg] bg-gradient-to-r from-red-600 to-red-400 text-white px-4 py-1 text-xs font-bold shadow-lg tracking-wider z-10 rounded-sm">
           OFFER
         </div>
       )}
@@ -57,7 +58,7 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
                 typeof item === "string" ? item : item?.product_images ?? null;
 
               const src = img
-                ? imageUrls.userImageBase + img
+                ? `${imageUrls.userImageBase + img}?v=${Math.random()}`
                 : imageUrls.noImage;
 
               return (
@@ -78,21 +79,15 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
         </Carousel>
       </div>
       <div className="px-2 mb-2">
-        {/* Product Name */}
         <h3 className="text-base font-semibold mb-2 text-[#333] leading-tight">
-          {/* {highlightMatch(product_name || "", _match)} */}
           {product_name || ""}
         </h3>
 
-        {/* MRP and Unit */}
         <div className="flex justify-between items-center mb-2 text-sm text-gray-700">
           <div>
-            <span className="font-medium mb-0">MRP:</span>{" "}
-            {/* {highlightMatch(product_mrp || "", _match)} */}
-            {product_mrp || ""}
+            <span className="font-medium mb-0">MRP:</span> {product_mrp || ""}
           </div>
           <span className="text-gray-600 font-medium bg-[#e6f2f2] px-2 py-0.5 rounded-full">
-            {/* {highlightMatch(`${product_unit_value} ${unit_name}`, _match)} */}
             {product_unit_value || ""}
             {unit_name}
           </span>
