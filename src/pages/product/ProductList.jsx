@@ -84,7 +84,7 @@ const ProductList = () => {
         setUsers(updatedUsers);
         message.success(
           res.message ||
-            Ō`User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
+            `User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
         );
       } else {
         message.error(res.message || "Failed to update user status.");

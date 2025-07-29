@@ -14,19 +14,26 @@ import {
 import { useEffect, useState } from "react";
 import { SLIDER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
+import CropImageModal from "../../components/common/CropImageModal";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const { message } = App.useApp();
   const isEditMode = userId ? true : false;
+  const [sliderImageData, setSliderImageData] = useState({
+    cropModalVisible: false,
+    file: null,
+    preview: null,
+    imageSrc: null,
+    tempFileName: "",
+    fileName: "",
+  });
 
   const [form] = Form.useForm();
   const token = usetoken();
   const [initialData, setInitialData] = useState({});
-  const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
+  const { trigger: FetchTrigger } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
-  const [sliderFile, setSliderFile] = useState(null);
-  const [sliderFilePreview, setSliderFilePreview] = useState(null);
   const [noImageUrl, setNoImageUrl] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
   const fetchSlider = async () => {
@@ -50,7 +57,6 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       const noImage = res.image_url?.find((i) => i.image_for === "No Image");
 
       setImageBaseUrl(userImage?.image_url || "");
-      //   setSliderFile(userData.slider_image || "");
       setNoImageUrl(noImage?.image_url || "");
     } catch (err) {
       console.error("Error fetching slider data:", err);
@@ -64,8 +70,12 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
     } else {
       form.resetFields();
       setInitialData({});
-      setSliderFile(null);
-      setSliderFilePreview(null);
+      setSliderImageData({
+        cropModalVisible: false,
+        file: null,
+        preview: null,
+        imageSrc: null,
+      });
     }
   }, [userId]);
   const handleProfileSave = async (values) => {
@@ -74,8 +84,8 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       formData.append("slider_sort", values.slider_sort || "");
       formData.append("slider_url", values.slider_url || "");
 
-      if (sliderFile) {
-        formData.append("slider_image", sliderFile);
+      if (sliderImageData?.file) {
+        formData.append("slider_image", sliderImageData?.file);
       }
 
       if (isEditMode) {
@@ -100,6 +110,25 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       message.error(err || "Failed to update Slider.");
     }
   };
+
+  const handleCroppedImage = ({ blob, fileUrl }) => {
+    if (!blob) return;
+
+    setSliderImageData((prev) => ({
+      ...prev,
+      file: blob,
+      preview: fileUrl,
+      fileName: prev.tempFileName,
+      cropModalVisible: false,
+    }));
+  };
+
+  const handleClose = () => {
+    setOpenDialog(false);
+    form.resetFields();
+    setInitialData({});
+    setSliderImageData({ file: null, fileName: "", preview: "" });
+  };
   return (
     <Modal
       open={open}
@@ -108,7 +137,7 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       footer={null}
       centered
       maskClosable={false}
-      onCancel={() => setOpenDialog(false)}
+      onCancel={handleClose}
       width={800}
     >
       <h2 className="text-2xl font-bold text-[#006666]">
@@ -130,12 +159,22 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 <div className="flex flex-col items-center gap-2">
                   <div className="relative w-full h-[200px] border rounded-md overflow-hidden">
                     <Image
+                      // src={
+                      //   sliderImageData.preview ||
+                      //   (initialData.slider_image
+                      //     ? initialData.slider_image.startsWith("data:image")
+                      //       ? initialData.slider_image
+                      //       : `${imageBaseUrl}${initialData.slider_image}`
+                      //     : noImageUrl)
+                      // }
                       src={
-                        sliderFilePreview ||
+                        sliderImageData.preview ||
                         (initialData.slider_image
                           ? initialData.slider_image.startsWith("data:image")
                             ? initialData.slider_image
-                            : `${imageBaseUrl}${initialData.slider_image}`
+                            : `${imageBaseUrl}${
+                                initialData.slider_image
+                              }?v=${Math.random()}`
                           : noImageUrl)
                       }
                       alt="Slider"
@@ -166,24 +205,27 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
             >
               <Input />
             </Form.Item>
-            {/* {!isEditMode && ( */}
+
             <Form.Item
-              className="w-full"
-              name="slider_image"
               label={
                 <span>
                   Image <span className="text-red-500">*</span>
                 </span>
               }
-              //   rules={[{ required: true, message: "Image is required" }]}
             >
               <Upload
                 showUploadList={false}
                 accept="image/*"
                 beforeUpload={(file) => {
-                  setSliderFile(file);
                   const reader = new FileReader();
-                  reader.onload = () => setSliderFilePreview(reader.result);
+                  reader.onload = () => {
+                    setSliderImageData((prev) => ({
+                      ...prev,
+                      tempFileName: file.name,
+                      imageSrc: reader.result,
+                      cropModalVisible: true,
+                    }));
+                  };
                   reader.readAsDataURL(file);
                   return false;
                 }}
@@ -193,22 +235,17 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 </Button>
               </Upload>
 
-              {/* <Upload
-                    showUploadList={false}
-                    accept="image/*"
-                    beforeUpload={(file) => {
-                      setCategoryFile(file);
-                      const reader = new FileReader();
-                      reader.onload = () =>
-                        setCategoryFilePreview(reader.result);
-                      reader.readAsDataURL(file);
-                      return false;
-                    }}
-                  >
-                    <Button icon={<UploadOutlined />}>Upload Avatar</Button>
-                  </Upload> */}
+              {sliderImageData.file && (
+                <div className="mt-2 text-sm text-gray-600 overflow-hidden">
+                  Selected file:{" "}
+                  <strong>
+                    {sliderImageData.fileName.length > 15
+                      ? `${sliderImageData.fileName.slice(0, 15)}...`
+                      : sliderImageData.fileName}
+                  </strong>
+                </div>
+              )}
             </Form.Item>
-            {/* )} */}
 
             <Form.Item label={<span>Url</span>} name="slider_url">
               <Input />
@@ -224,6 +261,17 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           </div>
         </Form>
       </Card>
+      <CropImageModal
+        open={sliderImageData.cropModalVisible}
+        imageSrc={sliderImageData.imageSrc}
+        onCancel={() =>
+          setSliderImageData((prev) => ({ ...prev, cropModalVisible: false }))
+        }
+        onCropComplete={handleCroppedImage}
+        maxCropSize={{ width: 800, height: 400 }}
+        title="Crop Slider Image"
+        cropstucture={true}
+      />
     </Modal>
   );
 };

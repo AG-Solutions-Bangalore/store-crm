@@ -7,14 +7,14 @@ import {
 } from "@ant-design/icons";
 import { Button, Card, Image, Popconfirm, Tag } from "antd";
 
-const SliderCard = ({ users, onToggleStatus, onEdit, imageUrls }) => {
-  const { id, category_name, slider_image, slider_sort, is_active, _match } =
+const SliderCard = ({ users, onEdit, imageUrls }) => {
+  const { id, slider_image, slider_sort, is_active, _match } =
     users;
 
   const isActive = is_active === "true";
 
   const avatarSrc = slider_image
-    ? imageUrls.userImageBase + slider_image
+    ? `${imageUrls.userImageBase}${slider_image}?v=${Math.random()}`
     : imageUrls.noImage;
 
   const highlightMatch = (text, match) => {

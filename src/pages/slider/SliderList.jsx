@@ -48,8 +48,11 @@ const SliderList = () => {
   }, []);
 
   const handleEdit = (id) => {
-    setopenDialog(true);
-    setSelecetdId(id);
+    setSelecetdId(null);
+    setTimeout(() => {
+      setSelecetdId(id);
+      setopenDialog(true);
+    }, 0);
   };
 
   const handleAddUser = () => {
@@ -98,8 +101,9 @@ const SliderList = () => {
           </div>
         ) : filteredUsers.length > 0 ? (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
-            {filteredUsers.map((user) => (
+            {filteredUsers.map((user, index) => (
               <SliderCard
+                key={index}
                 imageUrls={imageUrls}
                 users={user}
                 onEdit={handleEdit}
@@ -110,12 +114,14 @@ const SliderList = () => {
           <div className="text-center text-gray-500 py-20">No data found.</div>
         )}
       </div>
-      <SliderForm
-        open={open}
-        setOpenDialog={setopenDialog}
-        userId={selectedId}
-        fetchUser={fetchUser}
-      />
+      {open && (
+        <SliderForm
+          open={open}
+          setOpenDialog={setopenDialog}
+          userId={selectedId}
+          fetchUser={fetchUser}
+        />
+      )}
     </Card>
   );
 };

@@ -26,7 +26,7 @@ const OrderProductReport = () => {
   const token = useToken();
   const [form] = Form.useForm();
   const { trigger: submitTrigger, loading: isMutating } = useApiMutation();
-  const { trigger, loading: isOrder } = useApiMutation();
+  const { trigger } = useApiMutation();
 
   const [ordersstatus, setOrdersSatus] = useState([]);
   const [orders, setOrders] = useState([]);

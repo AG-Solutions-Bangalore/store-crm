@@ -7,8 +7,8 @@ import { useApiMutation } from "../../hooks/useApiMutation";
 
 const { Search } = Input;
 const GuestUserList = () => {
-  const [selectedId, setSelecetdId] = useState(false);
-  const [open, setopenDialog] = useState(false);
+  // const [selectedId, setSelecetdId] = useState(false);
+  // const [open, setopenDialog] = useState(false);
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const { trigger, loading: isMutating } = useApiMutation();
@@ -28,10 +28,10 @@ const GuestUserList = () => {
     fetchUser();
   }, []);
 
-  const handleEdit = (id) => {
-    setopenDialog(true);
-    setSelecetdId(id);
-  };
+  // const handleEdit = (id) => {
+  //   setopenDialog(true);
+  //   setSelecetdId(id);
+  // };
 
   const filteredUsers = users
 
@@ -67,17 +67,12 @@ const GuestUserList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <GuestUserTable users={filteredUsers} onEdit={handleEdit} />
+          <GuestUserTable users={filteredUsers}  />
         ) : (
           <div className="text-center text-gray-500 py-20">No users found.</div>
         )}
       </div>
-      {/* <GuestUserForm
-        userId={selectedId}
-        open={open}
-        onClose={() => setopenDialog(false)}
-        onSuccess={() => fetchUser()}
-      /> */}
+    
     </Card>
   );
 };

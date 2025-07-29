@@ -13,7 +13,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { trigger, loading } = useApiMutation();
-  const auth = useSelector((state) => state.auth);
+  // const auth = useSelector((state) => state.auth);
   const token = useSelector((state) => state.auth.token);
   const finalUserImage = useFinalUserImage();
   if (token) {

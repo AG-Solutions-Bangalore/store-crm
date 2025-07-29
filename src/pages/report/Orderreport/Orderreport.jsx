@@ -26,8 +26,8 @@ const OrderReport = () => {
   const token = useToken();
   const [form] = Form.useForm();
   const { trigger: submitTrigger, loading: isMutating } = useApiMutation();
-  const { trigger, loading: isOrder } = useApiMutation();
-
+  const { trigger } = useApiMutation();
+  const { Option } = Select;
   const [ordersstatus, setOrdersSatus] = useState([]);
   const [orders, setOrders] = useState([]);
   const [filteredOrder, setFilteredOrder] = useState([]);
@@ -90,7 +90,6 @@ const OrderReport = () => {
   return (
     <Card
       title="Order Report"
-      bordered={false}
       className="shadow-md rounded-lg"
       extra={
         <div className="flex  items-center gap-2">

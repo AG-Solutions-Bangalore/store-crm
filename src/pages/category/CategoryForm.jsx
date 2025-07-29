@@ -9,7 +9,7 @@ import {
   Modal,
   Space,
   Switch,
-  Upload
+  Upload,
 } from "antd";
 import { useEffect, useState } from "react";
 import { CATEGORY_LIST } from "../../api";
@@ -23,17 +23,27 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const [form] = Form.useForm();
   const token = usetoken();
   const [initialData, setInitialData] = useState({});
-  const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
+  const { trigger: FetchTrigger } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
-  const [categoryFile, setCategoryFile] = useState(null);
-  const [categoryFilePreview, setCategoryFilePreview] = useState(null);
-  const [categoryBannerFile, setCategoryBannerFile] = useState(null);
   const [noImageUrl, setNoImageUrl] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
-  const [cropModalVisible, setCropModalVisible] = useState(false);
-  const [croppingImage, setCroppingImage] = useState(null);
-  const [bannerCroppingImage, setBannerCroppingImage] = useState(null);
-  const [bannerCropModalVisible, setBannerCropModalVisible] = useState(false);
+
+  const [cropState, setCropState] = useState({
+    modalVisible: false,
+    imageSrc: null,
+    tempFileName: "",
+    type: "",
+  });
+  const [categoryImageInfo, setCategoryImageInfo] = useState({
+    file: null,
+    fileName: "",
+    preview: "",
+  });
+  const [bannerImageInfo, setBannerImageInfo] = useState({
+    file: null,
+    fileName: "",
+    preview: "",
+  });
 
   const fetchProfile = async () => {
     try {
@@ -68,19 +78,17 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
 
   useEffect(() => {
     setInitialData({});
-    setCategoryBannerFile(null);
-    setCategoryFilePreview(null);
-    setCategoryFile(null);
+
     if (isEditMode) {
       fetchProfile();
     } else {
       form.resetFields();
       setInitialData({});
-      setCategoryBannerFile(null);
-      setCategoryFilePreview(null);
-      setCategoryFile(null);
+      setCategoryImageInfo({ file: null, fileName: "", preview: "" });
+      setBannerImageInfo({ file: null, fileName: "", preview: "" });
     }
   }, [userId]);
+
   const handleProfileSave = async (values) => {
     try {
       const formData = new FormData();
@@ -88,11 +96,15 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       formData.append("category_sort_order", values.category_sort_order || "");
       formData.append("category_description", values.category_description);
 
-      if (categoryFile) {
-        formData.append("category_image", categoryFile);
+      if (categoryImageInfo.file) {
+        formData.append("category_image", categoryImageInfo.file);
       }
-      if (categoryBannerFile) {
-        formData.append("category_banner_image", categoryBannerFile);
+
+      if (bannerImageInfo.file) {
+        formData.append("category_banner_image", bannerImageInfo.file);
+      }
+      if (isEditMode) {
+        formData.append("is_active", values.is_active);
       }
       if (isEditMode) {
         formData.append("is_active", values.is_active);
@@ -123,8 +135,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       if (typeof errMsg === "string") {
         message.error(errMsg);
       } else if (typeof errMsg === "object") {
-        // If message is an object with field-level errors
-        const flatErrors = Object.values(errMsg).flat(); // flatten all messages
+        const flatErrors = Object.values(errMsg).flat();
         flatErrors.forEach((msg) => {
           message.error(msg);
         });
@@ -134,32 +145,54 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
     }
   };
 
-  const openCropper = (file) => {
+  const openCropper = (file, type) => {
     const reader = new FileReader();
     reader.onload = () => {
-      setCroppingImage(reader.result);
-      setCropModalVisible(true);
+      setCropState({
+        modalVisible: true,
+        imageSrc: reader.result,
+        tempFileName: file.name,
+        finalFileName: "",
+        finalFile: null,
+        finalFilePreview: "",
+        type,
+      });
     };
     reader.readAsDataURL(file);
-  };
-  const openBannerCropper = (file) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBannerCroppingImage(reader.result);
-      setBannerCropModalVisible(true);
-    };
-    reader.readAsDataURL(file);
-  };
-  const handleCroppedBannerImage = ({ blob, fileUrl }) => {
-    setCategoryBannerFile(blob);
-    setBannerCropModalVisible(false);
   };
 
   const handleCroppedImage = ({ blob, fileUrl }) => {
-    setCategoryFile(blob);
-    setCategoryFilePreview(fileUrl);
-    setCropModalVisible(false);
+    setCropState((prev) => {
+      if (prev.type === "category") {
+        setCategoryImageInfo({
+          file: blob,
+          fileName: prev.tempFileName,
+          preview: fileUrl,
+        });
+      } else if (prev.type === "banner") {
+        setBannerImageInfo({
+          file: blob,
+          fileName: prev.tempFileName,
+          preview: fileUrl,
+        });
+      }
+
+      return {
+        modalVisible: false,
+        imageSrc: null,
+        tempFileName: "",
+        type: "",
+      };
+    });
   };
+  const handleClose = () => {
+    setOpenDialog(false);
+    form.resetFields();
+    setInitialData({});
+    setCategoryImageInfo({ file: null, fileName: "", preview: "" });
+    setBannerImageInfo({ file: null, fileName: "", preview: "" });
+  };
+
   return (
     <Modal
       open={open}
@@ -168,7 +201,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       footer={null}
       centered
       maskClosable={false}
-      onCancel={() => setOpenDialog(false)}
+      onCancel={handleClose}
       width={800}
     >
       <h2 className="text-2xl font-bold text-[#006666]">
@@ -189,25 +222,35 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 <div className="flex flex-col items-center gap-2">
                   <Avatar
                     size={64}
+                    // src={
+                    //   categoryImageInfo.preview
+                    //     ? categoryImageInfo.preview
+                    //     : initialData.category_image
+                    //     ? initialData.category_image.startsWith("data:image")
+                    //       ? initialData.category_image
+                    //       : `${imageBaseUrl}${initialData.category_image}`
+                    //     : noImageUrl
+                    // }
                     src={
-                      categoryFilePreview ||
-                      (initialData.category_image
+                      categoryImageInfo.preview
+                        ? categoryImageInfo.preview
+                        : initialData.category_image
                         ? initialData.category_image.startsWith("data:image")
                           ? initialData.category_image
-                          : `${imageBaseUrl}${initialData.category_image}`
-                        : noImageUrl)
+                          : `${imageBaseUrl}${
+                              initialData.category_image
+                            }?v=${Math.random()}`
+                        : noImageUrl
                     }
                     icon={<UserOutlined />}
                   />
+
                   <Upload
                     showUploadList={false}
                     accept="image/*"
                     beforeUpload={(file) => {
-                      // setCategoryFile(file);
-                      openCropper(file);
+                      openCropper(file, "category");
                       const reader = new FileReader();
-                      reader.onload = () =>
-                        setCategoryFilePreview(reader.result);
                       reader.readAsDataURL(file);
                       return false;
                     }}
@@ -259,8 +302,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                   showUploadList={false}
                   accept="image/*"
                   beforeUpload={(file) => {
-                    openCropper(file);
-                    // setCategoryFile(file);
+                    openCropper(file, "category");
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     return false;
@@ -270,14 +312,13 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                     Upload Category Image
                   </Button>
                 </Upload>
-                {categoryFile && (
-                  <div className="mt-2 text-sm text-gray-600 overflow-hiden">
-                    Selected file:{" "}
+                {categoryImageInfo.fileName && (
+                  <div className="mt-2 text-sm text-gray-600 overflow-hidden">
+                    Selected Image:{" "}
                     <strong>
-                      {" "}
-                      {categoryFile.name.length > 15
-                        ? `${categoryFile.name.slice(0, 15)}...`
-                        : categoryFile.name}
+                      {categoryImageInfo.fileName.length > 15
+                        ? `${categoryImageInfo.fileName.slice(0, 15)}...`
+                        : categoryImageInfo.fileName}
                     </strong>
                   </div>
                 )}
@@ -292,7 +333,8 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 accept="image/*"
                 beforeUpload={(file) => {
                   // setCategoryBannerFile(file);
-                  openBannerCropper(file);
+                  openCropper(file, "banner");
+
                   const reader = new FileReader();
                   reader.readAsDataURL(file);
                   return false;
@@ -301,13 +343,13 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 <Button icon={<UploadOutlined />}>Upload Banner Image</Button>
               </Upload>
 
-              {categoryBannerFile && (
-                <div className="mt-2 text-sm text-gray-600 overflow-hiden">
-                  Selected file:{" "}
+              {bannerImageInfo.fileName && (
+                <div className="mt-2 text-sm text-gray-600 overflow-hidden">
+                  Selected Image:{" "}
                   <strong>
-                    {categoryBannerFile.name?.length > 15
-                      ? `${categoryBannerFile.name.slice(0, 15)}...`
-                      : categoryBannerFile.name}
+                    {bannerImageInfo.fileName.length > 15
+                      ? `${bannerImageInfo.fileName.slice(0, 15)}...`
+                      : bannerImageInfo.fileName}
                   </strong>
                 </div>
               )}
@@ -333,21 +375,19 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           </div>
         </Form>
       </Card>
+
       <CropImageModal
-        open={cropModalVisible}
-        imageSrc={croppingImage}
-        onCancel={() => setCropModalVisible(false)}
+        open={cropState.modalVisible}
+        imageSrc={cropState.imageSrc}
+        onCancel={() =>
+          setCropState((prev) => ({ ...prev, modalVisible: false }))
+        }
         onCropComplete={handleCroppedImage}
-        cropSize={{ width: 400, height: 400 }}
-        title="Crop Category Image"
-      />
-      <CropImageModal
-        open={bannerCropModalVisible}
-        imageSrc={bannerCroppingImage}
-        onCancel={() => setBannerCropModalVisible(false)}
-        onCropComplete={handleCroppedBannerImage}
-        cropSize={{ width: 400, height: 400 }}
-        title="Crop Banner Image"
+        maxCropSize={{ width: 400, height: 400 }}
+        title={`Crop ${
+          cropState.type === "banner" ? "Banner" : "Category"
+        } Image`}
+        cropstucture={true}
       />
     </Modal>
   );

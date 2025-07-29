@@ -179,13 +179,14 @@ const CategoryList = () => {
           )}
         </div>
       </Card>
-
-      <CategoryForm
-        open={open}
-        setOpenDialog={setopenDialog}
-        userId={selectedId}
-        fetchUser={fetchUser}
-      />
+      {open && (
+        <CategoryForm
+          open={open}
+          setOpenDialog={setopenDialog}
+          userId={selectedId}
+          fetchUser={fetchUser}
+        />
+      )}
     </>
   );
 };

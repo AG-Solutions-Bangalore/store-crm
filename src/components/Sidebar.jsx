@@ -249,7 +249,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-xs text-gray-500 p-3 text-center border-t border-[#006666] bg-[#e6f2f2]"
+          className="text-xs text-gray-500  text-center border-t border-[#006666] bg-[#e6f2f2]"
         >
           {showDialog ? (
             <div
@@ -272,18 +272,36 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
               />
             </div>
           ) : (
+            // <Alert
+            //   message={
+            //     <div className="flex items-center justify-center text-xs font-semibold">
+            //       <span className="flex items-center gap-1">
+            //         Version: {localVersion}
+            //       </span>
+            //     </div>
+            //   }
+            //   type="info"
+            //   showIcon={false}
+            //   banner
+            //   className="rounded-md"
+            // />
             <Alert
               message={
-                <div className="flex items-center justify-center text-xs font-semibold">
-                  <span className="flex items-center gap-1">
-                    Version: {localVersion}
-                  </span>
+                <div className="flex flex-col items-center text-center text-xs font-semibold">
+                  <div className="flex items-center gap-1">
+                    <span className="flex items-center gap-1">
+                      Version: {localVersion}
+                    </span>
+                  </div>
+                  <div className="text-[11px] font-normal text-gray-500 mt-1">
+                    Updated on: 28-07-2025
+                  </div>
                 </div>
               }
               type="info"
               showIcon={false}
               banner
-              className="rounded-md"
+              className="rounded-md bg-blue-50 text-blue-800 border-blue-100 px-4 py-1"
             />
           )}
         </motion.div>

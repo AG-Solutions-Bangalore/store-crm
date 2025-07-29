@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UPDATE_STATUS, USER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import UserTable from "../../components/user/UserCard";
+import UserTable from "../../components/user/UserTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { App } from "antd";
 

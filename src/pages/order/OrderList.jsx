@@ -12,7 +12,6 @@ const { Option } = Select;
 const OrderList = () => {
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(null);
   const { trigger, loading: isMutating } = useApiMutation();
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
@@ -40,10 +39,7 @@ const OrderList = () => {
   };
 
   const filteredUsers = users
-    .filter((user) => {
-      if (!statusFilter) return true;
-      return user.order_status === statusFilter;
-    })
+
     .map((user) => {
       const flatString = Object.values(user)
         .filter((v) => typeof v === "string" || typeof v === "number")

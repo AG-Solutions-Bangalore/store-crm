@@ -1,13 +1,11 @@
-import { PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Input, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { NOTIFICATION_LIST, UPDATE_STATUS, USER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import UserTable from "../../components/user/UserCard";
+import UserTable from "../../components/user/UserTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { App } from "antd";
-
+import { ReloadOutlined, UserOutlined, PlusOutlined } from "@ant-design/icons";
 const { Search } = Input;
 import { Select } from "antd";
 import NotificationTable from "../../components/notification/NotificationTable";
@@ -53,8 +51,11 @@ const Notification = () => {
   }, []);
 
   const handleEdit = (id) => {
-    setopenDialog(true);
-    setSelecetdId(id);
+    setSelecetdId(null);
+    setTimeout(() => {
+      setSelecetdId(id);
+      setopenDialog(true);
+    }, 0);
   };
 
   const handleAddUser = () => {
@@ -127,13 +128,14 @@ const Notification = () => {
           <div className="text-center text-gray-500 py-20">No users found.</div>
         )}
       </div>
-
-      <NotificationForm
-        open={open}
-        setOpenDialog={setopenDialog}
-        userId={selectedId}
-        fetchUser={fetchUser}
-      />
+      {open && (
+        <NotificationForm
+          open={open}
+          setOpenDialog={setopenDialog}
+          userId={selectedId}
+          fetchUser={fetchUser}
+        />
+      )}
     </Card>
   );
 };
