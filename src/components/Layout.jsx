@@ -20,7 +20,6 @@ export default function Layout({ children }) {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* {!isMobile && <Sidebar collapsed={collapsed} />} */}
       {!isMobile && (
         <ConfigProvider
           theme={{
