@@ -1,11 +1,10 @@
-import {
-    EditOutlined
-} from "@ant-design/icons";
-import { Button, Space, Tag, Tooltip } from "antd";
+import { EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { Button, Space, Tooltip } from "antd";
 import dayjs from "dayjs";
 import STTable from "../STTable/STTable";
+import OrderStatusTag from "../common/OrderStatusTag";
 
-const OrderTable = ({ users, onEdit }) => {
+const OrderTable = ({ users, onEdit, handleView }) => {
   const highlightMatch = (text, match) => {
     if (!match || !text) return text;
     const regex = new RegExp(`(${match})`, "gi");
@@ -60,14 +59,13 @@ const OrderTable = ({ users, onEdit }) => {
       dataIndex: "order_status",
       key: "order_status",
       render: (_, user) => {
-        const isPending = user.order_status === "pending";
-
         return (
-          <div className="flex justify-center">
-            <Tag color={isPending ? "orange" : "green"}>
-              {user.order_status}
-            </Tag>
-          </div>
+          // <div className="flex justify-center">
+          //   <Tag color={isPending ? "orange" : "green"}>
+          //     {user.order_status}
+          //   </Tag>
+          // </div>
+          <OrderStatusTag status={user.order_status} />
         );
       },
     },
@@ -84,6 +82,15 @@ const OrderTable = ({ users, onEdit }) => {
                 icon={<EditOutlined />}
                 size="small"
                 onClick={() => onEdit(id)}
+                className="bg-[#006666]"
+              />
+            </Tooltip>
+            <Tooltip title="View Order">
+              <Button
+                type="primary"
+                icon={<EyeOutlined />}
+                size="small"
+                onClick={() => handleView(id)}
                 className="bg-[#006666]"
               />
             </Tooltip>

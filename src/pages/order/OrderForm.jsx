@@ -19,7 +19,7 @@ import {
   FETCH_PRODUCTLIST,
   GUEST_USER_ORDER_BY_ID,
   ORDER_LIST,
-  USER_BY_ID,
+  ORDER_STATUS,
 } from "../../api";
 import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
@@ -36,6 +36,8 @@ const OrderForm = () => {
   const [ProductData, setProductData] = useState([]);
   const [UserData, setUserData] = useState([]);
   const [orderData, setOrderData] = useState(null);
+  const [ordersstatus, setOrdersSatus] = useState([]);
+
   const [ProductForms, setProductForms] = useState([
     {
       id: "",
@@ -71,10 +73,22 @@ const OrderForm = () => {
       console.error("Error fetching product data:", err);
     }
   };
+  const fetchOrderStatus = async () => {
+    const res = await FetchTrigger({
+      url: `${ORDER_STATUS}`,
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
+    if (res.code === 201) {
+      const responseData = res.data;
+
+      setOrdersSatus(responseData || []);
+    }
+  };
   useEffect(() => {
     fetchProductData();
     fetchuserData();
+    fetchOrderStatus();
   }, []);
 
   const fetchOrder = async () => {
@@ -133,7 +147,6 @@ const OrderForm = () => {
   useEffect(() => {
     if (isEditMode) fetchOrder();
   }, [id]);
-  console.log(orderData?.delivery_address_id, "id");
 
   const handleUserChange = async (userId) => {
     form.setFieldsValue({ delivery_address_id: undefined });
@@ -429,8 +442,13 @@ const OrderForm = () => {
               {isEditMode && (
                 <Form.Item label="Status" name="order_status">
                   <Select placeholder="Select Status" allowClear>
-                    <Select.Option value="pending">Pending</Select.Option>
-                    <Select.Option value="completed">Completed</Select.Option>
+                    {/* <Select.Option value="pending">Pending</Select.Option>
+                    <Select.Option value="completed">Completed</Select.Option> */}
+                    {ordersstatus.map((status) => (
+                      <Option key={status.id} value={status.status}>
+                        <span className="capitalize">{status.status}</span>{" "}
+                      </Option>
+                    ))}
                   </Select>
                 </Form.Item>
               )}

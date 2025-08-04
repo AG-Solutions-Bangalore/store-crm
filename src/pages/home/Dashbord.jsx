@@ -1,4 +1,5 @@
-import { Card, Col, Row, Spin, Table, Tag, Typography } from "antd";
+import { Card, Spin, Table, Typography } from "antd";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -10,8 +11,8 @@ import {
 } from "recharts";
 import { DASHBOARD } from "../../api";
 import useToken from "../../api/usetoken";
+import OrderStatusTag from "../../components/common/OrderStatusTag";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import dayjs from "dayjs";
 const { Title } = Typography;
 
 const Dashboard = () => {
@@ -77,9 +78,8 @@ const Dashboard = () => {
       dataIndex: "order_status",
       key: "order_status",
       render: (status) => (
-        <Tag color={status === "completed" ? "green" : "orange"}>
-          {status.toUpperCase()}
-        </Tag>
+
+        <OrderStatusTag status={status} />
       ),
     },
   ];

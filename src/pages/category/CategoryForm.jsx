@@ -56,7 +56,6 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
 
       const userData = res.data;
       setInitialData(userData);
-      // Set the fetched values directly into the form
       form.setFieldsValue({
         category_name: userData.category_name,
         category_sort_order: userData.category_sort_order,
@@ -64,11 +63,9 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
         is_active: userData.is_active,
       });
 
-      // Handle category image and banner
       const userImage = res.image_url?.find((i) => i.image_for === "Category");
       const noImage = res.image_url?.find((i) => i.image_for === "No Image");
       setImageBaseUrl(userImage?.image_url || "");
-      // categoryBannerFile(userImage?.category_banner_image || "");
       setNoImageUrl(noImage?.image_url || "");
     } catch (err) {
       console.error("Error fetching category data:", err);
@@ -197,7 +194,6 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
     <Modal
       open={open}
       onClose
-      //   closable={false}
       footer={null}
       centered
       maskClosable={false}
@@ -222,15 +218,6 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 <div className="flex flex-col items-center gap-2">
                   <Avatar
                     size={64}
-                    // src={
-                    //   categoryImageInfo.preview
-                    //     ? categoryImageInfo.preview
-                    //     : initialData.category_image
-                    //     ? initialData.category_image.startsWith("data:image")
-                    //       ? initialData.category_image
-                    //       : `${imageBaseUrl}${initialData.category_image}`
-                    //     : noImageUrl
-                    // }
                     src={
                       categoryImageInfo.preview
                         ? categoryImageInfo.preview
@@ -277,9 +264,9 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 </span>
               }
               name="category_name"
-              rules={[{ required: true, message: "name is required" }]}
+              rules={[{ required: true, message: "Name is required" }]}
             >
-              <Input />
+              <Input maxLength={50} />
             </Form.Item>
 
             <Form.Item
@@ -289,20 +276,37 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 </span>
               }
               name="category_sort_order"
-              rules={[{ required: true, message: "Sort Order is required" }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Sort Order is required",
+                },
+                {
+                  pattern: /^\d+(\.\d{1,2})?$/,
+                  message: "Enter a number (e.g. 34 or 34.56)",
+                },
+              ]}
             >
-              <Input />
+              <Input maxLength={2}/>
             </Form.Item>
             {!isEditMode && (
               <Form.Item
-                label={<span>Category Image</span>}
+                label={
+                  <span>
+                    Category Image<span className="text-red-500">*</span>
+                  </span>
+                }
                 name="category_image"
+                rules={[{ required: true, message: "Image is required" }]}
               >
                 <Upload
                   showUploadList={false}
                   accept="image/*"
                   beforeUpload={(file) => {
                     openCropper(file, "category");
+                    form.setFieldsValue({
+                      category_image: file.name,
+                    });
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     return false;
@@ -369,7 +373,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           <div className=" mt-6">
             <Form.Item className="text-center mt-6">
               <Button type="primary" htmlType="submit" loading={submitloading}>
-                Save
+                {isEditMode ? "Update" : "Submit"}
               </Button>
             </Form.Item>
           </div>

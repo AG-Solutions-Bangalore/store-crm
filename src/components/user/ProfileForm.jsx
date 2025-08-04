@@ -133,10 +133,10 @@ const ProfileForm = ({
         )}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <Form.Item label="Firm Name" name="firm_name">
-            <Input />
+            <Input maxLength={90} />
           </Form.Item>
           <Form.Item label="GSTIN" name="gstin">
-            <Input />
+            <Input maxLength={15} />
           </Form.Item>
           <Form.Item
             label={
@@ -147,7 +147,7 @@ const ProfileForm = ({
             name="name"
             rules={[{ required: true, message: "Name is required" }]}
           >
-            <Input />
+            <Input maxLength={90} />
           </Form.Item>
           <Form.Item
             label={
@@ -158,7 +158,7 @@ const ProfileForm = ({
             name="email"
             rules={[{ required: true, message: "Email is required" }]}
           >
-            <Input type="email" />
+            <Input type="email" maxLength={190} />
           </Form.Item>
           <Form.Item
             name="mobile"
@@ -250,6 +250,7 @@ const ProfileForm = ({
                     onChange={(e) =>
                       onAddressChange(idx, "address", e.target.value)
                     }
+                    maxLength={290}
                   />
                 </Form.Item>
                 <Form.Item label="Address Type" className="col-span-2">
@@ -260,17 +261,7 @@ const ProfileForm = ({
                     }
                   />
                 </Form.Item>
-                {/* <Form.Item label="Default">
-                  <Switch
-                    checked={addr.is_default}
-                    onChange={(checked) =>
-                      onAddressChange(idx, "is_default", checked)
-                    }
-                    disabled={
-                      !addr.is_default && addressForms.some((a) => a.is_default)
-                    }
-                  />
-                </Form.Item> */}
+
                 <Form.Item label="Default">
                   <Switch
                     checked={addr.is_default}
