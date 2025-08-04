@@ -30,6 +30,7 @@ import ProductReport from "./pages/report/ProductReport/ProductReport";
 import ProductCategoryReport from "./pages/report/ProductCategoryReport/ProductCategoryReport";
 import OrderReport from "./pages/report/Orderreport/Orderreport";
 import OrderProductReport from "./pages/report/OrderProductReport/OrderProductReport";
+import OrderView from "./pages/order/OrderView";
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
                 <Route path="/order" element={<OrderList />} />
                 <Route path="/order-form" element={<OrderForm />} />
                 <Route path="/order-form/:id" element={<OrderForm />} />
+                <Route path="/order-view/:orderid" element={<OrderView />} />
                 <Route path="/guest-user" element={<GuestUserList />} />
                 <Route
                   path="/guest-user-order"
@@ -80,7 +82,10 @@ function App() {
                 <Route path="/product-edit/:id" element={<ProductForm />} />
                 <Route path="/website-enquiry" element={<WebsiteEnquiry />} />
                 <Route path="/report-order" element={<OrderReport />} />
-                <Route path="/report-order-product" element={<OrderProductReport />} />
+                <Route
+                  path="/report-order-product"
+                  element={<OrderProductReport />}
+                />
                 <Route path="/report-category" element={<CategoryReport />} />
                 <Route path="/report-product" element={<ProductReport />} />
                 <Route

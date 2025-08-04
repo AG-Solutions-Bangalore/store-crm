@@ -1,11 +1,8 @@
-import {
-  EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import { Button, Image, Space, Tag, Tooltip } from "antd";
-import STTable from "../STTable/STTable";
+import { EditOutlined } from "@ant-design/icons";
+import { Button, Space, Tooltip } from "antd";
 import dayjs from "dayjs";
+import STTable from "../STTable/STTable";
+import OrderStatusTag from "../common/OrderStatusTag";
 
 const GuestUserOrderTable = ({ users, onEdit }) => {
   const highlightMatch = (text, match) => {
@@ -61,14 +58,14 @@ const GuestUserOrderTable = ({ users, onEdit }) => {
       dataIndex: "order_status",
       key: "order_status",
       render: (_, user) => {
-        const isPending = user.order_status === "pending";
 
         return (
-          <div className="flex justify-center">
-            <Tag color={isPending ? "orange" : "green"}>
-              {user.order_status}
-            </Tag>
-          </div>
+          // <div className="flex justify-center">
+          //   <Tag color={isPending ? "orange" : "green"}>
+          //     {user.order_status}
+          //   </Tag>
+          // </div>
+          <OrderStatusTag status={user.order_status} />
         );
       },
     },

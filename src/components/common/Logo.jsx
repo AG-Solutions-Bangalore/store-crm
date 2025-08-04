@@ -1,4 +1,3 @@
-// src/hooks/useFinalUserImage.js
 import { useSelector } from "react-redux";
 
 const useFinalUserImage = () => {

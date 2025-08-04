@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOutlined,
   DeleteOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -282,9 +283,21 @@ const ProductForm = () => {
         }}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-[#006666]">
+          {/* <h2 className="text-2xl font-bold text-[#006666]">
             {isEditMode ? "Edit" : "Create"} Product
-          </h2>
+          </h2> */}
+          <div
+            className="flex items-center gap-3 mb-4 cursor-pointer"
+            onClick={() => navigate(-1)}
+          >
+            <div className="bg-[#e6f2f2] rounded-full p-2">
+              <ArrowLeftOutlined style={{ color: "#006666" }} />
+            </div>
+            <h2 className="text-2xl font-bold text-[#006666] mb-0">
+              {isEditMode ? "Edit" : "Create"} Product
+            </h2>
+          </div>
+
           {isEditMode && (
             <Form.Item name="is_active" label="Active" valuePropName="checked">
               <Switch />
@@ -333,11 +346,11 @@ const ProductForm = () => {
             }
             rules={[{ required: true, message: "Product name is required" }]}
           >
-            <Input />
+            <Input maxLength={100} />
           </Form.Item>
 
           <Form.Item name="product_brand" label="Brand">
-            <Input />
+            <Input maxLength={100} />
           </Form.Item>
           <Form.Item
             name="product_unit_value"
@@ -376,6 +389,7 @@ const ProductForm = () => {
 
                 e.preventDefault();
               }}
+              maxLength={8}
             />
           </Form.Item>
 
@@ -434,6 +448,7 @@ const ProductForm = () => {
 
                 e.preventDefault();
               }}
+              maxLength={8}
             />
           </Form.Item>
 
@@ -474,6 +489,7 @@ const ProductForm = () => {
 
                 e.preventDefault();
               }}
+              maxLength={8}
             />
           </Form.Item>
 
@@ -509,6 +525,7 @@ const ProductForm = () => {
 
                 e.preventDefault();
               }}
+              maxLength={8}
             />
           </Form.Item>
           <Form.Item
@@ -544,108 +561,107 @@ const ProductForm = () => {
                 </Button>
               </div>
 
-                {fields.map(({ key, name, ...restField }, index) => {
-                  const current = productForms[index] || {};
-                  return (
-                    <Card
-                      key={key}
-                      size="small"
-                      style={{ marginBottom: "10px" }}
-                      title={`Image ${index + 1}`}
-                      extra={
-                        <Button
-                          danger
-                          size="small"
-                          icon={<DeleteOutlined />}
-                          onClick={() => {
-                            const updated = [...productForms];
-                            updated.splice(index, 1);
-                            setProductForms(updated);
-                            remove(name);
-                          }}
-                          disabled={fields.length === 1}
-                        >
-                          Remove
-                        </Button>
-                      }
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <Form.Item
-                          {...restField}
-                          name={[name, "product_images"]}
-                          label="Product Image"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Avatar
-                              size={36}
-                              src={current.preview}
-                              // src={
-                              //   current.preview
-                              //     ? `${current.preview}?v=${Math.random()}`
-                              //     : ""
-                              // }
-                              icon={<UserOutlined />}
-                            />
-                            {/* <Upload
+              {fields.map(({ key, name, ...restField }, index) => {
+                const current = productForms[index] || {};
+                return (
+                  <Card
+                    key={key}
+                    size="small"
+                    style={{ marginBottom: "10px" }}
+                    title={`Image ${index + 1}`}
+                    extra={
+                      <Button
+                        danger
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        onClick={() => {
+                          const updated = [...productForms];
+                          updated.splice(index, 1);
+                          setProductForms(updated);
+                          remove(name);
+                        }}
+                        disabled={fields.length === 1}
+                      >
+                        Remove
+                      </Button>
+                    }
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <Form.Item
+                        {...restField}
+                        name={[name, "product_images"]}
+                        label="Product Image"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Avatar
+                            size={36}
+                            src={current.preview}
+                            // src={
+                            //   current.preview
+                            //     ? `${current.preview}?v=${Math.random()}`
+                            //     : ""
+                            // }
+                            icon={<UserOutlined />}
+                          />
+                          {/* <Upload
                             showUploadList={false}
                             accept="image/*"
                             beforeUpload={(file) =>
                               handleImageUpload(index, file)
                             }
                           > */}
-                            <Upload
-                              showUploadList={false}
-                              accept="image/*"
-                              beforeUpload={(file) => {
-                                // setCategoryFile(file);
-                                handleImageUpload(index, file);
-                                const reader = new FileReader();
-                                // reader.onload = () =>
-                                //   setCategoryFilePreview(reader.result);
-                                reader.readAsDataURL(file);
-                                return false;
-                              }}
-                            >
-                              <Button icon={<UploadOutlined />}>Upload</Button>
-                            </Upload>
-                          </div>
-                        </Form.Item>
+                          <Upload
+                            showUploadList={false}
+                            accept="image/*"
+                            beforeUpload={(file) => {
+                              // setCategoryFile(file);
+                              handleImageUpload(index, file);
+                              const reader = new FileReader();
+                              // reader.onload = () =>
+                              //   setCategoryFilePreview(reader.result);
+                              reader.readAsDataURL(file);
+                              return false;
+                            }}
+                          >
+                            <Button icon={<UploadOutlined />}>Upload</Button>
+                          </Upload>
+                        </div>
+                      </Form.Item>
 
+                      <Form.Item
+                        name={[name, "is_default"]}
+                        label="Default"
+                        valuePropName="checked"
+                      >
+                        <Switch
+                          checked={current.is_default}
+                          onChange={(checked) =>
+                            updateProductField(index, "is_default", checked)
+                          }
+                        />
+                      </Form.Item>
+
+                      {isEditMode && (
                         <Form.Item
-                          name={[name, "is_default"]}
-                          label="Default"
+                          name={[name, "is_active"]}
+                          label="Active"
                           valuePropName="checked"
                         >
                           <Switch
-                            checked={current.is_default}
+                            checked={current.is_active}
                             onChange={(checked) =>
-                              updateProductField(index, "is_default", checked)
+                              updateProductField(index, "is_active", checked)
                             }
                           />
                         </Form.Item>
-
-                        {isEditMode && (
-                          <Form.Item
-                            name={[name, "is_active"]}
-                            label="Active"
-                            valuePropName="checked"
-                          >
-                            <Switch
-                              checked={current.is_active}
-                              onChange={(checked) =>
-                                updateProductField(index, "is_active", checked)
-                              }
-                            />
-                          </Form.Item>
-                        )}
-                      </div>
-                    </Card>
-                  );
-                })}
-                <Form.Item name="is_default_error" style={{ display: "none" }}>
-                  <div />
-                </Form.Item>
-           
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+              <Form.Item name="is_default_error" style={{ display: "none" }}>
+                <div />
+              </Form.Item>
             </>
           )}
         </Form.List>
@@ -653,7 +669,7 @@ const ProductForm = () => {
         <div className="mt-6 text-center">
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={submitLoading}>
-              Submit
+              {isEditMode ? "Update" : "Submit"}
             </Button>
           </Form.Item>
         </div>
@@ -663,7 +679,7 @@ const ProductForm = () => {
         imageSrc={cropImageSrc}
         onCancel={() => setCropModalOpen(false)}
         onCropComplete={handleCropComplete}
-        maxCropSize={{ width: 600, height: 600 }}
+        maxCropSize={{ width: 600, height: 800 }}
         title="Crop Product Image"
         cropstucture={false}
       />

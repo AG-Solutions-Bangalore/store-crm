@@ -479,7 +479,7 @@ const GuestUserOrderForm = () => {
                 <Select placeholder="Select Status" allowClear>
                   {ordersstatus.map((status) => (
                     <Option key={status.id} value={status.status}>
-                      {status.status}
+                      <span className="capitalize">{status.status}</span>{" "}
                     </Option>
                   ))}
                 </Select>

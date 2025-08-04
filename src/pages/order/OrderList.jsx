@@ -30,6 +30,9 @@ const OrderList = () => {
     fetchUser();
   }, []);
 
+  const handleView = (user) => {
+    navigate(`/order-view/${user.id}`);
+  };
   const handleEdit = (user) => {
     navigate(`/order-form/${user.id}`);
   };
@@ -80,7 +83,11 @@ const OrderList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <OrderTable users={filteredUsers} onEdit={handleEdit} />
+          <OrderTable
+            users={filteredUsers}
+            onEdit={handleEdit}
+            handleView={handleView}
+          />
         ) : (
           <div className="text-center text-gray-500 py-20">No data found.</div>
         )}
