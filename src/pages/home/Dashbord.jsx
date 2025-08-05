@@ -118,7 +118,7 @@ const Dashboard = () => {
             ))}
           </div>
 
-          <Card title="Latest Orders" className="shadow-md">
+          <Card title="Latest Orders" className="shadow-md overflow-x-auto">
             <Table
               dataSource={data.latestOrders}
               columns={orderColumns}

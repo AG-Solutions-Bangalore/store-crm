@@ -31,7 +31,7 @@ const useLogout = () => {
       navigate("/");
       setTimeout(() => persistor.purge(), 1000);
     } catch (error) {
-      message.error(error?.response?.data?.message || "Logout Error");
+      // message.error(error?.response?.data?.message || "Logout Error");
     }
   };
 
