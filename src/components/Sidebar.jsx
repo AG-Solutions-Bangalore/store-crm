@@ -294,7 +294,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 01-08-2025
+                    Updated on: 05-08-2025
                   </div>
                 </div>
               }

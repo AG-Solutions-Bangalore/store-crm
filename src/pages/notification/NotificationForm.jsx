@@ -8,14 +8,15 @@ import {
   Input,
   Modal,
   Space,
+  Spin,
   Switch,
   Upload,
 } from "antd";
 import { useEffect, useState } from "react";
 import { NOTIFICATION_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
-import { useApiMutation } from "../../hooks/useApiMutation";
 import CropImageModal from "../../components/common/CropImageModal";
+import { useApiMutation } from "../../hooks/useApiMutation";
 
 const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const { message } = App.useApp();
@@ -24,10 +25,8 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const [form] = Form.useForm();
   const token = usetoken();
   const [initialData, setInitialData] = useState({});
-  const { trigger: FetchTrigger } = useApiMutation();
+  const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
-  // const [notificationFile, setNotificationFile] = useState(null);
-  // const [notificationFilePreview, setNotificationFilePreview] = useState(null);
   const [noImageUrl, setNoImageUrl] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
   const [notificationImageData, setNotificationImageData] = useState({
@@ -154,121 +153,137 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       <h2 className="text-2xl font-bold text-[#006666]">
         {isEditMode ? "Update" : "Create"} Notification
       </h2>
-
-      <Card>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleProfileSave}
-          initialValues={{ is_active: false }}
-          requiredMark={false}
-          className="mt-4"
-        >
-          <Space className="mb-4 w-full justify-between" direction="horizontal">
-            {isEditMode && (
-              <>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="relative w-full h-[200px] border rounded-md overflow-hidden">
-                    <Image
-                      src={
-                        notificationImageData.preview ||
-                        (initialData.notification_images
-                          ? initialData.notification_images.startsWith(
-                              "data:image"
-                            )
-                            ? initialData.notification_images
-                            : `${imageBaseUrl}${initialData.notification_images}`
-                          : noImageUrl)
-                      }
-                      alt="Notification"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-                <Form.Item
-                  label="Active"
-                  name="is_active"
-                  valuePropName="checked"
-                >
-                  <Switch />
-                </Form.Item>
-              </>
-            )}
-          </Space>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item
-              label={
-                <span>
-                  Heading <span className="text-red-500">*</span>
-                </span>
-              }
-              name="notification_heading"
-              rules={[{ required: true, message: "Heading is required" }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              className="w-full"
-              name="notification_images"
-              label={
-                <span>
-                  Image <span className="text-red-500">*</span>
-                </span>
-              }
-              {...(!isEditMode && {
-                rules: [{ required: true, message: "Image is required" }],
-              })}
-            >
-              <Upload
-                showUploadList={false}
-                accept="image/*"
-                beforeUpload={(file) => {
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setNotificationImageData((prev) => ({
-                      ...prev,
-                      tempFileName: file.name,
-                      imageSrc: reader.result,
-                      cropModalVisible: true,
-                    }));
-                  };
-                  reader.readAsDataURL(file);
-                  return false;
-                }}
-              >
-                <Button icon={<UploadOutlined />} className="w-[340px]">
-                  Upload Image
-                </Button>
-              </Upload>
-              {notificationImageData.file && (
-                <div className="mt-2 text-sm text-gray-600 overflow-hidden">
-                  Selected file:{" "}
-                  <strong>
-                    {notificationImageData.fileName.length > 15
-                      ? `${notificationImageData.fileName.slice(0, 15)}...`
-                      : notificationImageData.fileName}
-                  </strong>
-                </div>
-              )}
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            label={<span>Description</span>}
-            name="notification_description"
+      {fetchloading ? (
+        <div className="flex justify-center py-20">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <Card>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleProfileSave}
+            initialValues={{ is_active: false }}
+            requiredMark={false}
+            className="mt-4"
           >
-            <Input.TextArea />
-          </Form.Item>
-          <div className=" mt-6">
-            <Form.Item className="text-center mt-6">
-              <Button type="primary" htmlType="submit" loading={submitloading}>
-                {isEditMode ? "Update" : "Create"}
-              </Button>
+            <Space
+              className="mb-4 w-full justify-between"
+              direction="horizontal"
+            >
+              {isEditMode && (
+                <>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative w-full h-[200px] border rounded-md overflow-hidden">
+                      <Image
+                        src={
+                          notificationImageData.preview ||
+                          (initialData.notification_images
+                            ? initialData.notification_images.startsWith(
+                                "data:image"
+                              )
+                              ? initialData.notification_images
+                              : `${imageBaseUrl}${initialData.notification_images}`
+                            : noImageUrl)
+                        }
+                        alt="Notification"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <Form.Item
+                    label="Active"
+                    name="is_active"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                </>
+              )}
+            </Space>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Form.Item
+                label={
+                  <span>
+                    Heading <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="notification_heading"
+                rules={[{ required: true, message: "Heading is required" }]}
+              >
+                <Input maxLength={100} />
+              </Form.Item>
+              <Form.Item
+                className="w-full"
+                name="notification_images"
+                label={
+                  <span>
+                    Image <span className="text-red-500">*</span>
+                  </span>
+                }
+                {...(!isEditMode && {
+                  rules: [{ required: true, message: "Image is required" }],
+                })}
+              >
+                <Upload
+                  showUploadList={false}
+                  accept="image/*"
+                  beforeUpload={(file) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setNotificationImageData((prev) => ({
+                        ...prev,
+                        tempFileName: file.name,
+                        imageSrc: reader.result,
+                        cropModalVisible: true,
+                      }));
+                    };
+                    reader.readAsDataURL(file);
+                    return false;
+                  }}
+                >
+                  <Button icon={<UploadOutlined />} className="w-[340px]">
+                    Upload Image
+                  </Button>
+                </Upload>
+                {notificationImageData.file && (
+                  <div className="mt-2 text-sm text-gray-600 overflow-hidden">
+                    Selected file:{" "}
+                    <strong>
+                      {notificationImageData.fileName.length > 15
+                        ? `${notificationImageData.fileName.slice(0, 15)}...`
+                        : notificationImageData.fileName}
+                    </strong>
+                  </div>
+                )}
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              label={<span>Description</span>}
+              name="notification_description"
+            >
+              <Input.TextArea maxLength={250} />
             </Form.Item>
-          </div>
-        </Form>
-      </Card>
+            <div className=" mt-6">
+              <Form.Item className="text-center mt-6">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={submitloading}
+                  style={{ marginRight: 8 }}
+                >
+                  {isEditMode ? "Update" : "Create"}
+                </Button>
+                <Button danger type="default" onClick={handleClose}>
+                  Cancel
+                </Button>
+              </Form.Item>
+            </div>
+          </Form>
+        </Card>
+      )}
       <CropImageModal
         open={notificationImageData.cropModalVisible}
         imageSrc={notificationImageData.imageSrc}

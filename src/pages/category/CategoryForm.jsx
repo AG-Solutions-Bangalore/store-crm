@@ -198,7 +198,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       centered
       maskClosable={false}
       onCancel={handleClose}
-      width={800}
+      width={1000}
     >
       <h2 className="text-2xl font-bold text-[#006666]">
         {isEditMode ? "Update" : "Create"} Category
@@ -256,7 +256,11 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
             )}
           </Space>
 
-          <div className={`grid grid-cols-1 md:grid-cols-3 gap-4`}>
+          <div
+            className={`grid grid-cols-1 ${
+              isEditMode ? "grid-cols-3" : "grid-cols-4"
+            } gap-4`}
+          >
             <Form.Item
               label={
                 <span>
@@ -287,7 +291,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 },
               ]}
             >
-              <Input maxLength={2}/>
+              <Input maxLength={2} />
             </Form.Item>
             {!isEditMode && (
               <Form.Item
@@ -372,8 +376,16 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
           </Form.Item>
           <div className=" mt-6">
             <Form.Item className="text-center mt-6">
-              <Button type="primary" htmlType="submit" loading={submitloading}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={submitloading}
+                style={{ marginRight: 8 }}
+              >
                 {isEditMode ? "Update" : "Submit"}
+              </Button>
+              <Button danger type="default" onClick={handleClose}>
+                Cancel
               </Button>
             </Form.Item>
           </div>

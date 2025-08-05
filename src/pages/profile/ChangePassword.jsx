@@ -22,7 +22,7 @@ const ChangePassword = ({ open, setOpenDialog }) => {
 
       const response = await SubmitTrigger({
         url: PANEL_CHANGE_PASSWORD,
-        method: "post", 
+        method: "post",
         data: payload,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -125,8 +125,20 @@ const ChangePassword = ({ open, setOpenDialog }) => {
 
           <div className="mt-6">
             <Form.Item className="text-center mt-6">
-              <Button type="primary" htmlType="submit" loading={submitloading}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={submitloading}
+                style={{ marginRight: 8 }}
+              >
                 Submit
+              </Button>
+              <Button
+                danger
+                type="default"
+                onClick={() => setOpenDialog(false)}
+              >
+                Cancel
               </Button>
             </Form.Item>
           </div>
