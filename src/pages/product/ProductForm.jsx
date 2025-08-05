@@ -229,9 +229,9 @@ const ProductForm = () => {
           );
         }
       });
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}:`, pair[1]);
-      }
+      // for (let pair of formData.entries()) {
+      //   console.log(`${pair[0]}:`, pair[1]);
+      // }
       await submitTrigger({
         url: isEditMode ? `${PRODUCT_LIST}/${id}?_method=PUT` : PRODUCT_LIST,
         method: "post",
@@ -286,11 +286,11 @@ const ProductForm = () => {
           {/* <h2 className="text-2xl font-bold text-[#006666]">
             {isEditMode ? "Edit" : "Create"} Product
           </h2> */}
-          <div
-            className="flex items-center gap-3 mb-4 cursor-pointer"
-            onClick={() => navigate(-1)}
-          >
-            <div className="bg-[#e6f2f2] rounded-full p-2">
+          <div className="flex items-center gap-3 mb-4 ">
+            <div
+              className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
+              onClick={() => navigate(-1)}
+            >
               <ArrowLeftOutlined style={{ color: "#006666" }} />
             </div>
             <h2 className="text-2xl font-bold text-[#006666] mb-0">
@@ -668,8 +668,16 @@ const ProductForm = () => {
 
         <div className="mt-6 text-center">
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={submitLoading}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={submitLoading}
+              style={{ marginRight: 8 }}
+            >
               {isEditMode ? "Update" : "Submit"}
+            </Button>
+            <Button danger type="default" onClick={() => navigate(-1)}>
+              Cancel
             </Button>
           </Form.Item>
         </div>
@@ -680,6 +688,7 @@ const ProductForm = () => {
         onCancel={() => setCropModalOpen(false)}
         onCropComplete={handleCropComplete}
         maxCropSize={{ width: 600, height: 800 }}
+        // maxCropSize={{ width: 700, height: 1000 }}
         title="Crop Product Image"
         cropstucture={false}
       />

@@ -1,5 +1,6 @@
 // components/forms/ProfileForm.jsx
 import {
+  ArrowLeftOutlined,
   DeleteOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -17,6 +18,7 @@ import {
   Upload,
 } from "antd";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ProfileForm = ({
   type,
@@ -43,7 +45,7 @@ const ProfileForm = ({
   const handleFinish = (values) => {
     onSubmit?.(values);
   };
-
+  const navigate = useNavigate();
   return (
     <Card>
       <Form
@@ -95,8 +97,19 @@ const ProfileForm = ({
           </Space>
         ) : (
           <Space className="mb-4 w-full justify-between" direction="horizontal">
-            <div>
+            {/* <div>
               <h2 className="text-2xl font-bold text-[#006666]">
+                {title || ""}
+              </h2>
+            </div> */}
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeftOutlined style={{ color: "#006666" }} />
+              </div>
+              <h2 className="text-2xl font-bold text-[#006666] mb-0">
                 {title || ""}
               </h2>
             </div>
@@ -131,7 +144,11 @@ const ProfileForm = ({
             </div>
           </Space>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div
+          className={`grid grid-cols-1 md:grid-cols-3 ${
+            type == "updateprofile" ? "lg:grid-cols-4" : "lg:grid-cols-3"
+          } gap-4`}
+        >
           <Form.Item label="Firm Name" name="firm_name">
             <Input maxLength={90} />
           </Form.Item>
@@ -217,7 +234,7 @@ const ProfileForm = ({
         </div>
 
         <div className="flex justify-between items-center mb-4">
-          <strong>Addresses</strong>
+          <strong>Address</strong>
           <Button type="dashed" onClick={onAddAddress} icon={<PlusOutlined />}>
             Add Address
           </Button>
@@ -276,8 +293,16 @@ const ProfileForm = ({
         </div>
         <div className=" mt-6">
           <Form.Item className="text-center">
-            <Button type="primary" htmlType="submit" loading={loading}>
-              {submititle || ""}
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              style={{ marginRight: 8 }}
+            >
+              <span className="capitalize"> {submititle || ""}</span>
+            </Button>
+            <Button danger type="default" onClick={() => navigate(-1)}>
+              Cancel
             </Button>
           </Form.Item>
         </div>

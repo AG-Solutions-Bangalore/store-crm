@@ -59,17 +59,20 @@
 //       width={1000}
 //       centered
 //       maskClosable={false}
-//       styles={{ body: { padding: 0 } }}
+//       bodyStyle={{
+//         padding: 0,
+//         height: "75vh",
+//         display: "flex",
+//         flexDirection: "column",
+//       }}
 //     >
 //       <div
 //         style={{
-//           width: "100%",
-//           height: "64vh",
+//           flexGrow: 1,
 //           position: "relative",
-//           background: "#000",
-//           display: "flex",
-//           flexDirection: "column",
-//           justifyContent: "center", // 🟢 center vertically
+//           backgroundColor: "#000",
+//           overflow: "hidden",
+//           borderRadius: "4px",
 //         }}
 //       >
 //         <Cropper
@@ -86,15 +89,25 @@
 //               width: "100%",
 //               height: "100%",
 //               position: "relative",
+//               overflow: "hidden",
 //             },
 //             mediaStyle: {
-//               objectFit: "contain",
+//               objectFit: "contain", // ensures large images scale down
+//               maxWidth: "100%",
+//               maxHeight: "100%",
 //             },
 //           }}
 //         />
 //       </div>
-//       <div className="mt-4 px-6 pb-4">
-//         <Slider min={1} max={3} step={0.1} value={zoom} onChange={setZoom} />
+
+//       <div style={{ padding: "16px 24px" }}>
+//         <Slider
+//           min={1}
+//           max={3}
+//           step={0.1}
+//           value={zoom}
+//           onChange={setZoom}
+//         />
 //       </div>
 //     </Modal>
 //   );
@@ -103,7 +116,7 @@
 // export default CropImageModal;
 import Cropper from "react-easy-crop";
 import { Modal, Slider } from "antd";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import getCroppedImg from "./cropImageUtils";
 
 const CropImageModal = ({
@@ -133,10 +146,27 @@ const CropImageModal = ({
     };
   }, [imageSrc]);
 
-  const cropSize = {
-    width: Math.min(maxCropSize.width, imageSize.width),
-    height: Math.min(maxCropSize.height, imageSize.height),
-  };
+  const cropSize = useMemo(() => {
+    if (!imageSize.width || !imageSize.height) return maxCropSize;
+
+    const viewportHeight = window.innerHeight * 0.75; // 75vh (modal body height)
+    const maxAvailableHeight = viewportHeight - 120; // account for modal padding and slider
+
+    const adjustedWidth = maxCropSize.width;
+    const adjustedHeight = maxCropSize.height;
+
+    const scaleFactor = Math.min(
+      imageSize.width / adjustedWidth,
+      imageSize.height / adjustedHeight,
+      maxAvailableHeight / adjustedHeight,
+      1
+    );
+
+    return {
+      width: adjustedWidth * scaleFactor,
+      height: adjustedHeight * scaleFactor,
+    };
+  }, [imageSize, maxCropSize]);
 
   const aspectRatio =
     cropSize.width && cropSize.height
@@ -152,7 +182,6 @@ const CropImageModal = ({
     );
     onCropComplete(croppedImage);
   };
-
   return (
     <Modal
       open={open}
@@ -162,11 +191,13 @@ const CropImageModal = ({
       width={1000}
       centered
       maskClosable={false}
-      bodyStyle={{
-        padding: 0,
-        height: "75vh",
-        display: "flex",
-        flexDirection: "column",
+      styles={{
+        body: {
+          padding: 0,
+          maxHeight: "80vh",
+          display: "flex",
+          flexDirection: "column",
+        },
       }}
     >
       <div
@@ -190,12 +221,12 @@ const CropImageModal = ({
           style={{
             containerStyle: {
               width: "100%",
-              height: "100%",
+              height: cropSize.height || 400,
               position: "relative",
               overflow: "hidden",
             },
             mediaStyle: {
-              objectFit: "contain", // ensures large images scale down
+              objectFit: "contain",
               maxWidth: "100%",
               maxHeight: "100%",
             },
@@ -204,13 +235,7 @@ const CropImageModal = ({
       </div>
 
       <div style={{ padding: "16px 24px" }}>
-        <Slider
-          min={1}
-          max={3}
-          step={0.1}
-          value={zoom}
-          onChange={setZoom}
-        />
+        <Slider min={1} max={3} step={0.1} value={zoom} onChange={setZoom} />
       </div>
     </Modal>
   );

@@ -72,15 +72,15 @@ const ForgotPassword = () => {
               <Form.Item
                 label={
                   <span>
-                    Username <span className="text-red-500">*</span>
+                    Mobile No <span className="text-red-500">*</span>
                   </span>
                 }
                 name="username"
                 rules={[
-                  { required: true, message: "Please enter your username" },
+                  { required: true, message: "Please enter your  mobile no " },
                 ]}
               >
-                <Input size="large" placeholder="Enter username" />
+                <Input size="large" placeholder="Enter mobile no " />
               </Form.Item>
 
               <Form.Item

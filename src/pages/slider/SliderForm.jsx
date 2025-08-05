@@ -8,6 +8,7 @@ import {
   Input,
   Modal,
   Space,
+  Spin,
   Switch,
   Upload,
 } from "antd";
@@ -32,7 +33,7 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const [form] = Form.useForm();
   const token = usetoken();
   const [initialData, setInitialData] = useState({});
-  const { trigger: FetchTrigger } = useApiMutation();
+  const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
   const [noImageUrl, setNoImageUrl] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
@@ -143,124 +144,168 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       <h2 className="text-2xl font-bold text-[#006666]">
         {isEditMode ? "Update" : "Create"} Slider
       </h2>
-
-      <Card>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleProfileSave}
-          initialValues={{ is_active: false }}
-          requiredMark={false}
-          className="mt-4"
-        >
-          <Space className="mb-4 w-full justify-between" direction="horizontal">
-            {isEditMode && (
-              <>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="relative w-full h-[200px] border rounded-md overflow-hidden">
-                    <Image
-                      // src={
-                      //   sliderImageData.preview ||
-                      //   (initialData.slider_image
-                      //     ? initialData.slider_image.startsWith("data:image")
-                      //       ? initialData.slider_image
-                      //       : `${imageBaseUrl}${initialData.slider_image}`
-                      //     : noImageUrl)
-                      // }
-                      src={
-                        sliderImageData.preview ||
-                        (initialData.slider_image
-                          ? initialData.slider_image.startsWith("data:image")
-                            ? initialData.slider_image
-                            : `${imageBaseUrl}${
-                                initialData.slider_image
-                              }?v=${Math.random()}`
-                          : noImageUrl)
-                      }
-                      alt="Slider"
-                      className="w-full h-full object-cover"
-                    />
+      {fetchloading ? (
+        <div className="flex justify-center py-20">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <Card>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleProfileSave}
+            initialValues={{ is_active: false }}
+            requiredMark={false}
+            className="mt-4"
+          >
+            <Space
+              className="mb-4 w-full justify-between"
+              direction="horizontal"
+            >
+              {isEditMode && (
+                <>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative w-full h-[200px] border rounded-md overflow-hidden">
+                      <Image
+                        // src={
+                        //   sliderImageData.preview ||
+                        //   (initialData.slider_image
+                        //     ? initialData.slider_image.startsWith("data:image")
+                        //       ? initialData.slider_image
+                        //       : `${imageBaseUrl}${initialData.slider_image}`
+                        //     : noImageUrl)
+                        // }
+                        src={
+                          sliderImageData.preview ||
+                          (initialData.slider_image
+                            ? initialData.slider_image.startsWith("data:image")
+                              ? initialData.slider_image
+                              : `${imageBaseUrl}${
+                                  initialData.slider_image
+                                }?v=${Math.random()}`
+                            : noImageUrl)
+                        }
+                        alt="Slider"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
-                </div>
-                <Form.Item
-                  label="Active"
-                  name="is_active"
-                  valuePropName="checked"
-                >
-                  <Switch />
-                </Form.Item>
-              </>
-            )}
-          </Space>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item
-              label={
-                <span>
-                  Sort Order <span className="text-red-500">*</span>
-                </span>
-              }
-              name="slider_sort"
-              rules={[{ required: true, message: "Sort Order is required" }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label={
-                <span>
-                  Image <span className="text-red-500">*</span>
-                </span>
-              }
-            >
-              <Upload
-                showUploadList={false}
-                accept="image/*"
-                beforeUpload={(file) => {
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setSliderImageData((prev) => ({
-                      ...prev,
-                      tempFileName: file.name,
-                      imageSrc: reader.result,
-                      cropModalVisible: true,
-                    }));
-                  };
-                  reader.readAsDataURL(file);
-                  return false;
-                }}
-              >
-                <Button icon={<UploadOutlined />} className="w-[215px]">
-                  Upload Image
-                </Button>
-              </Upload>
-
-              {sliderImageData.file && (
-                <div className="mt-2 text-sm text-gray-600 overflow-hidden">
-                  Selected file:{" "}
-                  <strong>
-                    {sliderImageData.fileName.length > 15
-                      ? `${sliderImageData.fileName.slice(0, 15)}...`
-                      : sliderImageData.fileName}
-                  </strong>
-                </div>
+                  <Form.Item
+                    label="Active"
+                    name="is_active"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                </>
               )}
-            </Form.Item>
+            </Space>
 
-            <Form.Item label={<span>Url</span>} name="slider_url">
-              <Input />
-            </Form.Item>
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Form.Item
+                label={
+                  <span>
+                    Sort Order <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="slider_sort"
+                rules={[
+                  { required: true, message: "Sort Order is required" },
+                  {
+                    pattern: /^\d+$/,
+                    message: "Enter a valid number (e.g. 23)",
+                  },
+                ]}
+              >
+                <Input
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
 
-          <div className=" mt-6">
-            <Form.Item className="text-center mt-6">
-              <Button type="primary" htmlType="submit" loading={submitloading}>
-                {isEditMode ? "Update" : "Create"}
-              </Button>
-            </Form.Item>
-          </div>
-        </Form>
-      </Card>
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /^[0-9]$/.test(e.key)
+                    ) {
+                      return;
+                    }
+
+                    e.preventDefault();
+                  }}
+                  maxLength={4}
+                />
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <span>
+                    Image <span className="text-red-500">*</span>
+                  </span>
+                }
+              >
+                <Upload
+                  showUploadList={false}
+                  accept="image/*"
+                  beforeUpload={(file) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setSliderImageData((prev) => ({
+                        ...prev,
+                        tempFileName: file.name,
+                        imageSrc: reader.result,
+                        cropModalVisible: true,
+                      }));
+                    };
+                    reader.readAsDataURL(file);
+                    return false;
+                  }}
+                >
+                  <Button icon={<UploadOutlined />} className="w-[215px]">
+                    Upload Image
+                  </Button>
+                </Upload>
+
+                {sliderImageData.file && (
+                  <div className="mt-2 text-sm text-gray-600 overflow-hidden">
+                    Selected file:{" "}
+                    <strong>
+                      {sliderImageData.fileName.length > 15
+                        ? `${sliderImageData.fileName.slice(0, 15)}...`
+                        : sliderImageData.fileName}
+                    </strong>
+                  </div>
+                )}
+              </Form.Item>
+
+              <Form.Item label={<span>Url</span>} name="slider_url">
+                <Input maxLength={60} />
+              </Form.Item>
+            </div>
+
+            <div className=" mt-6">
+              <Form.Item className="text-center mt-6">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={submitloading}
+                  style={{ marginRight: 8 }}
+                >
+                  {isEditMode ? "Update" : "Create"}
+                </Button>
+                <Button danger type="default" onClick={handleClose}>
+                  Cancel
+                </Button>
+              </Form.Item>
+            </div>
+          </Form>
+        </Card>
+      )}
       <CropImageModal
         open={sliderImageData.cropModalVisible}
         imageSrc={sliderImageData.imageSrc}

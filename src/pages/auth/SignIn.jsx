@@ -78,23 +78,23 @@ const SignIn = () => {
               onFinish={onFinish}
               className="w-full"
               initialValues={{
-                email: "9876543212",
-                password: "123456",
+                email: "",
+                password: "",
               }}
               requiredMark={false}
             >
               <Form.Item
                 label={
                   <span>
-                    Username <span className="text-red-500">*</span>
+                    Mobile No <span className="text-red-500">*</span>
                   </span>
                 }
                 name="email"
                 rules={[
-                  { required: true, message: "Please enter your username" },
+                  { required: true, message: "Please enter your mobile no" },
                 ]}
               >
-                <Input size="large" placeholder="Enter username" />
+                <Input size="large" placeholder="Enter  mobile no" />
               </Form.Item>
 
               <Form.Item

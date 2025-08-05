@@ -1,15 +1,9 @@
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import {
-  App,
-  Button,
-  Card,
-  DatePicker,
-  Form,
-  Input,
-  Select,
-  Space,
-  Spin,
-} from "antd";
+  ArrowLeftOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { App, Button, Card, DatePicker, Form, Input, Select, Spin } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -32,7 +26,7 @@ const OrderForm = () => {
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
   const [form] = Form.useForm();
   const [addressData, setAddressData] = useState([]);
-  const naviagte = useNavigate();
+  const navigate = useNavigate();
   const [ProductData, setProductData] = useState([]);
   const [UserData, setUserData] = useState([]);
   const [orderData, setOrderData] = useState(null);
@@ -296,7 +290,7 @@ const OrderForm = () => {
           res.message ||
             `Order ${isEditMode ? "updated" : "created"} successfully!`
         );
-        naviagte("/order");
+        navigate("/order");
       } else {
         message.error(res.message || "Something went wrong.");
       }
@@ -321,21 +315,19 @@ const OrderForm = () => {
             requiredMark={false}
             className="mt-4"
           >
-            <Space
-              className="mb-4 w-full justify-between"
-              direction="horizontal"
-            >
-              <div>
-                <h2 className="text-2xl font-bold text-[#006666]">
-                  {isEditMode ? "Update" : "Create"} Order
-                </h2>
+            <div className="flex items-center gap-3 mb-4 ">
+              <div
+                className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeftOutlined style={{ color: "#006666" }} />
               </div>
-            </Space>
-
+              <h2 className="text-2xl font-bold text-[#006666] mb-0">
+                {isEditMode ? "Edit" : "Create"} Order
+              </h2>
+            </div>
             <div
-              className={
-                "grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 "
-              }
+              className={"grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-5"}
             >
               {/* Order Date */}
               <Form.Item
@@ -410,40 +402,81 @@ const OrderForm = () => {
                   ))}
                 </Select>
               </Form.Item>
-
-              {/* Delivery Instruction */}
               <Form.Item
-                label="Delivery Instruction"
-                name="delivery_instructions"
+                label="Delivery Charge"
+                name="delivery_charges"
+                rules={[
+                  {
+                    pattern: /^\d*\.?\d{0,2}$/,
+                    message: "Enter a valid charge (e.g. 23.5)",
+                  },
+                ]}
               >
-                <Input />
+                <Input
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                      ".",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /^[0-9]$/.test(e.key)
+                    ) {
+                      return;
+                    }
+
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
               </Form.Item>
 
-              {/* Delivery Charges */}
-              <Form.Item label="Delivery Charge" name="delivery_charges">
-                <Input />
-              </Form.Item>
-
-              {/* Discount Amount */}
               <Form.Item
                 label="Discount Amount"
                 name="discount_amount"
                 rules={[
                   {
-                    pattern: /^[0-9]+$/,
-                    message: "Enter a valid numeric amount",
+                    pattern: /^\d*\.?\d{0,2}$/,
+                    message: "Enter a valid amount (e.g. 23.5)",
                   },
                 ]}
               >
-                <Input maxLength={10} />
+                <Input
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                      ".",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /^[0-9]$/.test(e.key)
+                    ) {
+                      return;
+                    }
+
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
               </Form.Item>
 
-              {/* Order Status (Only in Edit Mode) */}
               {isEditMode && (
                 <Form.Item label="Status" name="order_status">
                   <Select placeholder="Select Status" allowClear>
-                    {/* <Select.Option value="pending">Pending</Select.Option>
-                    <Select.Option value="completed">Completed</Select.Option> */}
                     {ordersstatus.map((status) => (
                       <Option key={status.id} value={status.status}>
                         <span className="capitalize">{status.status}</span>{" "}
@@ -452,13 +485,22 @@ const OrderForm = () => {
                   </Select>
                 </Form.Item>
               )}
+              <Form.Item
+                label="Delivery Instruction"
+                name="delivery_instructions"
+                className="md:col-span-2"
+              >
+                <Input.TextArea rows={3} maxLength={200} />
+              </Form.Item>
+
+              {/* Order Status (Only in Edit Mode) */}
 
               {/* Full-width Address Field */}
               <Form.Item
                 label="Address"
-                className="md:col-span-3 lg:col-span-4"
+                className={`${isEditMode ? "col-span-2" : "col-span-3"}`}
               >
-                <Input.TextArea rows={3} />
+                <Input.TextArea rows={3} maxLength={200} />
               </Form.Item>
             </div>
 
@@ -490,7 +532,7 @@ const OrderForm = () => {
                 >
                   <div
                     className={`grid grid-cols-1 md:grid-cols-2 ${
-                      isEditMode ? "lg:grid-cols-4" : "lg:grid-cols-3"
+                      isEditMode ? "lg:grid-cols-3" : "lg:grid-cols-2"
                     } gap-4`}
                   >
                     <Form.Item
@@ -534,8 +576,8 @@ const OrderForm = () => {
                       name={["subs", idx, "product_qnty"]}
                       rules={[
                         {
-                          pattern: /^[0-9]+$/,
-                          message: "Enter a valid numeric amount",
+                          pattern: /^\d*\.?\d{0,2}$/,
+                          message: "Enter a valid quantity (e.g. 23.5)",
                         },
                       ]}
                     >
@@ -548,6 +590,28 @@ const OrderForm = () => {
                             e.target.value
                           )
                         }
+                        onKeyDown={(e) => {
+                          const allowedKeys = [
+                            "Backspace",
+                            "Tab",
+                            "ArrowLeft",
+                            "ArrowRight",
+                            "Delete",
+                            ".",
+                          ];
+                          const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                          if (
+                            allowedKeys.includes(e.key) ||
+                            isCtrlCombo ||
+                            /^[0-9]$/.test(e.key)
+                          ) {
+                            return;
+                          }
+
+                          e.preventDefault();
+                        }}
+                        maxLength={4}
                       />
                     </Form.Item>
                     {isEditMode && (
@@ -577,8 +641,12 @@ const OrderForm = () => {
                   type="primary"
                   htmlType="submit"
                   loading={submitloading}
+                  style={{ marginRight: 8 }}
                 >
                   {isEditMode ? "Update" : "Submit"}
+                </Button>
+                <Button danger type="default" onClick={() => navigate(-1)}>
+                  Cancel
                 </Button>
               </Form.Item>
             </div>

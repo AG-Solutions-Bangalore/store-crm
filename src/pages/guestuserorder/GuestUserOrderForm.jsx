@@ -1,4 +1,8 @@
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import {
   App,
   Button,
@@ -34,7 +38,7 @@ const GuestUserOrderForm = () => {
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
   const [form] = Form.useForm();
   const [ProductData, setProductData] = useState([]);
-  const naviagte = useNavigate();
+  const navigate = useNavigate();
   const [ordersstatus, setOrdersSatus] = useState([]);
   const [ProductForms, setProductForms] = useState([
     {
@@ -303,7 +307,7 @@ const GuestUserOrderForm = () => {
           res.message ||
             `User ${isEditMode ? "updated" : "created"} successfully!`
         );
-        naviagte("/guest-user-order");
+        navigate("/guest-user-order");
       } else {
         message.error(res.message || "Something went wrong.");
       }
@@ -332,17 +336,27 @@ const GuestUserOrderForm = () => {
               className="mb-4 w-full justify-between"
               direction="horizontal"
             >
-              <div>
+              {/* <div>
                 <h2 className="text-2xl font-bold text-[#006666]">
                   {isEditMode ? "Update" : "Create"}Guest Order
+                </h2>
+              </div> */}
+              <div className="flex items-center gap-3 mb-4 ">
+                <div
+                  className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeftOutlined style={{ color: "#006666" }} />
+                </div>
+                <h2 className="text-2xl font-bold text-[#006666] mb-0">
+                  {isEditMode ? "Edit" : "Create"} Guest Order
                 </h2>
               </div>
             </Space>
             {isEditMode && (
               <Card
-                // bordered={false}
                 style={{ marginBottom: 16 }}
-                bodyStyle={{ padding: 16 }}
+                styles={{ body: { padding: 16 } }}
               >
                 <Row gutter={[16, 12]}>
                   {[
@@ -375,7 +389,7 @@ const GuestUserOrderForm = () => {
             <div
               className={`grid gap-4 ${
                 isEditMode
-                  ? "grid-cols-1 md:grid-cols-3 lg:grid-cols-5"
+                  ? "grid-cols-1 md:grid-cols-3 lg:grid-cols-4"
                   : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
               }`}
             >
@@ -383,9 +397,9 @@ const GuestUserOrderForm = () => {
               {!isEditMode && (
                 <>
                   <Form.Item label="Firm Name" name="firm_name">
-                    <Input />
+                    <Input maxLength={200} />
                   </Form.Item>
-                  <Form.Item label="GSTIN" name="gstin">
+                  <Form.Item label="GSTIN" name="gstin" maxLength={15}>
                     <Input />
                   </Form.Item>
                   <Form.Item
@@ -397,7 +411,7 @@ const GuestUserOrderForm = () => {
                     name="name"
                     rules={[{ required: true, message: "Name is required" }]}
                   >
-                    <Input />
+                    <Input maxLength={100} />
                   </Form.Item>
                   <Form.Item
                     label={
@@ -408,7 +422,7 @@ const GuestUserOrderForm = () => {
                     name="email"
                     rules={[{ required: true, message: "Email is required" }]}
                   >
-                    <Input type="email" />
+                    <Input type="email" maxLength={200} />
                   </Form.Item>
                   <Form.Item
                     name="mobile"
@@ -455,25 +469,74 @@ const GuestUserOrderForm = () => {
                 <DatePicker format="DD-MM-YYYY" className="w-full" />
               </Form.Item>
               <Form.Item
-                label="Delivery Instruction"
-                name="delivery_instructions"
+                label="Delivery Charge"
+                name="delivery_charges"
+                rules={[
+                  {
+                    pattern: /^\d*\.?\d{0,2}$/,
+                    message: "Enter a valid charge (e.g. 23.5)",
+                  },
+                ]}
               >
-                <Input />
-              </Form.Item>
-              <Form.Item label="Delivery Charge" name="delivery_charges">
-                <Input />
+                <Input
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                      ".",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /^[0-9]$/.test(e.key)
+                    ) {
+                      return;
+                    }
+
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
               </Form.Item>
               <Form.Item
                 label="Discount Amount"
                 name="discount_amount"
                 rules={[
                   {
-                    pattern: /^[0-9]+$/,
-                    message: "Enter a valid numeric amount",
+                    pattern: /^\d*\.?\d{0,2}$/,
+                    message: "Enter a valid amount (e.g. 23.5)",
                   },
                 ]}
               >
-                <Input maxLength={10} />
+                <Input
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                      ".",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /^[0-9]$/.test(e.key)
+                    ) {
+                      return;
+                    }
+
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
               </Form.Item>
               <Form.Item label="Status" name="order_status">
                 <Select placeholder="Select Status" allowClear>
@@ -484,8 +547,18 @@ const GuestUserOrderForm = () => {
                   ))}
                 </Select>
               </Form.Item>
-              <Form.Item label="Address" className="md:col-span-4">
-                <Input.TextArea rows={3} />
+              <Form.Item
+                className="col-span-2"
+                label="Delivery Instruction"
+                name="delivery_instructions"
+              >
+                <Input.TextArea rows={3} maxLength={200} />
+              </Form.Item>
+              <Form.Item
+                label="Address"
+                className={`${isEditMode ? "col-span-2" : "col-span-4"}`}
+              >
+                <Input.TextArea rows={3} maxLength={200} />
               </Form.Item>
             </div>
 
@@ -562,14 +635,13 @@ const GuestUserOrderForm = () => {
                       name={["subs", idx, "product_price"]}
                       rules={[
                         {
-                          pattern: /^[0-9]+$/,
-                          message: "Enter a valid numeric amount",
+                          pattern: /^\d*\.?\d{0,2}$/,
+                          message: "Enter a valid price (e.g. 23.5)",
                         },
                       ]}
                     >
                       <Input
                         value={parseFloat(addr.product_price) || 0}
-                        // value={addr.product_price}
                         onChange={(e) =>
                           handleProductChange(
                             idx,
@@ -577,16 +649,37 @@ const GuestUserOrderForm = () => {
                             e.target.value
                           )
                         }
+                        onKeyDown={(e) => {
+                          const allowedKeys = [
+                            "Backspace",
+                            "Tab",
+                            "ArrowLeft",
+                            "ArrowRight",
+                            "Delete",
+                            ".",
+                          ];
+                          const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                          if (
+                            allowedKeys.includes(e.key) ||
+                            isCtrlCombo ||
+                            /^[0-9]$/.test(e.key)
+                          ) {
+                            return;
+                          }
+
+                          e.preventDefault();
+                        }}
+                        maxLength={6}
                       />
                     </Form.Item>
                     <Form.Item
                       label="Quantity"
-                      // name={[idx, "product_qnty"]}
                       name={["subs", idx, "product_qnty"]}
                       rules={[
                         {
-                          pattern: /^[0-9]+$/,
-                          message: "Enter a valid numeric amount",
+                          pattern: /^\d*\.?\d{0,2}$/,
+                          message: "Enter a valid quantity (e.g. 23.5)",
                         },
                       ]}
                     >
@@ -599,6 +692,28 @@ const GuestUserOrderForm = () => {
                             e.target.value
                           )
                         }
+                        onKeyDown={(e) => {
+                          const allowedKeys = [
+                            "Backspace",
+                            "Tab",
+                            "ArrowLeft",
+                            "ArrowRight",
+                            "Delete",
+                            ".",
+                          ];
+                          const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                          if (
+                            allowedKeys.includes(e.key) ||
+                            isCtrlCombo ||
+                            /^[0-9]$/.test(e.key)
+                          ) {
+                            return;
+                          }
+
+                          e.preventDefault();
+                        }}
+                        maxLength={4}
                       />
                     </Form.Item>
                     {isEditMode && (
@@ -628,8 +743,13 @@ const GuestUserOrderForm = () => {
                   type="primary"
                   htmlType="submit"
                   loading={submitloading}
+                  style={{ marginRight: 8 }}
                 >
                   {isEditMode ? "Update" : "Submit"}
+                </Button>
+
+                <Button danger type="default" onClick={() => navigate(-1)}>
+                  Cancel
                 </Button>
               </Form.Item>
             </div>
