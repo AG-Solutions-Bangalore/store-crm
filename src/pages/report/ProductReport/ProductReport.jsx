@@ -4,18 +4,20 @@ import {
   PrinterOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Select, Spin, Tooltip } from "antd";
-import printJS from "print-js";
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { PRODUCT_REPORT } from "../../../api";
 import useToken from "../../../api/usetoken";
-import { exportProductTOExcel } from "../../../components/exportExcel/exportProductTOExcel";
+
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
+import { exportProductTOExcel } from "../../../components/exportExcel/exportProductToExcel";
+import { useReactToPrint } from "react-to-print";
 const { Option } = Select;
 
 const ProductReport = () => {
   const token = useToken();
-
+const productRef = useRef(null);
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
 
@@ -56,13 +58,35 @@ const ProductReport = () => {
     }
   };
 
-  const handlePrint = () => {
-    printJS({
-      printable: "printable-section",
-      type: "html",
-      targetStyles: ["*"],
-    });
-  };
+  
+   const handlePrint = useReactToPrint({
+       content: () => productRef.current, 
+       documentTitle: "product-report",
+       pageStyle: `
+         @page {
+           size: auto;
+           margin: 1mm;
+         }
+         @media print {
+           body {
+             margin: 0;
+             padding: 2mm;
+             
+           }
+           .print-hide {
+             display: none;
+           }
+         }
+           @media print {
+  .inactive-row {
+    background-color: #ffe5e5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+       `,
+     });
   return (
     <>
       <Card
@@ -114,7 +138,7 @@ const ProductReport = () => {
         }
       >
         {/* Only this part will be printed */}
-        <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
+        <div ref={productRef} id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
           <h2 className="text-xl font-semibold">Product Report</h2>
 
           {isMutating ? (
@@ -144,12 +168,13 @@ const ProductReport = () => {
                 {filteredCategory.map((item) => (
                   <tr
                     key={item.product_name}
-                    className="border-t"
+               
                     style={{
                       pageBreakInside: "avoid",
                       backgroundColor:
                         item.is_active === "false" ? "#ffe5e5" : "transparent",
                     }}
+                    className={`border-t ${item.is_active === "false" ? "inactive-row" : ""}`}
                   >
                     <td className="px-3 py-2 font-medium">
                       {item.product_name}

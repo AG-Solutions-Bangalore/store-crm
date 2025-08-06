@@ -87,18 +87,22 @@ const OrderForm = () => {
 
   const fetchOrder = async () => {
     const res = await FetchTrigger({
-      url: `${GUEST_USER_ORDER_BY_ID}/${id}`,
+      url: `${ORDER_LIST}/${id}`,
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    console.log("res",res?.data)
     if (!res || !res.data) return;
 
-    const guestUser = res.data?.[0] ?? {};
+    const guestUser = res.data ;
+    console.log("guest",guestUser)
     const order = res.order ?? {};
-    const orderSubs = res.orderSub ?? [];
+    const orderSubs = res?.data?.subs ?? [];
+
+    
     setOrderData(order);
-    if (order?.user_id) {
-      await handleUserChange(order?.user_id);
+    if (guestUser?.user_id) {
+      await handleUserChange(guestUser?.user_id);
     }
 
     const processedSubs = Array.isArray(orderSubs)
@@ -112,24 +116,24 @@ const OrderForm = () => {
       : [];
 
     form.setFieldsValue({
-      firm_name: guestUser.firm_name || "",
-      gstin: guestUser.gstin || "",
-      name: guestUser.name || "",
-      mobile: guestUser.mobile || "",
-      whatsapp: guestUser.whatsapp || "",
-      email: guestUser.email || "",
-      address: guestUser.address || "",
+      // firm_name: guestUser.company_name || "",
+      // gstin: guestUser.gstin || "",
+      // name: guestUser.name || "",
+      // mobile: guestUser.mobile || "",
+      // whatsapp: guestUser.whatsapp || "",
+      // email: guestUser.email || "",
+      // address: guestUser.address || "",
 
-      order_date: order.order_date ? dayjs(order.order_date) : null,
-      user_id: order.user_id || "",
-      delivery_address_id: order?.delivery_address_id || "",
-      delivery_instructions: order.delivery_instructions || "",
-      order_status: order.order_status || false,
-      delivery_charges: order.delivery_charges
-        ? parseFloat(order.delivery_charges)
+      order_date: guestUser.order_date ? dayjs(order.order_date) : null,
+      user_id: guestUser.user_id || "",
+      delivery_address_id: guestUser?.delivery_address_id || "",
+      delivery_instructions: guestUser.delivery_instructions || "",
+      order_status: guestUser.order_status || false,
+      delivery_charges: guestUser.delivery_charges
+        ? parseFloat(guestUser.delivery_charges)
         : 0,
-      discount_amount: order.discount_amount
-        ? parseFloat(order.discount_amount)
+      discount_amount: guestUser.discount_amount
+        ? parseFloat(guestUser.discount_amount)
         : 0,
 
       subs: processedSubs,
@@ -159,7 +163,7 @@ const OrderForm = () => {
         setAddressData(res.data);
       }
       if (isEditMode) {
-        console.log(orderData?.delivery_address_id, "id dd");
+        console.log(orderData, "id dd");
         const matchedAddress = res.data.find(
           (addr) => addr.id == orderData?.delivery_address_id
         );
@@ -241,48 +245,75 @@ const OrderForm = () => {
     }
 
     try {
-      const formData = new FormData();
-      formData.append(
-        "order_date",
-        values.order_date ? dayjs(values.order_date).format("YYYY-MM-DD") : ""
-      );
+      // const formData = new FormData();
+      // formData.append(
+      //   "order_date",
+      //   values.order_date ? dayjs(values.order_date).format("YYYY-MM-DD") : ""
+      // );
 
-      formData.append("user_id", values.user_id || "");
-      formData.append("delivery_address_id", values.delivery_address_id || "");
-      formData.append(
-        "delivery_instructions",
-        values.delivery_instructions || ""
-      );
-      formData.append("delivery_charges", values.delivery_charges || "");
-      formData.append("discount_amount", values.discount_amount || "");
+      // formData.append("user_id", values.user_id || "");
+      // formData.append("delivery_address_id", values.delivery_address_id || "");
+      // formData.append(
+      //   "delivery_instructions",
+      //   values.delivery_instructions || ""
+      // );
+      // formData.append("delivery_charges", values.delivery_charges || "");
+      // formData.append("discount_amount", values.discount_amount || "");
 
+      // if (isEditMode) {
+      //   formData.append("order_status", values.order_status);
+      // }
+
+      // subs.forEach((item, index) => {
+      //   formData.append(`subs[${index}][id]`, item.id);
+      //   formData.append(`subs[${index}][product_id]`, item.product_id);
+      //   formData.append(
+      //     `subs[${index}][product_qnty]`,
+      //     Number(item.product_qnty)
+      //   );
+
+      //   if (isEditMode) {
+      //     formData.append(
+      //       `subs[${index}][order_sub_status]`,
+      //       item.order_sub_status
+      //     );
+      //   }
+      // });
+      const payload = {
+        order_date: values.order_date
+          ? dayjs(values.order_date).format("YYYY-MM-DD")
+          : "",
+        user_id: values.user_id || "",
+        delivery_address_id: values.delivery_address_id || "",
+        delivery_instructions: values.delivery_instructions || "",
+        delivery_charges: values.delivery_charges || "",
+        discount_amount: values.discount_amount || "",
+        subs: subs.map((item) => {
+          const subItem = {
+            id: item.id,
+            product_id: item.product_id,
+            product_qnty: Number(item.product_qnty),
+          };
+      
+          if (isEditMode) {
+            subItem.order_sub_status = item.order_sub_status;
+          }
+      
+          return subItem;
+        }),
+      };
+      
       if (isEditMode) {
-        formData.append("order_status", values.order_status);
+        payload.order_status = values.order_status;
       }
-
-      subs.forEach((item, index) => {
-        formData.append(`subs[${index}][id]`, item.id);
-        formData.append(`subs[${index}][product_id]`, item.product_id);
-        formData.append(
-          `subs[${index}][product_qnty]`,
-          Number(item.product_qnty)
-        );
-
-        if (isEditMode) {
-          formData.append(
-            `subs[${index}][order_sub_status]`,
-            item.order_sub_status
-          );
-        }
-      });
-
+      
       const res = await SubmitTrigger({
         url: isEditMode ? `${ORDER_LIST}/${id}` : ORDER_LIST,
         method: isEditMode ? "put" : "post",
-        data: formData,
+        data: payload,
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+
         },
       });
       if (res.code == 201) {
@@ -296,7 +327,7 @@ const OrderForm = () => {
       }
     } catch (err) {
       console.error("Error submitting form:", err);
-      message.error(`Failed to ${isEditMode ? "update" : "create"} order.`);
+      message.error(err.response.data.message || `Failed to ${isEditMode ? "update" : "create"} order.`);
     }
   };
 
@@ -488,20 +519,14 @@ const OrderForm = () => {
               <Form.Item
                 label="Delivery Instruction"
                 name="delivery_instructions"
-                className="md:col-span-2"
+                className={`${isEditMode ? "col-span-1 md:col-span-4":" col-span-1 md:col-span-5"}`}
               >
                 <Input.TextArea rows={3} maxLength={200} />
               </Form.Item>
 
               {/* Order Status (Only in Edit Mode) */}
 
-              {/* Full-width Address Field */}
-              <Form.Item
-                label="Address"
-                className={`${isEditMode ? "col-span-2" : "col-span-3"}`}
-              >
-                <Input.TextArea rows={3} maxLength={200} />
-              </Form.Item>
+          
             </div>
 
             <div className="flex justify-between items-center mb-4">

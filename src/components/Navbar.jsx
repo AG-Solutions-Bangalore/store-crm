@@ -1,4 +1,6 @@
 import {
+  CompressOutlined,
+  ExpandOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -13,6 +15,7 @@ import ChangePassword from "../pages/profile/ChangePassword";
 import { useState } from "react";
 export default function Navbar({ collapsed, onToggle }) {
   const [open, setOpenDialog] = useState(false);
+   const [isFullscreen, setIsFullscreen] = useState(false);
   const imageUrls = useSelector((state) => state?.auth?.userImage);
   const userImagePath = useSelector((state) => state?.auth?.user?.avatar_photo);
   const userBaseUrl = imageUrls.find(
@@ -26,6 +29,21 @@ export default function Navbar({ collapsed, onToggle }) {
     : noImageUrl;
   const logout = useLogout();
   const naviagte = useNavigate();
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
+
   const handleMenuClick = async ({ key }) => {
     if (key === "logout") {
       try {
@@ -37,6 +55,8 @@ export default function Navbar({ collapsed, onToggle }) {
       naviagte("/user-form");
     } else if (key === "chnagepassword") {
       setOpenDialog(true);
+    } else if (key === "fullscreen") {
+      toggleFullscreen();
     }
   };
 
@@ -57,6 +77,21 @@ export default function Navbar({ collapsed, onToggle }) {
           <div className="flex items-center gap-2 px-2 py-2">
             <SettingOutlined className="text-teal-600" />
             <span className="text-gray-800">Change Password</span>
+          </div>
+        ),
+      },
+      {
+        key: "fullscreen",
+        label: (
+          <div className="flex items-center gap-2 px-2 py-2">
+            {isFullscreen ? (
+              <CompressOutlined className="text-teal-600" />
+            ) : (
+              <ExpandOutlined className="text-teal-600" />
+            )}
+            <span className="text-gray-800">
+              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            </span>
           </div>
         ),
       },
