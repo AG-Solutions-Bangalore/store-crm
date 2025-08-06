@@ -1,6 +1,6 @@
 import { Button, Card, Image, Select, Spin, Tooltip } from "antd";
-import printJS from "print-js";
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { CATEGORY_REPORT } from "../../../api";
 import useToken from "../../../api/usetoken";
 import { useApiMutation } from "../../../hooks/useApiMutation";
@@ -11,11 +11,12 @@ import {
   FileExcelOutlined,
 } from "@ant-design/icons";
 import { exportCategoryReportToExcel } from "../../../components/exportExcel/exportCategoryToExcel";
+import { useReactToPrint } from "react-to-print";
 const { Option } = Select;
 
 const CategoryReport = () => {
   const token = useToken();
-
+const categoryRef = useRef(null);
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
   const [imageBaseUrl, setImageBaseUrl] = useState("");
@@ -65,14 +66,26 @@ const CategoryReport = () => {
     }
   };
 
-  const handlePrint = () => {
-    printJS({
-      printable: "printable-section",
-      type: "html",
-      targetStyles: ["*"],
-    });
-  };
-
+ 
+ const handlePrint = useReactToPrint({
+     content: () => categoryRef.current, 
+     documentTitle: "category-report",
+     pageStyle: `
+       @page {
+         size: auto;
+         margin: 1mm;
+       }
+       @media print {
+         body {
+           margin: 0;
+           padding: 2mm;
+         }
+         .print-hide {
+           display: none;
+         }
+       }
+     `,
+   });
   return (
     <>
       <Card
@@ -125,7 +138,7 @@ const CategoryReport = () => {
           </div>
         }
       >
-        <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
+        <div ref={categoryRef} id='printable-section' className="p-0 m-0 print:p-0 print:m-0">
           <h2 className="text-xl font-semibold">Category Report</h2>
 
           {isMutating ? (

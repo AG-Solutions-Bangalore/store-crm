@@ -4,7 +4,6 @@ import ProtectedLayout from "./components/ProtectedLayout";
 import VersionCheck from "./components/VersionCheck";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import SignIn from "./pages/auth/SignIn";
-import Dashbord from "./pages/home/dashbord";
 import UserPage from "./pages/profile/Profile";
 import UserForm from "./pages/user/UserForm";
 import CategoryList from "./pages/category/CategoryList";
@@ -31,6 +30,8 @@ import ProductCategoryReport from "./pages/report/ProductCategoryReport/ProductC
 import OrderReport from "./pages/report/Orderreport/Orderreport";
 import OrderProductReport from "./pages/report/OrderProductReport/OrderProductReport";
 import OrderView from "./pages/order/OrderView";
+import Dashboard from "./pages/home/Dashbord";
+import Pos from "./pages/pos/Pos";
 
 function App() {
   return (
@@ -41,14 +42,15 @@ function App() {
         <Route path="/" element={<SignIn />} />
         <Route path="/forget-password" element={<ForgotPassword />} />
         <Route path="/maintenance" element={<MaintenancePage />} />
-
+        <Route path="/pos" element={<Pos />} />
         {/* Protected Routes: All other paths */}
         <Route
           path="*"
           element={
             <ProtectedLayout>
               <Routes>
-                <Route path="/home" element={<Dashbord />} />
+                <Route path="/home" element={<Dashboard />} />
+            
                 <Route path="/user-form" element={<UserPage />} />
                 <Route path="/user-create" element={<UserForm />} />
                 <Route path="/user-edit/:id" element={<UserForm />} />

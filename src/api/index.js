@@ -60,6 +60,7 @@ export const UPDATE_GUEST_USER = `/panel-update-guest-user`;
 //GUEST_USER_ORDER_LIST
 export const GUEST_USER_ORDER_LIST = `/panel-fetch-guest-user-order-list`;
 //GUEST_USER_ORDER_BY_ID
+// export const GUEST_USER_ORDER_BY_ID = `/panel-fetch-guest-user-order-by-id`;
 export const GUEST_USER_ORDER_BY_ID = `/panel-fetch-guest-user-order-by-id`;
 //GUEST_USER_ORDER_CREATE
 export const GUEST_USER_ORDER_CREATE = `/panel-create-guest-user-order`;

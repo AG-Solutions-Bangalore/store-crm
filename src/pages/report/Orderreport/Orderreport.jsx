@@ -17,12 +17,14 @@ import {
   FilePdfOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import printJS from "print-js";
+import { useEffect, useRef, useState } from "react";
+
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { expotOrderToExcel } from "../../../components/exportExcel/expotOrderToExcel";
+import { useReactToPrint } from "react-to-print";
 const OrderReport = () => {
   const { message } = App.useApp();
+  const orderRef = useRef(null);
   const token = useToken();
   const [form] = Form.useForm();
   const { trigger: submitTrigger, loading: isMutating } = useApiMutation();
@@ -80,13 +82,26 @@ const OrderReport = () => {
     }
   };
 
-  const handlePrint = () => {
-    printJS({
-      printable: "printable-section",
-      type: "html",
-      targetStyles: ["*"],
-    });
-  };
+ 
+   const handlePrint = useReactToPrint({
+       content: () => orderRef.current, 
+       documentTitle: "order-report",
+       pageStyle: `
+         @page {
+           size: auto;
+           margin: 1mm;
+         }
+         @media print {
+           body {
+             margin: 0;
+             padding: 2mm;
+           }
+           .print-hide {
+             display: none;
+           }
+         }
+       `,
+     });
   return (
     <Card
       title="Order Report"
@@ -184,7 +199,7 @@ const OrderReport = () => {
           <Spin size="large" />
         </div>
       ) : filteredOrder.length > 0 ? (
-        <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
+        <div ref={orderRef} id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
           <h2 className="text-xl font-semibold capitalize">Order Report</h2>
 
           <table

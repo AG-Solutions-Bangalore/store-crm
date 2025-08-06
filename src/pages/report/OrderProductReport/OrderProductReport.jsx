@@ -14,20 +14,20 @@ import {
   Tooltip,
 } from "antd";
 import dayjs from "dayjs";
-import printJS from "print-js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ORDER_PRODUCT_REPORT, ORDER_STATUS } from "../../../api";
 import useToken from "../../../api/usetoken";
 import { exportOrderProductExcel } from "../../../components/exportExcel/exportOrderProductExcel";
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useReactToPrint } from "react-to-print";
 const OrderProductReport = () => {
   const { message } = App.useApp();
   const token = useToken();
   const [form] = Form.useForm();
   const { trigger: submitTrigger, loading: isMutating } = useApiMutation();
   const { trigger } = useApiMutation();
-
+  const orderProductRef = useRef(null);
   const [ordersstatus, setOrdersSatus] = useState([]);
   const [orders, setOrders] = useState([]);
   const [filteredOrder, setFilteredOrder] = useState([]);
@@ -80,13 +80,25 @@ const OrderProductReport = () => {
     }
   };
 
-  const handlePrint = () => {
-    printJS({
-      printable: "printable-section",
-      type: "html",
-      targetStyles: ["*"],
-    });
-  };
+   const handlePrint = useReactToPrint({
+         content: () => orderProductRef.current, 
+         documentTitle: "order-product-report",
+         pageStyle: `
+           @page {
+             size: auto;
+             margin: 1mm;
+           }
+           @media print {
+             body {
+               margin: 0;
+               padding: 2mm;
+             }
+             .print-hide {
+               display: none;
+             }
+           }
+         `,
+       });
   return (
     <Card
       title="Order Product Report"
@@ -179,7 +191,7 @@ const OrderProductReport = () => {
           </div>
         </div>
       </Form>
-      <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
+      <div ref={orderProductRef} id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
         <h1 className="text-xl font-semibold mb-4 text-center">
           Order Product Report
         </h1>

@@ -4,18 +4,18 @@ import {
   PrinterOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Select, Spin, Tooltip } from "antd";
-import printJS from "print-js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PRODUCT_CATEGORY_REPORT } from "../../../api";
 import useToken from "../../../api/usetoken";
 import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
 import { exportProductCategoryExcel } from "../../../components/exportExcel/exportProductCategoryExcel";
+import { useReactToPrint } from "react-to-print";
 const { Option } = Select;
 
 const ProductCategoryReport = () => {
   const token = useToken();
-
+const productCatRef = useRef(null);
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
 
@@ -57,13 +57,35 @@ const ProductCategoryReport = () => {
     }
   };
 
-  const handlePrint = () => {
-    printJS({
-      printable: "printable-section",
-      type: "html",
-      targetStyles: ["*"],
-    });
-  };
+   
+    const handlePrint = useReactToPrint({
+        content: () => productCatRef.current, 
+        documentTitle: "product-category-report",
+        pageStyle: `
+          @page {
+            size: auto;
+            margin: 1mm;
+          }
+          @media print {
+            body {
+              margin: 0;
+              padding: 2mm;
+              
+            }
+            .print-hide {
+              display: none;
+            }
+          }
+            @media print {
+   .inactive-row {
+     background-color: #ffe5e5 !important;
+     -webkit-print-color-adjust: exact;
+     print-color-adjust: exact;
+   }
+ }
+ 
+        `,
+      });
 
   return (
     <>
@@ -118,7 +140,7 @@ const ProductCategoryReport = () => {
           </div>
         }
       >
-        <div id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
+        <div ref={productCatRef} id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
           <h1 className="text-xl font-semibold mb-4 text-center">
             Product Category Report
           </h1>
@@ -159,7 +181,7 @@ const ProductCategoryReport = () => {
                     {items.map((item) => (
                       <tr
                         key={item.id}
-                        className="border-t"
+                        className={`border-t ${item.is_active === "false" ? "inactive-row" : ""}`}
                         style={{
                           pageBreakInside: "avoid",
                           backgroundColor:

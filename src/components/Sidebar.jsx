@@ -29,6 +29,7 @@ import OrderProductReport from "../pages/report/OrderProductReport/OrderProductR
 const getMenuItems = (collapsed) => {
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
+    { key: "/pos", icon: <HomeOutlined />, label: "POS" },
     { key: "/category", icon: <TagsOutlined />, label: "Category" },
     { key: "/product", icon: <ShoppingOutlined />, label: "Products" },
   ];
@@ -180,7 +181,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
       initial={{ width: collapsed ? 95 : 260 }}
       animate={{ width: collapsed ? 95 : 260 }}
       transition={{ duration: 0.3 }}
-      className={`h-full bg-white shadow-xl rounded-r-2xl overflow-hidden flex flex-col font-[Inter] transition-all duration-300
+      className={`h-full bg-white shadow-xl  overflow-hidden flex flex-col font-[Inter] transition-all duration-300
         ${isMobile ? "fixed z-50 h-screen" : "relative"}`}
     >
       {/* Header bg-[#006666]*/}
