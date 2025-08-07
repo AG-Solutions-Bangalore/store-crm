@@ -32,6 +32,7 @@ import OrderProductReport from "./pages/report/OrderProductReport/OrderProductRe
 import OrderView from "./pages/order/OrderView";
 import Dashboard from "./pages/home/Dashbord";
 import Pos from "./pages/pos/Pos";
+import TeamList from "./pages/team/Team";
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
                 <Route path="/user-create" element={<UserForm />} />
                 <Route path="/user-edit/:id" element={<UserForm />} />
                 <Route path="/user" element={<UserList />} />
+                <Route path="/team" element={<TeamList />} />
                 <Route path="/security" element={<SecurityList />} />
                 <Route path="/staff" element={<StaffList />} />
                 <Route path="/delivery" element={<DeliveryList />} />

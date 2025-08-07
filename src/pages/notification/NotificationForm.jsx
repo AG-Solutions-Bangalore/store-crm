@@ -212,7 +212,7 @@ const NotificationForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                 name="notification_heading"
                 rules={[{ required: true, message: "Heading is required" }]}
               >
-                <Input maxLength={100} />
+                <Input maxLength={100} autoFocus />
               </Form.Item>
               <Form.Item
                 className="w-full"

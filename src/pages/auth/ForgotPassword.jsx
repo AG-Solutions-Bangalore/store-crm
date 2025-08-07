@@ -80,7 +80,7 @@ const ForgotPassword = () => {
                   { required: true, message: "Please enter your  mobile no " },
                 ]}
               >
-                <Input size="large" placeholder="Enter mobile no " />
+                <Input size="large" placeholder="Enter mobile no " autoFocus />
               </Form.Item>
 
               <Form.Item

@@ -1,22 +1,22 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Select, Spin } from "antd";
+import { App, Button, Card, Input, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ORDER_LIST } from "../../api";
+import { DELETE_SUB_LIST, ORDER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import OrderTable from "../../components/order/OrderTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const { Search } = Input;
-const { Option } = Select;
 const OrderList = () => {
   const token = usetoken();
-  
+  const { message } = App.useApp();
   const [searchTerm, setSearchTerm] = useState("");
   const { trigger, loading: isMutating } = useApiMutation();
+  const { trigger: DeleteTrigger, loading: deleteloading } = useApiMutation();
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
-  const fetchUser = async () => {
+  const fetchOrders = async () => {
     const res = await trigger({
       url: ORDER_LIST,
       headers: { Authorization: `Bearer ${token}` },
@@ -28,7 +28,7 @@ const OrderList = () => {
   };
 
   useEffect(() => {
-    fetchUser();
+    fetchOrders();
   }, []);
 
   const handleView = (user) => {
@@ -54,7 +54,26 @@ const OrderList = () => {
       return matched ? { ...user, _match: searchTerm } : null;
     })
     .filter(Boolean);
-
+  const handleDelete = async (user) => {
+    try {
+      if (user.id) {
+        const res = await DeleteTrigger({
+          url: `${ORDER_LIST}/${user.id}`,
+          method: "delete",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.code == 201) {
+          message.success(res.message || "Product removed successfully");
+          fetchOrders();
+        }
+      }
+    } catch (error) {
+      console.error("Delete failed", error);
+      message.error("Failed to delete product");
+    }
+  };
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
@@ -66,6 +85,7 @@ const OrderList = () => {
             allowClear
             onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             className="max-w-sm"
+            autoFocus
           />
 
           <Button
@@ -88,6 +108,7 @@ const OrderList = () => {
             users={filteredUsers}
             onEdit={handleEdit}
             handleView={handleView}
+            handleDelete={handleDelete}
           />
         ) : (
           <div className="text-center text-gray-500 py-20">No data found.</div>

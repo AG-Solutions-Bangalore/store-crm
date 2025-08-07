@@ -1,25 +1,21 @@
-import {
-  ArrowLeftOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   App,
   Button,
   Card,
-  Col,
   DatePicker,
   Form,
   Input,
-  Row,
+  Popconfirm,
   Select,
   Space,
   Spin,
-  Switch,
 } from "antd";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+  DELETE_SUB_LIST,
   FETCH_PRODUCTLIST,
   GUEST_USER_ORDER_BY_ID,
   GUEST_USER_ORDER_CREATE,
@@ -27,8 +23,8 @@ import {
   ORDER_STATUS,
 } from "../../api";
 import usetoken from "../../api/usetoken";
+import CardHeader from "../../components/common/CardHeader";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import dayjs from "dayjs";
 const GuestUserOrderForm = () => {
   const { message } = App.useApp();
   const token = usetoken();
@@ -36,17 +32,19 @@ const GuestUserOrderForm = () => {
   const isEditMode = Boolean(id);
   const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
+  const { trigger: DeleteTrigger, loading: deleteloading } = useApiMutation();
   const [form] = Form.useForm();
   const [ProductData, setProductData] = useState([]);
   const navigate = useNavigate();
   const [ordersstatus, setOrdersSatus] = useState([]);
+
   const [ProductForms, setProductForms] = useState([
     {
       id: "",
       product_id: "",
       product_price: "",
       product_qnty: "",
-      order_sub_status: false,
+      order_sub_status: "",
     },
   ]);
   const fetchOrderStatus = async () => {
@@ -81,7 +79,7 @@ const GuestUserOrderForm = () => {
     fetchOrderStatus();
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchGuestUserOrderData = async () => {
     const res = await FetchTrigger({
       url: `${GUEST_USER_ORDER_BY_ID}/${id}`,
       headers: { Authorization: `Bearer ${token}` },
@@ -92,8 +90,6 @@ const GuestUserOrderForm = () => {
     const guestUser = res.data?.[0] ?? {};
     const order = res.order ?? {};
     const orderSubs = res.orderSub ?? [];
-
-    // Format subs
     const processedSubs = Array.isArray(orderSubs)
       ? orderSubs.map((p) => ({
           id: p.id || "",
@@ -103,10 +99,7 @@ const GuestUserOrderForm = () => {
           order_sub_status: p.order_sub_status || false,
         }))
       : [];
-
-    // Set form values
     form.setFieldsValue({
-      // Guest user fields
       firm_name: guestUser.firm_name || "",
       gstin: guestUser.gstin || "",
       name: guestUser.name || "",
@@ -114,8 +107,6 @@ const GuestUserOrderForm = () => {
       whatsapp: guestUser.whatsapp || "",
       email: guestUser.email || "",
       address: guestUser.address || "",
-
-      // Order fields
       order_date: order.order_date ? dayjs(order.order_date) : null,
       delivery_instructions: order.delivery_instructions || "",
       order_status: order.order_status || false,
@@ -125,15 +116,13 @@ const GuestUserOrderForm = () => {
       discount_amount: order.discount_amount
         ? parseFloat(order.discount_amount)
         : 0,
-
-      // Order items
       subs: processedSubs,
     });
 
     setProductForms(processedSubs);
   };
   useEffect(() => {
-    if (isEditMode) fetchProfile();
+    if (isEditMode) fetchGuestUserOrderData();
   }, [id]);
 
   const handleProductChange = (index, field, value) => {
@@ -174,27 +163,18 @@ const GuestUserOrderForm = () => {
         product_id: "",
         product_price: "",
         product_qnty: "",
-        order_sub_status: false,
+        ...(isEditMode && { order_sub_status: "pending" }),
       },
     ]);
-  };
-
-  const removeRow = (index) => {
-    if (ProductForms.length > 1) {
-      const updated = [...ProductForms];
-      updated.splice(index, 1);
-      setProductForms(updated);
-    }
   };
 
   const handleSubmit = async (values) => {
     const subs = ProductForms || [];
     let hasValidSub = false;
     let hasInvalidSub = false;
-    // let hasDefault = false;
 
     subs.forEach((sub) => {
-      const { product_id, product_price, product_qnty, order_sub_status } = sub;
+      const { product_id, product_price, product_qnty } = sub;
 
       const isFilled =
         product_id?.toString().trim() &&
@@ -208,10 +188,6 @@ const GuestUserOrderForm = () => {
 
       if (isFilled) {
         hasValidSub = true;
-
-        // if (isEditMode && order_sub_status === true) {
-        //   hasDefault = true;
-        // }
       } else if (!isEmpty) {
         hasInvalidSub = true;
       }
@@ -230,76 +206,53 @@ const GuestUserOrderForm = () => {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("firm_name", values.firm_name || "");
-      formData.append("gstin", values.gstin || "");
-      formData.append("name", values.name || "");
-      formData.append("email", values.email || "");
-      formData.append("mobile", values.mobile || "");
-      formData.append("address", values.address || "");
-      formData.append(
-        "order_date",
-        values.order_date ? dayjs(values.order_date).format("YYYY-MM-DD") : ""
-      );
+      const payload = {
+        address: values.address || "",
+        order_date: values.order_date
+          ? dayjs(values.order_date).format("YYYY-MM-DD")
+          : "",
+        delivery_instructions: values.delivery_instructions || "",
+        delivery_charges: values.delivery_charges || "",
+        discount_amount: values.discount_amount || "",
+        subs: (form.getFieldValue("subs") || []).map((item) => {
+          const sub = {
+            product_id: item.product_id,
+            product_price: Number(item.product_price),
+            product_qnty: Number(item.product_qnty),
+          };
 
-      formData.append(
-        "delivery_instructions",
-        values.delivery_instructions || ""
-      );
-      formData.append("delivery_charges", values.delivery_charges || "");
-      formData.append("discount_amount", values.discount_amount || "");
+          if (item.id) {
+            sub.id = item.id;
+          }
 
-      if (isEditMode) {
-        formData.append("order_status", values.order_status);
+          if (isEditMode) {
+            sub.order_sub_status = item.order_sub_status;
+          }
+
+          return sub;
+        }),
+      };
+
+      if (!isEditMode) {
+        payload.firm_name = values.firm_name || "";
+        payload.gstin = values.gstin || "";
+        payload.name = values.name || "";
+        payload.email = values.email || "";
+        payload.mobile = values.mobile || "";
       }
 
-      formData.append(
-        "subs",
-        JSON.stringify(
-          subs.map((item) => {
-            const sub = {
-              product_id: item.product_id,
-              product_price: item.product_price,
-              product_qnty: item.product_qnty,
-            };
-
-            if (isEditMode) {
-              sub.order_sub_status = item.order_sub_status ? "yes" : "no";
-            }
-
-            return sub;
-          })
-        )
-      );
-      subs.forEach((item, index) => {
-        formData.append(`subs[${index}][id]`, item.id);
-        formData.append(`subs[${index}][product_id]`, item.product_id);
-        formData.append(
-          `subs[${index}][product_price]`,
-          Number(item.product_price)
-        );
-        formData.append(
-          `subs[${index}][product_qnty]`,
-          Number(item.product_qnty)
-        );
-
-        if (isEditMode) {
-          formData.append(
-            `subs[${index}][order_sub_status]`,
-            item.order_sub_status
-          );
-        }
-      });
+      if (isEditMode) {
+        payload.order_status = values.order_status;
+      }
 
       const res = await SubmitTrigger({
         url: isEditMode
-          ? `${GUEST_USER_ORDER_UPDATE}/${id}?_method=PUT`
+          ? `${GUEST_USER_ORDER_UPDATE}/${id}`
           : GUEST_USER_ORDER_CREATE,
-        method: "post",
-        data: formData,
+        method: `${isEditMode ? "put" : "post"}`,
+        data: payload,
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
       });
       if (res.code == 201) {
@@ -317,14 +270,42 @@ const GuestUserOrderForm = () => {
     }
   };
 
+  const handleDelete = async (id, index) => {
+    try {
+      if (id) {
+        const res = await DeleteTrigger({
+          url: `${DELETE_SUB_LIST}/${id}`,
+          method: "delete",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.code == 201) {
+          setProductForms((prev) => prev.filter((_, i) => i !== index));
+          message.success(res.message || "Product removed successfully");
+          fetchGuestUserOrderData();
+        }
+      }
+    } catch (error) {
+      console.error("Delete failed", error);
+      message.error(error.message || "Failed to delete product");
+    }
+  };
+
   return (
     <>
-      {fetchloading ? (
+      {fetchloading || deleteloading ? (
         <div className="flex justify-center py-20">
           <Spin size="large" />
         </div>
       ) : (
-        <Card>
+        <Card
+          title={
+            <CardHeader
+              title={`${isEditMode ? "Edit" : "Create"} Guest Order`}
+            />
+          }
+        >
           <Form
             form={form}
             layout="vertical"
@@ -332,410 +313,395 @@ const GuestUserOrderForm = () => {
             requiredMark={false}
             className="mt-4"
           >
-            <Space
-              className="mb-4 w-full justify-between"
-              direction="horizontal"
+            <div
+              className={`grid ${
+                isEditMode
+                  ? "grid-cols-1 md:grid-cols-2"
+                  : "grid-cols-1 md:grid-cols-1"
+              } gap-2`}
             >
-              {/* <div>
-                <h2 className="text-2xl font-bold text-[#006666]">
-                  {isEditMode ? "Update" : "Create"}Guest Order
-                </h2>
-              </div> */}
-              <div className="flex items-center gap-3 mb-4 ">
-                <div
-                  className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
-                  onClick={() => navigate(-1)}
+              {isEditMode && (
+                <Card
+                  style={{ marginBottom: 6 }}
+                  styles={{ body: { padding: 6 } }}
                 >
-                  <ArrowLeftOutlined style={{ color: "#006666" }} />
-                </div>
-                <h2 className="text-2xl font-bold text-[#006666] mb-0">
-                  {isEditMode ? "Edit" : "Create"} Guest Order
-                </h2>
-              </div>
-            </Space>
-            {isEditMode && (
-              <Card
-                style={{ marginBottom: 16 }}
-                styles={{ body: { padding: 16 } }}
-              >
-                <Row gutter={[16, 12]}>
-                  {[
-                    {
-                      label: "Firm Name",
-                      value: form.getFieldValue("firm_name"),
-                    },
-                    { label: "GSTIN", value: form.getFieldValue("gstin") },
-                    { label: "Name", value: form.getFieldValue("name") },
-                    { label: "Email", value: form.getFieldValue("email") },
-                    { label: "Mobile", value: form.getFieldValue("mobile") },
-                    {
-                      label: "WhatsApp",
-                      value: form.getFieldValue("whatsapp"),
-                    },
-                  ].map(({ label, value }, index) => (
-                    <Col xs={24} md={12} lg={8} key={index}>
-                      <div className="text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    {[
+                      {
+                        label: "Firm Name",
+                        value: form.getFieldValue("firm_name"),
+                      },
+                      { label: "GSTIN", value: form.getFieldValue("gstin") },
+                      { label: "Name", value: form.getFieldValue("name") },
+                      { label: "Email", value: form.getFieldValue("email") },
+                      { label: "Mobile", value: form.getFieldValue("mobile") },
+                      {
+                        label: "WhatsApp",
+                        value: form.getFieldValue("whatsapp"),
+                      },
+                    ].map(({ label, value }, index) => (
+                      <div key={index} className="text-sm">
                         <span className="text-gray-500">{label}: </span>
                         <span className="text-gray-800 font-medium">
                           {value || <span className="text-gray-400">-</span>}
                         </span>
                       </div>
-                    </Col>
-                  ))}
-                </Row>
-              </Card>
-            )}
-
-            <div
-              className={`grid gap-4 ${
-                isEditMode
-                  ? "grid-cols-1 md:grid-cols-3 lg:grid-cols-4"
-                  : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-              }`}
-            >
-              {" "}
-              {!isEditMode && (
-                <>
-                  <Form.Item label="Firm Name" name="firm_name">
-                    <Input maxLength={200} />
-                  </Form.Item>
-                  <Form.Item label="GSTIN" name="gstin" maxLength={15}>
-                    <Input />
-                  </Form.Item>
-                  <Form.Item
-                    label={
-                      <span>
-                        Name <span className="text-red-500">*</span>
-                      </span>
-                    }
-                    name="name"
-                    rules={[{ required: true, message: "Name is required" }]}
-                  >
-                    <Input maxLength={100} />
-                  </Form.Item>
-                  <Form.Item
-                    label={
-                      <span>
-                        Email <span className="text-red-500">*</span>
-                      </span>
-                    }
-                    name="email"
-                    rules={[{ required: true, message: "Email is required" }]}
-                  >
-                    <Input type="email" maxLength={200} />
-                  </Form.Item>
-                  <Form.Item
-                    name="mobile"
-                    label={
-                      <span>
-                        Mobile <span className="text-red-500">*</span>
-                      </span>
-                    }
-                    rules={[
-                      { required: true, message: "Mobile is required" },
-                      {
-                        pattern: /^[0-9]{10}$/,
-                        message: "Enter a valid 10-digit mobile number",
-                      },
-                    ]}
-                  >
-                    <Input maxLength={10} />
-                  </Form.Item>
-                  <Form.Item
-                    label="WhatsApp"
-                    name="whatsapp"
-                    rules={[
-                      {
-                        pattern: /^[0-9]{10}$/,
-                        message: "Enter a valid 10-digit whatsaap number",
-                      },
-                    ]}
-                  >
-                    <Input maxLength={10} />
-                  </Form.Item>
-                </>
+                    ))}
+                  </div>
+                </Card>
               )}
-              <Form.Item
-                label={
-                  <span>
-                    Order Date <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="order_date"
-                rules={[
-                  { required: true, message: "Please select order date" },
-                ]}
+              <Card
+                style={{ marginBottom: 6 }}
+                styles={{ body: { padding: 6 } }}
               >
-                <DatePicker format="DD-MM-YYYY" className="w-full" />
-              </Form.Item>
-              <Form.Item
-                label="Delivery Charge"
-                name="delivery_charges"
-                rules={[
-                  {
-                    pattern: /^\d*\.?\d{0,2}$/,
-                    message: "Enter a valid charge (e.g. 23.5)",
-                  },
-                ]}
-              >
-                <Input
-                  onKeyDown={(e) => {
-                    const allowedKeys = [
-                      "Backspace",
-                      "Tab",
-                      "ArrowLeft",
-                      "ArrowRight",
-                      "Delete",
-                      ".",
-                    ];
-                    const isCtrlCombo = e.ctrlKey || e.metaKey;
-
-                    if (
-                      allowedKeys.includes(e.key) ||
-                      isCtrlCombo ||
-                      /^[0-9]$/.test(e.key)
-                    ) {
-                      return;
+                <div
+                  className={`grid gap-2 ${
+                    isEditMode
+                      ? "grid-cols-1 md:grid-cols-2"
+                      : "grid-cols-1 md:grid-cols-3"
+                  }`}
+                >
+                  {" "}
+                  {!isEditMode && (
+                    <>
+                      <Form.Item
+                        label="Firm Name"
+                        name="firm_name"
+                        style={{ marginBottom: "0px" }}
+                      >
+                        <Input maxLength={200} autoFocus={!isEditMode} />
+                      </Form.Item>
+                      <Form.Item
+                        label="GSTIN"
+                        name="gstin"
+                        style={{ marginBottom: "0px" }}
+                      >
+                        <Input maxLength={15} />
+                      </Form.Item>
+                      <Form.Item
+                        label={
+                          <span>
+                            Name <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        name="name"
+                        rules={[
+                          { required: true, message: "Name is required" },
+                        ]}
+                        style={{ marginBottom: "0px" }}
+                      >
+                        <Input maxLength={100} />
+                      </Form.Item>
+                      <Form.Item
+                        label={
+                          <span>
+                            Email <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        name="email"
+                        rules={[
+                          { required: true, message: "Email is required" },
+                        ]}
+                        style={{ marginBottom: "0px" }}
+                      >
+                        <Input type="email" maxLength={200} />
+                      </Form.Item>
+                      <Form.Item
+                        name="mobile"
+                        label={
+                          <span>
+                            Mobile <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        rules={[
+                          { required: true, message: "Mobile is required" },
+                          {
+                            pattern: /^[0-9]{10}$/,
+                            message: "Enter a valid 10-digit mobile number",
+                          },
+                        ]}
+                        style={{ marginBottom: "0px" }}
+                      >
+                        <Input maxLength={10} />
+                      </Form.Item>
+                      <Form.Item
+                        label="WhatsApp"
+                        name="whatsapp"
+                        rules={[
+                          {
+                            pattern: /^[0-9]{10}$/,
+                            message: "Enter a valid 10-digit whatsaap number",
+                          },
+                        ]}
+                        style={{ marginBottom: "0px" }}
+                      >
+                        <Input maxLength={10} />
+                      </Form.Item>
+                    </>
+                  )}
+                  <Form.Item
+                    label={
+                      <span>
+                        Order Date <span className="text-red-500">*</span>
+                      </span>
                     }
+                    name="order_date"
+                    rules={[
+                      { required: true, message: "Please select order date" },
+                    ]}
+                    style={{ marginBottom: "0px" }}
+                  >
+                    <DatePicker
+                      format="DD-MM-YYYY"
+                      className="w-full"
+                      autoFocus={isEditMode}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Delivery Charge"
+                    name="delivery_charges"
+                    rules={[
+                      {
+                        pattern: /^\d*\.?\d{0,2}$/,
+                        message: "Enter a valid charge (e.g. 23.5)",
+                      },
+                    ]}
+                    style={{ marginBottom: "0px" }}
+                  >
+                    <Input
+                      onKeyDown={(e) => {
+                        const allowedKeys = [
+                          "Backspace",
+                          "Tab",
+                          "ArrowLeft",
+                          "ArrowRight",
+                          "Delete",
+                          ".",
+                        ];
+                        const isCtrlCombo = e.ctrlKey || e.metaKey;
 
-                    e.preventDefault();
-                  }}
-                  maxLength={8}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Discount Amount"
-                name="discount_amount"
-                rules={[
-                  {
-                    pattern: /^\d*\.?\d{0,2}$/,
-                    message: "Enter a valid amount (e.g. 23.5)",
-                  },
-                ]}
-              >
-                <Input
-                  onKeyDown={(e) => {
-                    const allowedKeys = [
-                      "Backspace",
-                      "Tab",
-                      "ArrowLeft",
-                      "ArrowRight",
-                      "Delete",
-                      ".",
-                    ];
-                    const isCtrlCombo = e.ctrlKey || e.metaKey;
+                        if (
+                          allowedKeys.includes(e.key) ||
+                          isCtrlCombo ||
+                          /^[0-9]$/.test(e.key)
+                        ) {
+                          return;
+                        }
 
-                    if (
-                      allowedKeys.includes(e.key) ||
-                      isCtrlCombo ||
-                      /^[0-9]$/.test(e.key)
-                    ) {
-                      return;
+                        e.preventDefault();
+                      }}
+                      maxLength={8}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Discount Amount"
+                    name="discount_amount"
+                    rules={[
+                      {
+                        pattern: /^\d*\.?\d{0,2}$/,
+                        message: "Enter a valid amount (e.g. 23.5)",
+                      },
+                    ]}
+                    style={{ marginBottom: "0px" }}
+                  >
+                    <Input
+                      onKeyDown={(e) => {
+                        const allowedKeys = [
+                          "Backspace",
+                          "Tab",
+                          "ArrowLeft",
+                          "ArrowRight",
+                          "Delete",
+                          ".",
+                        ];
+                        const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                        if (
+                          allowedKeys.includes(e.key) ||
+                          isCtrlCombo ||
+                          /^[0-9]$/.test(e.key)
+                        ) {
+                          return;
+                        }
+
+                        e.preventDefault();
+                      }}
+                      maxLength={8}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Status"
+                    name="order_status"
+                    style={{ marginBottom: "0px" }}
+                  >
+                    <Select placeholder="Select Status" allowClear>
+                      {ordersstatus.map((status) => (
+                        <Option key={status.id} value={status.status}>
+                          <span className="capitalize">{status.status}</span>{" "}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </div>
+              </Card>
+            </div>
+            <Card
+              title={<strong>Product</strong>}
+              style={{ marginBottom: 16 }}
+              extra={
+                <Button type="dashed" icon={<PlusOutlined />} onClick={addRow}>
+                  Add Product
+                </Button>
+              }
+            >
+              {ProductForms.map((item, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-4 mb-4">
+                  <div className="col-span-1 flex justify-start items-center font-semibold">
+                    {idx + 1}.
+                  </div>
+
+                  <Form.Item
+                    name={["subs", idx, "product_id"]}
+                    label={
+                      <span>
+                        Product <span className="text-red-500">*</span>
+                      </span>
                     }
+                    rules={[
+                      { required: true, message: "Please select a product" },
+                    ]}
+                    className={`${isEditMode ? "col-span-3" : "col-span-4"}`}
+                  >
+                    <Select
+                      placeholder="Select Product"
+                      allowClear
+                      showSearch
+                      value={item.product_id}
+                      filterOption={(input, option) =>
+                        option?.children
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      onChange={(value) =>
+                        handleProductChange(idx, "product_id", value)
+                      }
+                    >
+                      {ProductData.map((cat) => (
+                        <Select.Option key={cat.id} value={cat.id}>
+                          {cat.product_name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
 
-                    e.preventDefault();
-                  }}
-                  maxLength={8}
-                />
-              </Form.Item>
-              <Form.Item label="Status" name="order_status">
-                <Select placeholder="Select Status" allowClear>
-                  {ordersstatus.map((status) => (
-                    <Option key={status.id} value={status.status}>
-                      <span className="capitalize">{status.status}</span>{" "}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Form.Item
+                    name={["subs", idx, "product_price"]}
+                    label="Product Price"
+                    className={`${isEditMode ? "col-span-2" : "col-span-3"}`}
+                    rules={[
+                      {
+                        pattern: /^\d*\.?\d{0,2}$/,
+                        message: "Enter a valid price (e.g. 23.5)",
+                      },
+                    ]}
+                  >
+                    <Input
+                      maxLength={6}
+                      value={item.product_price}
+                      onChange={(e) =>
+                        handleProductChange(
+                          idx,
+                          "product_price",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name={["subs", idx, "product_qnty"]}
+                    label="Quantity"
+                    className={`${isEditMode ? "col-span-2" : "col-span-3"}`}
+                    rules={[
+                      {
+                        pattern: /^\d*\.?\d{0,2}$/,
+                        message: "Enter a valid quantity (e.g. 23.5)",
+                      },
+                    ]}
+                  >
+                    <Input
+                      maxLength={4}
+                      value={item.product_qnty}
+                      onChange={(e) =>
+                        handleProductChange(idx, "product_qnty", e.target.value)
+                      }
+                    />
+                  </Form.Item>
+
+                  {isEditMode && (
+                    <Form.Item
+                      name={["subs", idx, "order_sub_status"]}
+                      label="Status"
+                      className="col-span-3"
+                    >
+                      <Select
+                        placeholder="Select Status"
+                        value={item.order_sub_status}
+                        onChange={(value) =>
+                          handleProductChange(idx, "order_sub_status", value)
+                        }
+                      >
+                        <Select.Option value="pending">Pending</Select.Option>
+                        <Select.Option value="completed">
+                          Completed
+                        </Select.Option>
+                      </Select>
+                    </Form.Item>
+                  )}
+
+                  <div className="col-span-1 flex justify-end items-center h-full">
+                    {item.id ? (
+                      <Popconfirm
+                        title="Are you sure to delete this product?"
+                        onConfirm={() => handleDelete(item.id, idx)}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <Button
+                          danger
+                          size="small"
+                          icon={<DeleteOutlined />}
+                          disabled={ProductForms.length === 1}
+                        />
+                      </Popconfirm>
+                    ) : (
+                      <Button
+                        size="small"
+                        icon={<MinusOutlined />}
+                        onClick={() => {
+                          setProductForms((prev) => {
+                            const updated = [...prev];
+                            updated.splice(idx, 1);
+                            return updated;
+                          });
+                        }}
+                        disabled={ProductForms.length === 1}
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Form.Item
-                className="col-span-2"
                 label="Delivery Instruction"
                 name="delivery_instructions"
               >
                 <Input.TextArea rows={3} maxLength={200} />
               </Form.Item>
-              <Form.Item
-                label="Address"
-                className={`${isEditMode ? "col-span-2" : "col-span-4"}`}
-              >
+              <Form.Item label="Address" name="address">
                 <Input.TextArea rows={3} maxLength={200} />
               </Form.Item>
-            </div>
-
-            <div className="flex justify-between items-center mb-4">
-              <strong>Product</strong>
-              <Button type="dashed" onClick={addRow} icon={<PlusOutlined />}>
-                Add Product
-              </Button>
-            </div>
-
-            <div className="flex flex-col gap-6">
-              {ProductForms.map((addr, idx) => (
-                <Card
-                  key={idx}
-                  size="small"
-                  className="space-y-3"
-                  title={`Product ${idx + 1}`}
-                  extra={
-                    <Button
-                      danger
-                      size="small"
-                      icon={<DeleteOutlined />}
-                      onClick={() => removeRow(idx)}
-                      disabled={ProductForms.length === 1}
-                    >
-                      Remove
-                    </Button>
-                  }
-                >
-                  <div
-                    className={`grid grid-cols-1 md:grid-cols-2 ${
-                      isEditMode ? "lg:grid-cols-4" : "lg:grid-cols-3"
-                    } gap-4`}
-                  >
-                    <Form.Item
-                      name={["subs", idx, "product_id"]}
-                      label={
-                        <span>
-                          Product <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select a product",
-                        },
-                      ]}
-                    >
-                      <Select
-                        placeholder="Select Product"
-                        allowClear
-                        showSearch
-                        filterOption={(input, option) =>
-                          option?.children
-                            ?.toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        value={addr.product_id}
-                        onChange={(value) =>
-                          handleProductChange(idx, "product_id", value)
-                        }
-                      >
-                        {ProductData.map((cat) => (
-                          <Select.Option key={cat.id} value={cat.id}>
-                            {cat.product_name}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Product Price"
-                      // name={[idx, "product_price"]}
-                      name={["subs", idx, "product_price"]}
-                      rules={[
-                        {
-                          pattern: /^\d*\.?\d{0,2}$/,
-                          message: "Enter a valid price (e.g. 23.5)",
-                        },
-                      ]}
-                    >
-                      <Input
-                        value={parseFloat(addr.product_price) || 0}
-                        onChange={(e) =>
-                          handleProductChange(
-                            idx,
-                            "product_price",
-                            e.target.value
-                          )
-                        }
-                        onKeyDown={(e) => {
-                          const allowedKeys = [
-                            "Backspace",
-                            "Tab",
-                            "ArrowLeft",
-                            "ArrowRight",
-                            "Delete",
-                            ".",
-                          ];
-                          const isCtrlCombo = e.ctrlKey || e.metaKey;
-
-                          if (
-                            allowedKeys.includes(e.key) ||
-                            isCtrlCombo ||
-                            /^[0-9]$/.test(e.key)
-                          ) {
-                            return;
-                          }
-
-                          e.preventDefault();
-                        }}
-                        maxLength={6}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Quantity"
-                      name={["subs", idx, "product_qnty"]}
-                      rules={[
-                        {
-                          pattern: /^\d*\.?\d{0,2}$/,
-                          message: "Enter a valid quantity (e.g. 23.5)",
-                        },
-                      ]}
-                    >
-                      <Input
-                        value={addr.product_qnty}
-                        onChange={(e) =>
-                          handleProductChange(
-                            idx,
-                            "product_qnty",
-                            e.target.value
-                          )
-                        }
-                        onKeyDown={(e) => {
-                          const allowedKeys = [
-                            "Backspace",
-                            "Tab",
-                            "ArrowLeft",
-                            "ArrowRight",
-                            "Delete",
-                            ".",
-                          ];
-                          const isCtrlCombo = e.ctrlKey || e.metaKey;
-
-                          if (
-                            allowedKeys.includes(e.key) ||
-                            isCtrlCombo ||
-                            /^[0-9]$/.test(e.key)
-                          ) {
-                            return;
-                          }
-
-                          e.preventDefault();
-                        }}
-                        maxLength={4}
-                      />
-                    </Form.Item>
-                    {isEditMode && (
-                      <Form.Item label="Status">
-                        <Select
-                          placeholder="Select Status"
-                          allowClear
-                          value={addr.order_sub_status}
-                          onChange={(value) =>
-                            handleProductChange(idx, "order_sub_status", value)
-                          }
-                        >
-                          <Select.Option value="pending">Pending</Select.Option>
-                          <Select.Option value="completed">
-                            Completed
-                          </Select.Option>
-                        </Select>
-                      </Form.Item>
-                    )}
-                  </div>
-                </Card>
-              ))}
             </div>
             <div className=" mt-6">
               <Form.Item className="text-center">

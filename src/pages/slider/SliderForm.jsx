@@ -239,6 +239,7 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
                     e.preventDefault();
                   }}
                   maxLength={4}
+                  autoFocus
                 />
               </Form.Item>
 

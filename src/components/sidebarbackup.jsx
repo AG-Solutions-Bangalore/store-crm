@@ -4,6 +4,7 @@ import {
   BellOutlined,
   CloseOutlined,
   HomeOutlined,
+  MailOutlined,
   MessageOutlined,
   PictureOutlined,
   ProfileOutlined,
@@ -11,29 +12,32 @@ import {
   ShoppingOutlined,
   SolutionOutlined,
   TagsOutlined,
-  UserOutlined
+  UserOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import logo1 from "../assets/logo-1.png";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import useFinalUserImage from "./common/Logo";
 
 const getMenuItems = (collapsed) => {
-  const userType = useSelector((state) => state?.auth?.user?.user_type);
+  const userType = Number(localStorage.getItem("user_type")) || "";
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-    ...(userType === 6
+    // { key: "/pos", icon: <HomeOutlined />, label: "POS" },
+    ...(userType === 3
       ? [{ key: "/pos", icon: <HomeOutlined />, label: "POS" }]
       : []),
     { key: "/category", icon: <TagsOutlined />, label: "Category" },
     { key: "/product", icon: <ShoppingOutlined />, label: "Products" },
   ];
   const generalItems = [
-    ...(userType === 6
+    // { key: "/user", icon: <UserOutlined />, label: "App User" },
+    // { key: "/guest-user", icon: <UserOutlined />, label: "Guest User" },
+    ...(userType === 3
       ? [
           { key: "/user", icon: <UserOutlined />, label: "App User" },
           { key: "/guest-user", icon: <UserOutlined />, label: "Guest User" },
@@ -105,7 +109,7 @@ const getMenuItems = (collapsed) => {
       {
         key: "sub2",
         icon: <BarChartOutlined />,
-        label: <span id="report-scroll-anchor">Report</span>,
+        label: "Report",
         children: reportItemsChildren,
       },
     ];
@@ -147,8 +151,7 @@ const getMenuItems = (collapsed) => {
         {
           key: "sub2",
           icon: <BarChartOutlined />,
-          label: <span id="report-scroll-anchor">Report</span>,
-
+          label: "Report",
           children: reportItemsChildren,
         },
       ],
@@ -157,16 +160,8 @@ const getMenuItems = (collapsed) => {
 };
 
 export default function Sidebar({ collapsed, isMobile = false, onClose }) {
-  const location = useLocation();
-  const selectedKeys = [location.pathname];
-  const getOpenKeysFromPath = (path) => {
-    if (path.startsWith("/report-")) return ["sub2"];
-    return [];
-  };
-
-  const [openKeys, setOpenKeys] = useState(() =>
-    getOpenKeysFromPath(location.pathname)
-  );
+  const [selectedKeys, setSelectedKeys] = useState([""]);
+  const [openKeys, setOpenKeys] = useState([""]);
   const naviagte = useNavigate();
   const items = getMenuItems(collapsed);
   const dispatch = useDispatch();
@@ -192,35 +187,6 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
     );
   };
   const rootSubmenuKeys = ["sub1", "sub2"];
-  useEffect(() => {
-    if (openKeys.includes("sub2")) {
-      const anchor = document.getElementById("report-scroll-anchor");
-      const scrollContainer = document.querySelector(".scrollbar-custom");
-
-      if (anchor && scrollContainer) {
-        let offset = 0;
-        let el = anchor;
-
-        while (el && el !== scrollContainer) {
-          offset += el.offsetTop;
-          el = el.offsetParent;
-        }
-
-        scrollContainer.scrollTo({
-          top: offset - 10,
-          behavior: "smooth",
-        });
-        setTimeout(() => {
-          scrollContainer.scrollTo({
-            top: offset - 10,
-            behavior: "smooth",
-          });
-        }, 200);
-      } else {
-        console.warn("⚠️ Could not find anchor or scroll container.");
-      }
-    }
-  }, [openKeys]);
 
   return (
     <motion.aside
@@ -230,6 +196,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
       className={`h-full bg-white shadow-xl  overflow-hidden flex flex-col font-[Inter] transition-all duration-300
         ${isMobile ? "fixed z-50 h-screen" : "relative"}`}
     >
+      {/* Header bg-[#006666]*/}
       <div className="flex items-center justify-center h-14 px-4 bg-[#e6f2f2]">
         <motion.img
           src={collapsed ? logo1 : finalUserImage}
@@ -260,6 +227,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
           items={items}
           openKeys={openKeys}
           selectedKeys={selectedKeys}
+          // onOpenChange={(keys) => setOpenKeys(keys)}
           onOpenChange={(keys) => {
             const latestOpenKey = keys.find(
               (key) => openKeys.indexOf(key) === -1
@@ -270,13 +238,19 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
               setOpenKeys(keys);
             }
           }}
+          // onClick={({ key }) => {
+          //   setSelectedKeys([key]);
+          //   naviagte(key);
+          // }}
           onClick={({ key, keyPath }) => {
+            setSelectedKeys([key]);
             if (isMobile && onClose) {
               onClose();
             }
             if (keyPath.length === 1) {
               setOpenKeys([]);
             }
+
             naviagte(key);
           }}
           className="custom-menu"
@@ -311,6 +285,19 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
               />
             </div>
           ) : (
+            // <Alert
+            //   message={
+            //     <div className="flex items-center justify-center text-xs font-semibold">
+            //       <span className="flex items-center gap-1">
+            //         Version: {localVersion}
+            //       </span>
+            //     </div>
+            //   }
+            //   type="info"
+            //   showIcon={false}
+            //   banner
+            //   className="rounded-md"
+            // />
             <Alert
               message={
                 <div className="flex flex-col items-center text-center text-xs font-semibold">
@@ -320,7 +307,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 07-08-2025
+                    Updated on: 05-08-2025
                   </div>
                 </div>
               }
@@ -335,3 +322,4 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
     </motion.aside>
   );
 }
+//////////////////////////////sidebar backup

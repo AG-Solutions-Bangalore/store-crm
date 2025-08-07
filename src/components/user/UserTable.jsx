@@ -35,11 +35,6 @@ const UserTable = ({ users, onToggleStatus, onEdit, imageUrls, type }) => {
         <div className="flex justify-center">
           <Avatar
             size={38}
-            // src={
-            //   user.avatar_photo
-            //     ? imageUrls.userImageBase + user.avatar_photo
-            //     : imageUrls.noImage
-            // }
             src={
               user.avatar_photo
                 ? `${imageUrls.userImageBase}${
@@ -93,6 +88,31 @@ const UserTable = ({ users, onToggleStatus, onEdit, imageUrls, type }) => {
         </Tooltip>
       ),
     },
+    ...(type != "user"
+      ? [
+          {
+            title: "User Type",
+            dataIndex: "user_type",
+            key: "user_type",
+            render: (user_type) => {
+              const userTypeMap = {
+                1: { label: "User", color: "blue" },
+                2: { label: "Security", color: "volcano" },
+                3: { label: "Staff", color: "purple" },
+                4: { label: "Delivery", color: "green" },
+              };
+
+              const tagInfo = userTypeMap[user_type] || {
+                label: "Unknown",
+                color: "default",
+              };
+
+              return <Tag color={tagInfo.color}>{tagInfo.label}</Tag>;
+            },
+          },
+        ]
+      : []),
+
     {
       title: "Status",
       dataIndex: "is_active",

@@ -80,6 +80,7 @@ const SliderList = () => {
             placeholder="Filter by status"
             onChange={(value) => setStatusFilter(value)}
             className="w-40"
+      
           >
             <Option value="active">Active</Option>
             <Option value="inactive">Inactive</Option>

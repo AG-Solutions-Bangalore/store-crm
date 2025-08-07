@@ -16,7 +16,7 @@ const UserForm = () => {
   const token = usetoken();
   const { id } = useParams();
   const location = useLocation();
-  const { user_type, title, navigatedata } = location.state;
+  const { title, navigatedata } = location.state;
   const isEditMode = Boolean(id);
   const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
@@ -43,7 +43,6 @@ const UserForm = () => {
     const userData = res.data;
     setInitialData({
       ...userData,
-      // user_type: String(userData.user_type),
     });
     form.setFieldsValue(userData);
 
@@ -147,7 +146,7 @@ const UserForm = () => {
       formData.append("email", values.email);
       formData.append("mobile", values.mobile);
       formData.append("whatsapp", values.whatsapp || "");
-      formData.append("user_type", String(user_type));
+      // formData.append("user_type", String(user_type));
       if (isEditMode) {
         formData.append("is_active", values.is_active ? "true" : "false");
       }
@@ -198,7 +197,6 @@ const UserForm = () => {
         <ProfileForm
           loading={submitloading}
           title={isEditMode ? `Update ${title}` : `Create ${title}`}
-          
           form={form}
           initialValues={initialData}
           onSubmit={handleSubmit}
