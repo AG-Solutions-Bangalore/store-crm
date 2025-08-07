@@ -127,6 +127,7 @@ const CategoryList = () => {
               allowClear
               onChange={handleSearchChange}
               className="max-w-sm"
+              autoFocus
             />
 
             <Button

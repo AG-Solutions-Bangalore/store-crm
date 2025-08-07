@@ -58,6 +58,7 @@ const GuestUserList = () => {
             allowClear
             onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             className="max-w-sm"
+            autoFocus
           />
         </div>
       </div>

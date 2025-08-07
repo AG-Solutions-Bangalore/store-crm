@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Card, Spin, Table, Typography } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -15,13 +14,13 @@ import useToken from "../../api/usetoken";
 import OrderStatusTag from "../../components/common/OrderStatusTag";
 import { useApiMutation } from "../../hooks/useApiMutation";
 const { Title } = Typography;
-
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
   const { trigger, loading: isMutating } = useApiMutation();
   const token = useToken();
-
+  const navigate = useNavigate();
   const fetchDashboard = async () => {
     const res = await trigger({
       url: DASHBOARD,
@@ -36,15 +35,22 @@ const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  // if (isMutating || !data) return <Spin fullscreen />;
   const monthlyData = data?.monthly || [];
 
   const cardItems = [
-    { title: "Categories", count: data?.categoryCount || "" },
-    { title: "Products", count: data?.productCount || "" },
-    { title: "Orders", count: data?.orderCount || "" },
-    { title: "Users", count: data?.userCount || "" },
-    { title: "Guest Users", count: data?.guestuserCount || "" },
+    {
+      title: "Categories",
+      count: data?.categoryCount || "",
+      link: "/category",
+    },
+    { title: "Products", count: data?.productCount || "", link: "/product" },
+    { title: "Orders", count: data?.orderCount || "", link: "/order" },
+    { title: "Users", count: data?.userCount || "", link: "" },
+    {
+      title: "Guest Users",
+      count: data?.guestuserCount || "",
+      link: "",
+    },
   ];
 
   const orderColumns = [
@@ -79,10 +85,7 @@ const Dashboard = () => {
       title: "Status",
       dataIndex: "order_status",
       key: "order_status",
-      render: (status) => (
-
-        <OrderStatusTag status={status} />
-      ),
+      render: (status) => <OrderStatusTag status={status} />,
     },
   ];
 
@@ -97,23 +100,13 @@ const Dashboard = () => {
           <Title level={3}>Dashboard</Title>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {/* {cardItems.map((item, index) => (
-              <Card
-                key={index}
-                title={item.title}
-                bordered={false}
-                  variant="outlined"
-                className="shadow-md text-center"
-              >
-                <p className="text-2xl font-semibold">{item.count}</p>
-              </Card>
-            ))} */}
             {cardItems.map((item, index) => (
               <Card
                 key={index}
                 title={item.title}
                 variant="filled"
-                className="shadow-md text-center"
+                onClick={() => navigate(item.link)}
+                className="shadow-md text-center cursor-pointer"
               >
                 <p className="text-2xl font-semibold">{item.count}</p>
               </Card>

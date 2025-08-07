@@ -93,6 +93,7 @@ const Notification = () => {
             allowClear
             onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             className="max-w-sm"
+            autoFocus
           />
           <Select
             allowClear

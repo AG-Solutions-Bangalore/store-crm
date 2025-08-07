@@ -59,6 +59,8 @@ export const GUEST_USER_BY_ID = `/panel-fetch-guest-user-by-id`;
 export const UPDATE_GUEST_USER = `/panel-update-guest-user`;
 //GUEST_USER_ORDER_LIST
 export const GUEST_USER_ORDER_LIST = `/panel-fetch-guest-user-order-list`;
+//DELETE_SUB_LIST -order-guest
+export const DELETE_SUB_LIST = `/order-sub`;
 //GUEST_USER_ORDER_BY_ID
 // export const GUEST_USER_ORDER_BY_ID = `/panel-fetch-guest-user-order-by-id`;
 export const GUEST_USER_ORDER_BY_ID = `/panel-fetch-guest-user-order-by-id`;

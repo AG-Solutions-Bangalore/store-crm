@@ -8,6 +8,7 @@ import {
   Input,
   Modal,
   Space,
+  Spin,
   Switch,
   Upload,
 } from "antd";
@@ -23,10 +24,11 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
   const [form] = Form.useForm();
   const token = usetoken();
   const [initialData, setInitialData] = useState({});
-  const { trigger: FetchTrigger } = useApiMutation();
+  const { trigger: FetchTrigger, loading: categotyloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
   const [noImageUrl, setNoImageUrl] = useState("");
   const [imageBaseUrl, setImageBaseUrl] = useState("");
+ 
 
   const [cropState, setCropState] = useState({
     modalVisible: false,
@@ -45,7 +47,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
     preview: "",
   });
 
-  const fetchProfile = async () => {
+  const fetchCategoryData = async () => {
     try {
       const res = await FetchTrigger({
         url: `${CATEGORY_LIST}/${userId}`,
@@ -77,7 +79,7 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
     setInitialData({});
 
     if (isEditMode) {
-      fetchProfile();
+      fetchCategoryData();
     } else {
       form.resetFields();
       setInitialData({});
@@ -203,195 +205,202 @@ const CategoryForm = ({ open, setOpenDialog, userId, fetchUser }) => {
       <h2 className="text-2xl font-bold text-[#006666]">
         {isEditMode ? "Update" : "Create"} Category
       </h2>
+      {categotyloading ? (
+        <div className="flex justify-center py-20">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <Card>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleProfileSave}
+            requiredMark={false}
+            className="mt-4"
+          >
+            <Space
+              className="mb-4 w-full justify-between"
+              direction="horizontal"
+            >
+              {isEditMode && (
+                <>
+                  <div className="flex flex-col items-center gap-2">
+                    <Avatar
+                      size={64}
+                      src={
+                        categoryImageInfo.preview
+                          ? categoryImageInfo.preview
+                          : initialData.category_image
+                          ? initialData.category_image.startsWith("data:image")
+                            ? initialData.category_image
+                            : `${imageBaseUrl}${
+                                initialData.category_image
+                              }?v=${Math.random()}`
+                          : noImageUrl
+                      }
+                      icon={<UserOutlined />}
+                    />
 
-      <Card>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleProfileSave}
-          requiredMark={false}
-          className="mt-4"
-        >
-          <Space className="mb-4 w-full justify-between" direction="horizontal">
-            {isEditMode && (
-              <>
-                <div className="flex flex-col items-center gap-2">
-                  <Avatar
-                    size={64}
-                    src={
-                      categoryImageInfo.preview
-                        ? categoryImageInfo.preview
-                        : initialData.category_image
-                        ? initialData.category_image.startsWith("data:image")
-                          ? initialData.category_image
-                          : `${imageBaseUrl}${
-                              initialData.category_image
-                            }?v=${Math.random()}`
-                        : noImageUrl
-                    }
-                    icon={<UserOutlined />}
-                  />
+                    <Upload
+                      showUploadList={false}
+                      accept="image/*"
+                      beforeUpload={(file) => {
+                        openCropper(file, "category");
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        return false;
+                      }}
+                    >
+                      <Button icon={<UploadOutlined />}>Upload Avatar</Button>
+                    </Upload>
+                  </div>
+                  <Form.Item
+                    label="Active"
+                    name="is_active"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                </>
+              )}
+            </Space>
 
+            <div
+              className={`grid grid-cols-1 ${
+                isEditMode ? "grid-cols-3" : "grid-cols-4"
+              } gap-4`}
+            >
+              <Form.Item
+                label={
+                  <span>
+                    Category Name <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="category_name"
+                rules={[{ required: true, message: "Name is required" }]}
+              >
+                <Input maxLength={50} autoFocus />
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <span>
+                    Sort Order <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="category_sort_order"
+                rules={[
+                  {
+                    required: true,
+                    message: "Sort Order is required",
+                  },
+                  {
+                    pattern: /^\d+(\.\d{1,2})?$/,
+                    message: "Enter a number (e.g. 34 or 34.56)",
+                  },
+                ]}
+              >
+                <Input maxLength={2} />
+              </Form.Item>
+              {!isEditMode && (
+                <Form.Item
+                  label={
+                    <span>
+                      Category Image<span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="category_image"
+                  rules={[{ required: true, message: "Image is required" }]}
+                >
                   <Upload
                     showUploadList={false}
                     accept="image/*"
                     beforeUpload={(file) => {
                       openCropper(file, "category");
+                      form.setFieldsValue({
+                        category_image: file.name,
+                      });
                       const reader = new FileReader();
                       reader.readAsDataURL(file);
                       return false;
                     }}
                   >
-                    <Button icon={<UploadOutlined />}>Upload Avatar</Button>
+                    <Button icon={<UploadOutlined />}>
+                      Upload Category Image
+                    </Button>
                   </Upload>
-                </div>
-                <Form.Item
-                  label="Active"
-                  name="is_active"
-                  valuePropName="checked"
-                >
-                  <Switch />
+                  {categoryImageInfo.fileName && (
+                    <div className="mt-2 text-sm text-gray-600 overflow-hidden">
+                      Selected Image:{" "}
+                      <strong>
+                        {categoryImageInfo.fileName.length > 15
+                          ? `${categoryImageInfo.fileName.slice(0, 15)}...`
+                          : categoryImageInfo.fileName}
+                      </strong>
+                    </div>
+                  )}
                 </Form.Item>
-              </>
-            )}
-          </Space>
-
-          <div
-            className={`grid grid-cols-1 ${
-              isEditMode ? "grid-cols-3" : "grid-cols-4"
-            } gap-4`}
-          >
-            <Form.Item
-              label={
-                <span>
-                  Category Name <span className="text-red-500">*</span>
-                </span>
-              }
-              name="category_name"
-              rules={[{ required: true, message: "Name is required" }]}
-            >
-              <Input maxLength={50} />
-            </Form.Item>
-
-            <Form.Item
-              label={
-                <span>
-                  Sort Order <span className="text-red-500">*</span>
-                </span>
-              }
-              name="category_sort_order"
-              rules={[
-                {
-                  required: true,
-                  message: "Sort Order is required",
-                },
-                {
-                  pattern: /^\d+(\.\d{1,2})?$/,
-                  message: "Enter a number (e.g. 34 or 34.56)",
-                },
-              ]}
-            >
-              <Input maxLength={2} />
-            </Form.Item>
-            {!isEditMode && (
+              )}
               <Form.Item
-                label={
-                  <span>
-                    Category Image<span className="text-red-500">*</span>
-                  </span>
-                }
-                name="category_image"
-                rules={[{ required: true, message: "Image is required" }]}
+                label={<span>Banner Image</span>}
+                name="category_banner_image"
               >
                 <Upload
                   showUploadList={false}
                   accept="image/*"
                   beforeUpload={(file) => {
-                    openCropper(file, "category");
-                    form.setFieldsValue({
-                      category_image: file.name,
-                    });
+                    // setCategoryBannerFile(file);
+                    openCropper(file, "banner");
+
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     return false;
                   }}
                 >
-                  <Button icon={<UploadOutlined />}>
-                    Upload Category Image
-                  </Button>
+                  <Button icon={<UploadOutlined />}>Upload Banner Image</Button>
                 </Upload>
-                {categoryImageInfo.fileName && (
+
+                {bannerImageInfo.fileName && (
                   <div className="mt-2 text-sm text-gray-600 overflow-hidden">
                     Selected Image:{" "}
                     <strong>
-                      {categoryImageInfo.fileName.length > 15
-                        ? `${categoryImageInfo.fileName.slice(0, 15)}...`
-                        : categoryImageInfo.fileName}
+                      {bannerImageInfo.fileName.length > 15
+                        ? `${bannerImageInfo.fileName.slice(0, 15)}...`
+                        : bannerImageInfo.fileName}
                     </strong>
                   </div>
                 )}
               </Form.Item>
-            )}
+            </div>
             <Form.Item
-              label={<span>Banner Image</span>}
-              name="category_banner_image"
+              label={
+                <span>
+                  Description <span className="text-red-500">*</span>
+                </span>
+              }
+              name="category_description"
+              rules={[{ required: true, message: "Description is required" }]}
             >
-              <Upload
-                showUploadList={false}
-                accept="image/*"
-                beforeUpload={(file) => {
-                  // setCategoryBannerFile(file);
-                  openCropper(file, "banner");
-
-                  const reader = new FileReader();
-                  reader.readAsDataURL(file);
-                  return false;
-                }}
-              >
-                <Button icon={<UploadOutlined />}>Upload Banner Image</Button>
-              </Upload>
-
-              {bannerImageInfo.fileName && (
-                <div className="mt-2 text-sm text-gray-600 overflow-hidden">
-                  Selected Image:{" "}
-                  <strong>
-                    {bannerImageInfo.fileName.length > 15
-                      ? `${bannerImageInfo.fileName.slice(0, 15)}...`
-                      : bannerImageInfo.fileName}
-                  </strong>
-                </div>
-              )}
+              <Input.TextArea rows={3} type="email" />
             </Form.Item>
-          </div>
-          <Form.Item
-            label={
-              <span>
-                Description <span className="text-red-500">*</span>
-              </span>
-            }
-            name="category_description"
-            rules={[{ required: true, message: "Description is required" }]}
-          >
-            <Input.TextArea rows={3} type="email" />
-          </Form.Item>
-          <div className=" mt-6">
-            <Form.Item className="text-center mt-6">
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={submitloading}
-                style={{ marginRight: 8 }}
-              >
-                {isEditMode ? "Update" : "Submit"}
-              </Button>
-              <Button danger type="default" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Form.Item>
-          </div>
-        </Form>
-      </Card>
-
+            <div className=" mt-6">
+              <Form.Item className="text-center mt-6">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={submitloading}
+                  style={{ marginRight: 8 }}
+                >
+                  {isEditMode ? "Update" : "Submit"}
+                </Button>
+                <Button danger type="default" onClick={handleClose}>
+                  Cancel
+                </Button>
+              </Form.Item>
+            </div>
+          </Form>
+        </Card>
+      )}
       <CropImageModal
         open={cropState.modalVisible}
         imageSrc={cropState.imageSrc}

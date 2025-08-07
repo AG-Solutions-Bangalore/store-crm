@@ -1,10 +1,10 @@
-import { EditOutlined, EyeOutlined } from "@ant-design/icons";
-import { Button, Space, Tooltip } from "antd";
+import { DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { Button, Popconfirm, Space, Tooltip } from "antd";
 import dayjs from "dayjs";
 import STTable from "../STTable/STTable";
 import OrderStatusTag from "../common/OrderStatusTag";
 
-const OrderTable = ({ users, onEdit, handleView }) => {
+const OrderTable = ({ users, onEdit, handleView, handleDelete }) => {
   const highlightMatch = (text, match) => {
     if (!match || !text) return text;
     const regex = new RegExp(`(${match})`, "gi");
@@ -59,14 +59,7 @@ const OrderTable = ({ users, onEdit, handleView }) => {
       dataIndex: "order_status",
       key: "order_status",
       render: (_, user) => {
-        return (
-          // <div className="flex justify-center">
-          //   <Tag color={isPending ? "orange" : "green"}>
-          //     {user.order_status}
-          //   </Tag>
-          // </div>
-          <OrderStatusTag status={user.order_status} />
-        );
+        return <OrderStatusTag status={user.order_status} />;
       },
     },
 
@@ -76,7 +69,7 @@ const OrderTable = ({ users, onEdit, handleView }) => {
       render: (_, id) => {
         return (
           <Space>
-            <Tooltip title="Edit Guest Order">
+            <Tooltip title="Edit Order">
               <Button
                 type="primary"
                 icon={<EditOutlined />}
@@ -94,6 +87,14 @@ const OrderTable = ({ users, onEdit, handleView }) => {
                 className="bg-[#006666]"
               />
             </Tooltip>
+            <Popconfirm
+              title="Are you sure to delete this order?"
+              onConfirm={() => handleDelete(id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button danger size="small" icon={<DeleteOutlined />} />
+            </Popconfirm>
           </Space>
         );
       },

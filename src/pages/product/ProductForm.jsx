@@ -23,6 +23,7 @@ import { CATEGORY_ACTIVE, FETCH_UNIT, PRODUCT_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import CropImageModal from "../../components/common/CropImageModal";
+import CardHeader from "../../components/common/CardHeader";
 
 const ProductForm = () => {
   const { message } = App.useApp();
@@ -269,7 +270,7 @@ const ProductForm = () => {
       <Spin size="large" />
     </div>
   ) : (
-    <Card>
+    <>
       <Form
         form={form}
         layout="vertical"
@@ -282,11 +283,29 @@ const ProductForm = () => {
           }
         }}
       >
-        <div className="flex justify-between items-center mb-4">
-          {/* <h2 className="text-2xl font-bold text-[#006666]">
+        <Card
+          title={
+            <CardHeader title={`${isEditMode ? "Edit" : "Create"} Product`} />
+          }
+          extra={
+            <div className="flex items-center gap-2">
+              {isEditMode && (
+                <Form.Item 
+                  name="is_active"
+                  valuePropName="checked"
+                style={{marginBottom:"0px"}}
+                >
+                  <Switch />
+                </Form.Item>
+              )}
+            </div>
+          }
+        >
+          <div className="flex justify-between items-center mb-4">
+            {/* <h2 className="text-2xl font-bold text-[#006666]">
             {isEditMode ? "Edit" : "Create"} Product
           </h2> */}
-          <div className="flex items-center gap-3 mb-4 ">
+            {/* <div className="flex items-center gap-3 mb-4 ">
             <div
               className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
               onClick={() => navigate(-1)}
@@ -296,392 +315,398 @@ const ProductForm = () => {
             <h2 className="text-2xl font-bold text-[#006666] mb-0">
               {isEditMode ? "Edit" : "Create"} Product
             </h2>
+          </div> */}
+          </div>
+          {/* {isEditMode && (
+          <Form.Item
+            name="is_active"
+            label="Active"
+            valuePropName="checked"
+            className="mb-0"
+          >
+            <Switch />
+          </Form.Item>
+        )} */}
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <Form.Item
+              name="category_ids"
+              label={
+                <span>
+                  Category <span className="text-red-500">*</span>
+                </span>
+              }
+              rules={[
+                {
+                  required: true,
+                  message: "Please select at least one category",
+                },
+              ]}
+            >
+              <Select
+                mode="multiple"
+                placeholder="Select Categories"
+                allowClear
+                autoFocus
+                showSearch
+                filterOption={(input, option) =>
+                  option?.children?.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {categoryData.map((cat) => (
+                  <Select.Option key={cat.id} value={cat.id}>
+                    {cat.category_name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="product_name"
+              label={
+                <span>
+                  Product Name <span className="text-red-500">*</span>
+                </span>
+              }
+              rules={[{ required: true, message: "Product name is required" }]}
+            >
+              <Input maxLength={100} />
+            </Form.Item>
+
+            <Form.Item name="product_brand" label="Brand">
+              <Input maxLength={100} />
+            </Form.Item>
+            <Form.Item
+              name="product_unit_value"
+              label={
+                <span>
+                  Unit Value<span className="text-red-500">*</span>
+                </span>
+              }
+              rules={[
+                { required: true, message: "Unit value is required" },
+                {
+                  pattern: /^\d+(\.\d{1,2})?$/,
+                  message: "Enter a valid number (e.g. 34.4)",
+                },
+              ]}
+            >
+              <Input
+                inputMode="decimal"
+                onKeyDown={(e) => {
+                  const allowedKeys = [
+                    "Backspace",
+                    "Tab",
+                    "ArrowLeft",
+                    "ArrowRight",
+                    "Delete",
+                  ];
+                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                  if (
+                    allowedKeys.includes(e.key) ||
+                    isCtrlCombo ||
+                    /[0-9.]/.test(e.key)
+                  ) {
+                    return;
+                  }
+
+                  e.preventDefault();
+                }}
+                maxLength={8}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="product_unit_id"
+              label={
+                <span>
+                  Unit<span className="text-red-500">*</span>
+                </span>
+              }
+              rules={[{ required: true, message: "Please select a unit" }]}
+            >
+              <Select placeholder="Select Unit">
+                {unitData.map((unit) => (
+                  <Select.Option key={unit.id} value={unit.id}>
+                    {unit.unit}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="product_mrp"
+              label={
+                <span>
+                  MRP<span className="text-red-500">*</span>
+                </span>
+              }
+              rules={[
+                { required: true, message: "MRP is required" },
+                {
+                  pattern: /^\d+(\.\d{1,2})?$/,
+                  message: "Enter a valid number (e.g. 34.4)",
+                },
+              ]}
+            >
+              <Input
+                inputMode="decimal"
+                onKeyDown={(e) => {
+                  const allowedKeys = [
+                    "Backspace",
+                    "Tab",
+                    "ArrowLeft",
+                    "ArrowRight",
+                    "Delete",
+                  ];
+                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                  if (
+                    allowedKeys.includes(e.key) ||
+                    isCtrlCombo ||
+                    /[0-9.]/.test(e.key)
+                  ) {
+                    return;
+                  }
+
+                  e.preventDefault();
+                }}
+                maxLength={8}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="product_selling_price"
+              label={
+                <span>
+                  Selling Price<span className="text-red-500">*</span>
+                </span>
+              }
+              rules={[
+                { required: true, message: "Selling price is required" },
+                {
+                  pattern: /^\d+(\.\d{1,2})?$/,
+                  message: "Enter a valid number (e.g. 34.4)",
+                },
+              ]}
+            >
+              <Input
+                inputMode="decimal"
+                onKeyDown={(e) => {
+                  const allowedKeys = [
+                    "Backspace",
+                    "Tab",
+                    "ArrowLeft",
+                    "ArrowRight",
+                    "Delete",
+                  ];
+                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                  if (
+                    allowedKeys.includes(e.key) ||
+                    isCtrlCombo ||
+                    /[0-9.]/.test(e.key)
+                  ) {
+                    return;
+                  }
+
+                  e.preventDefault();
+                }}
+                maxLength={8}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="product_spl_offer_price"
+              label="Offer Price"
+              rules={[
+                {
+                  pattern: /^\d+(\.\d{1,2})?$/,
+                  message: "Enter a valid number (e.g. 34.4)",
+                },
+              ]}
+            >
+              <Input
+                inputMode="decimal"
+                onKeyDown={(e) => {
+                  const allowedKeys = [
+                    "Backspace",
+                    "Tab",
+                    "ArrowLeft",
+                    "ArrowRight",
+                    "Delete",
+                  ];
+                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                  if (
+                    allowedKeys.includes(e.key) ||
+                    isCtrlCombo ||
+                    /[0-9.]/.test(e.key)
+                  ) {
+                    return;
+                  }
+
+                  e.preventDefault();
+                }}
+                maxLength={8}
+              />
+            </Form.Item>
+            <Form.Item
+              name="product_short_description"
+              label="Description"
+              className="md:col-span-4"
+            >
+              <Input.TextArea rows={3} />
+            </Form.Item>
           </div>
 
-          {isEditMode && (
-            <Form.Item name="is_active" label="Active" valuePropName="checked">
-              <Switch />
-            </Form.Item>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <Form.Item
-            name="category_ids"
-            label={
-              <span>
-                Category <span className="text-red-500">*</span>
-              </span>
-            }
-            rules={[
-              {
-                required: true,
-                message: "Please select at least one category",
-              },
-            ]}
-          >
-            <Select
-              mode="multiple"
-              placeholder="Select Categories"
-              allowClear
-              showSearch
-              filterOption={(input, option) =>
-                option?.children?.toLowerCase().includes(input.toLowerCase())
-              }
-            >
-              {categoryData.map((cat) => (
-                <Select.Option key={cat.id} value={cat.id}>
-                  {cat.category_name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="product_name"
-            label={
-              <span>
-                Product Name <span className="text-red-500">*</span>
-              </span>
-            }
-            rules={[{ required: true, message: "Product name is required" }]}
-          >
-            <Input maxLength={100} />
-          </Form.Item>
-
-          <Form.Item name="product_brand" label="Brand">
-            <Input maxLength={100} />
-          </Form.Item>
-          <Form.Item
-            name="product_unit_value"
-            label={
-              <span>
-                Unit Value<span className="text-red-500">*</span>
-              </span>
-            }
-            rules={[
-              { required: true, message: "Unit value is required" },
-              {
-                pattern: /^\d+(\.\d{1,2})?$/,
-                message: "Enter a valid number (e.g. 34.4)",
-              },
-            ]}
-          >
-            <Input
-              inputMode="decimal"
-              onKeyDown={(e) => {
-                const allowedKeys = [
-                  "Backspace",
-                  "Tab",
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "Delete",
-                ];
-                const isCtrlCombo = e.ctrlKey || e.metaKey;
-
-                if (
-                  allowedKeys.includes(e.key) ||
-                  isCtrlCombo ||
-                  /[0-9.]/.test(e.key)
-                ) {
-                  return;
-                }
-
-                e.preventDefault();
-              }}
-              maxLength={8}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="product_unit_id"
-            label={
-              <span>
-                Unit<span className="text-red-500">*</span>
-              </span>
-            }
-            rules={[{ required: true, message: "Please select a unit" }]}
-          >
-            <Select placeholder="Select Unit">
-              {unitData.map((unit) => (
-                <Select.Option key={unit.id} value={unit.id}>
-                  {unit.unit}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="product_mrp"
-            label={
-              <span>
-                MRP<span className="text-red-500">*</span>
-              </span>
-            }
-            rules={[
-              { required: true, message: "MRP is required" },
-              {
-                pattern: /^\d+(\.\d{1,2})?$/,
-                message: "Enter a valid number (e.g. 34.4)",
-              },
-            ]}
-          >
-            <Input
-              inputMode="decimal"
-              onKeyDown={(e) => {
-                const allowedKeys = [
-                  "Backspace",
-                  "Tab",
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "Delete",
-                ];
-                const isCtrlCombo = e.ctrlKey || e.metaKey;
-
-                if (
-                  allowedKeys.includes(e.key) ||
-                  isCtrlCombo ||
-                  /[0-9.]/.test(e.key)
-                ) {
-                  return;
-                }
-
-                e.preventDefault();
-              }}
-              maxLength={8}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="product_selling_price"
-            label={
-              <span>
-                Selling Price<span className="text-red-500">*</span>
-              </span>
-            }
-            rules={[
-              { required: true, message: "Selling price is required" },
-              {
-                pattern: /^\d+(\.\d{1,2})?$/,
-                message: "Enter a valid number (e.g. 34.4)",
-              },
-            ]}
-          >
-            <Input
-              inputMode="decimal"
-              onKeyDown={(e) => {
-                const allowedKeys = [
-                  "Backspace",
-                  "Tab",
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "Delete",
-                ];
-                const isCtrlCombo = e.ctrlKey || e.metaKey;
-
-                if (
-                  allowedKeys.includes(e.key) ||
-                  isCtrlCombo ||
-                  /[0-9.]/.test(e.key)
-                ) {
-                  return;
-                }
-
-                e.preventDefault();
-              }}
-              maxLength={8}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="product_spl_offer_price"
-            label="Offer Price"
-            rules={[
-              {
-                pattern: /^\d+(\.\d{1,2})?$/,
-                message: "Enter a valid number (e.g. 34.4)",
-              },
-            ]}
-          >
-            <Input
-              inputMode="decimal"
-              onKeyDown={(e) => {
-                const allowedKeys = [
-                  "Backspace",
-                  "Tab",
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "Delete",
-                ];
-                const isCtrlCombo = e.ctrlKey || e.metaKey;
-
-                if (
-                  allowedKeys.includes(e.key) ||
-                  isCtrlCombo ||
-                  /[0-9.]/.test(e.key)
-                ) {
-                  return;
-                }
-
-                e.preventDefault();
-              }}
-              maxLength={8}
-            />
-          </Form.Item>
-          <Form.Item
-            name="product_short_description"
-            label="Description"
-            className="md:col-span-4"
-          >
-            <Input.TextArea rows={3} />
-          </Form.Item>
-        </div>
-
-        <Form.List name="subs">
-          {(fields, { add, remove }) => (
-            <>
-              <div className="flex justify-between items-center mb-4">
-                <strong>Product Sub Variants</strong>
-                <Button
-                  type="dashed"
-                  icon={<PlusOutlined />}
-                  onClick={() => {
-                    const newSub = {
-                      id: "",
-                      is_default: false,
-                      is_active: false,
-                      product_images: null,
-                      preview: "",
-                    };
-                    setProductForms([...productForms, newSub]);
-                    add();
-                  }}
-                >
-                  Add Product
-                </Button>
-              </div>
-
-              {fields.map(({ key, name, ...restField }, index) => {
-                const current = productForms[index] || {};
-                return (
-                  <Card
-                    key={key}
-                    size="small"
-                    style={{ marginBottom: "10px" }}
-                    title={`Image ${index + 1}`}
-                    extra={
-                      <Button
-                        danger
-                        size="small"
-                        icon={<DeleteOutlined />}
-                        onClick={() => {
-                          const updated = [...productForms];
-                          updated.splice(index, 1);
-                          setProductForms(updated);
-                          remove(name);
-                        }}
-                        disabled={fields.length === 1}
-                      >
-                        Remove
-                      </Button>
-                    }
+          <Form.List name="subs">
+            {(fields, { add, remove }) => (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <strong>Product Sub Variants</strong>
+                  <Button
+                    type="dashed"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      const newSub = {
+                        id: "",
+                        is_default: false,
+                        is_active: false,
+                        product_images: null,
+                        preview: "",
+                      };
+                      setProductForms([...productForms, newSub]);
+                      add();
+                    }}
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <Form.Item
-                        {...restField}
-                        name={[name, "product_images"]}
-                        label="Product Image"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Avatar
-                            size={36}
-                            src={current.preview}
-                            // src={
-                            //   current.preview
-                            //     ? `${current.preview}?v=${Math.random()}`
-                            //     : ""
-                            // }
-                            icon={<UserOutlined />}
-                          />
-                          {/* <Upload
+                    Add Product
+                  </Button>
+                </div>
+
+                {fields.map(({ key, name, ...restField }, index) => {
+                  const current = productForms[index] || {};
+                  return (
+                    <Card
+                      key={key}
+                      size="small"
+                      style={{ marginBottom: "10px" }}
+                      title={`Image ${index + 1}`}
+                      extra={
+                        <Button
+                          danger
+                          size="small"
+                          icon={<DeleteOutlined />}
+                          onClick={() => {
+                            const updated = [...productForms];
+                            updated.splice(index, 1);
+                            setProductForms(updated);
+                            remove(name);
+                          }}
+                          disabled={fields.length === 1}
+                        >
+                          Remove
+                        </Button>
+                      }
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Form.Item
+                          {...restField}
+                          name={[name, "product_images"]}
+                          label="Product Image"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Avatar
+                              size={36}
+                              src={current.preview}
+                              // src={
+                              //   current.preview
+                              //     ? `${current.preview}?v=${Math.random()}`
+                              //     : ""
+                              // }
+                              icon={<UserOutlined />}
+                            />
+                            {/* <Upload
                             showUploadList={false}
                             accept="image/*"
                             beforeUpload={(file) =>
                               handleImageUpload(index, file)
                             }
                           > */}
-                          <Upload
-                            showUploadList={false}
-                            accept="image/*"
-                            beforeUpload={(file) => {
-                              // setCategoryFile(file);
-                              handleImageUpload(index, file);
-                              const reader = new FileReader();
-                              // reader.onload = () =>
-                              //   setCategoryFilePreview(reader.result);
-                              reader.readAsDataURL(file);
-                              return false;
-                            }}
-                          >
-                            <Button icon={<UploadOutlined />}>Upload</Button>
-                          </Upload>
-                        </div>
-                      </Form.Item>
+                            <Upload
+                              showUploadList={false}
+                              accept="image/*"
+                              beforeUpload={(file) => {
+                                // setCategoryFile(file);
+                                handleImageUpload(index, file);
+                                const reader = new FileReader();
+                                // reader.onload = () =>
+                                //   setCategoryFilePreview(reader.result);
+                                reader.readAsDataURL(file);
+                                return false;
+                              }}
+                            >
+                              <Button icon={<UploadOutlined />}>Upload</Button>
+                            </Upload>
+                          </div>
+                        </Form.Item>
 
-                      <Form.Item
-                        name={[name, "is_default"]}
-                        label="Default"
-                        valuePropName="checked"
-                      >
-                        <Switch
-                          checked={current.is_default}
-                          onChange={(checked) =>
-                            updateProductField(index, "is_default", checked)
-                          }
-                        />
-                      </Form.Item>
-
-                      {isEditMode && (
                         <Form.Item
-                          name={[name, "is_active"]}
-                          label="Active"
+                          name={[name, "is_default"]}
+                          label="Default"
                           valuePropName="checked"
                         >
                           <Switch
-                            checked={current.is_active}
+                            checked={current.is_default}
                             onChange={(checked) =>
-                              updateProductField(index, "is_active", checked)
+                              updateProductField(index, "is_default", checked)
                             }
                           />
                         </Form.Item>
-                      )}
-                    </div>
-                  </Card>
-                );
-              })}
-              <Form.Item name="is_default_error" style={{ display: "none" }}>
-                <div />
-              </Form.Item>
-            </>
-          )}
-        </Form.List>
 
-        <div className="mt-6 text-center">
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={submitLoading}
-              style={{ marginRight: 8 }}
-            >
-              {isEditMode ? "Update" : "Submit"}
-            </Button>
-            <Button danger type="default" onClick={() => navigate(-1)}>
-              Cancel
-            </Button>
-          </Form.Item>
-        </div>
+                        {isEditMode && (
+                          <Form.Item
+                            name={[name, "is_active"]}
+                            label="Active"
+                            valuePropName="checked"
+                          >
+                            <Switch
+                              checked={current.is_active}
+                              onChange={(checked) =>
+                                updateProductField(index, "is_active", checked)
+                              }
+                            />
+                          </Form.Item>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+                <Form.Item name="is_default_error" style={{ display: "none" }}>
+                  <div />
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
+          <div className="mt-6 text-center">
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={submitLoading}
+                style={{ marginRight: 8 }}
+              >
+                {isEditMode ? "Update" : "Submit"}
+              </Button>
+              <Button danger type="default" onClick={() => navigate(-1)}>
+                Cancel
+              </Button>
+            </Form.Item>
+          </div>
+        </Card>
       </Form>
+
       <CropImageModal
         open={cropModalOpen}
         imageSrc={cropImageSrc}
@@ -692,7 +717,7 @@ const ProductForm = () => {
         title="Crop Product Image"
         cropstucture={false}
       />
-    </Card>
+    </>
   );
 };
 

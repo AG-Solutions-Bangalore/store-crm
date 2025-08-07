@@ -17,7 +17,7 @@ const OrderStatusTag = ({ status }) => {
 
   return (
     <div className="flex justify-center">
-      <Tag color={color}>{status.toUpperCase()}</Tag>
+      <Tag color={color}>{status ? status.toUpperCase() : ""}</Tag>
     </div>
   );
 };

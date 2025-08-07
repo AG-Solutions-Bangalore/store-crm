@@ -19,6 +19,7 @@ import {
 } from "antd";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import CardHeader from "../common/CardHeader";
 
 const ProfileForm = ({
   type,
@@ -102,7 +103,7 @@ const ProfileForm = ({
                 {title || ""}
               </h2>
             </div> */}
-            <div className="flex items-center gap-3 mb-4">
+            {/* <div className="flex items-center gap-3 mb-4">
               <div
                 className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
                 onClick={() => navigate(-1)}
@@ -112,7 +113,10 @@ const ProfileForm = ({
               <h2 className="text-2xl font-bold text-[#006666] mb-0">
                 {title || ""}
               </h2>
-            </div>
+            </div> */}
+
+            <CardHeader title={title || ""} />
+
             <div className="flex items-center gap-4">
               <Avatar
                 size={64}
@@ -150,7 +154,7 @@ const ProfileForm = ({
           } gap-4`}
         >
           <Form.Item label="Firm Name" name="firm_name">
-            <Input maxLength={90} />
+            <Input maxLength={90} autoFocus />
           </Form.Item>
           <Form.Item label="GSTIN" name="gstin">
             <Input maxLength={15} />

@@ -92,7 +92,7 @@ const categoryRef = useRef(null);
         title="Category Report"
         className="shadow-md rounded-lg"
         extra={
-          <div className="flex  items-center gap-2">
+          <div className="flex items-center gap-2">
             <Select
               defaultValue="all"
               style={{ width: 150 }}

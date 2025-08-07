@@ -93,7 +93,7 @@ const ChangePassword = ({ open, setOpenDialog }) => {
               name="old_password"
               rules={[{ required: true, message: "Old password is required" }]}
             >
-              <Input.Password />
+              <Input.Password/>
             </Form.Item>
 
             <Form.Item

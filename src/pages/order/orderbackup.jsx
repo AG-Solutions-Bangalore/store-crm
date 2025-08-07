@@ -1,27 +1,15 @@
 import {
   ArrowLeftOutlined,
   DeleteOutlined,
-  MinusOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import {
-  App,
-  Button,
-  Card,
-  DatePicker,
-  Form,
-  Input,
-  Popconfirm,
-  Select,
-  Spin,
-} from "antd";
+import { App, Button, Card, DatePicker, Form, Input, Select, Spin } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ADDRESS_BY_ID,
   CUSTOMER_LIST,
-  DELETE_SUB_LIST,
   FETCH_PRODUCTLIST,
   GUEST_USER_ORDER_BY_ID,
   ORDER_LIST,
@@ -37,8 +25,6 @@ const OrderForm = () => {
   const isEditMode = Boolean(id);
   const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
-  const { trigger: DeleteTrigger, loading: deleteloading } = useApiMutation();
-
   const [form] = Form.useForm();
   const [addressData, setAddressData] = useState([]);
   const navigate = useNavigate();
@@ -106,10 +92,14 @@ const OrderForm = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    console.log("res", res?.data);
     if (!res || !res.data) return;
+
     const guestUser = res.data;
-    const order = res.data ?? {};
+    console.log("guest", guestUser);
+    const order = res.order ?? {};
     const orderSubs = res?.data?.subs ?? [];
+
     setOrderData(order);
     if (guestUser?.user_id) {
       await handleUserChange(guestUser?.user_id);
@@ -126,6 +116,14 @@ const OrderForm = () => {
       : [];
 
     form.setFieldsValue({
+      // firm_name: guestUser.company_name || "",
+      // gstin: guestUser.gstin || "",
+      // name: guestUser.name || "",
+      // mobile: guestUser.mobile || "",
+      // whatsapp: guestUser.whatsapp || "",
+      // email: guestUser.email || "",
+      // address: guestUser.address || "",
+
       order_date: guestUser.order_date ? dayjs(order.order_date) : null,
       user_id: guestUser.user_id || "",
       delivery_address_id: guestUser?.delivery_address_id || "",
@@ -165,6 +163,7 @@ const OrderForm = () => {
         setAddressData(res.data);
       }
       if (isEditMode) {
+        console.log(orderData, "id dd");
         const matchedAddress = res.data.find(
           (addr) => addr.id == orderData?.delivery_address_id
         );
@@ -177,9 +176,15 @@ const OrderForm = () => {
       }
     } catch (err) {
       console.error("Failed to fetch address data:", err);
-      message.error(err.message || "Failed to load address.");
+      message.error("Failed to load address.");
       setAddressData([]);
     }
+  };
+  const handleProductChange = (index, field, value) => {
+    const updatedForms = [...ProductForms];
+    updatedForms[index][field] = value;
+
+    setProductForms(updatedForms);
   };
 
   const addRow = () => {
@@ -189,17 +194,26 @@ const OrderForm = () => {
         id: "",
         product_id: "",
         product_qnty: "",
-        order_sub_status: "",
+        order_sub_status: false,
       },
     ]);
+  };
+
+  const removeRow = (index) => {
+    if (ProductForms.length > 1) {
+      const updated = [...ProductForms];
+      updated.splice(index, 1);
+      setProductForms(updated);
+    }
   };
 
   const handleSubmit = async (values) => {
     const subs = ProductForms || [];
     let hasValidSub = false;
     let hasInvalidSub = false;
+    // let hasDefault = false;
     subs.forEach((sub) => {
-      const { product_id, product_qnty } = sub;
+      const { product_id, product_qnty, order_sub_status } = sub;
 
       const isFilled =
         product_id?.toString().trim() && product_qnty?.toString().trim();
@@ -209,6 +223,10 @@ const OrderForm = () => {
 
       if (isFilled) {
         hasValidSub = true;
+
+        // if (isEditMode && order_sub_status === true) {
+        //   hasDefault = true;
+        // }
       } else if (!isEmpty) {
         hasInvalidSub = true;
       }
@@ -254,7 +272,7 @@ const OrderForm = () => {
       if (isEditMode) {
         payload.order_status = values.order_status;
       }
-console.log(payload,"payload")
+
       const res = await SubmitTrigger({
         url: isEditMode ? `${ORDER_LIST}/${id}` : ORDER_LIST,
         method: isEditMode ? "put" : "post",
@@ -280,37 +298,10 @@ console.log(payload,"payload")
       );
     }
   };
-  const handleProductChange = (index, field, value) => {
-    const updatedForms = [...ProductForms];
-    updatedForms[index][field] = value;
 
-    setProductForms(updatedForms);
-  };
-
-  const handleDelete = async (id, index) => {
-    try {
-      if (id) {
-        const res = await DeleteTrigger({
-          url: `${DELETE_SUB_LIST}/${id}`,
-          method: "delete",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.code == 201) {
-          setProductForms((prev) => prev.filter((_, i) => i !== index));
-          message.success(res.message || "Product removed successfully");
-          fetchOrder();
-        }
-      }
-    } catch (error) {
-      console.error("Delete failed", error);
-      message.error(error.message || "Failed to delete product");
-    }
-  };
   return (
     <>
-      {fetchloading || deleteloading ? (
+      {fetchloading ? (
         <div className="flex justify-center py-20">
           <Spin size="large" />
         </div>
@@ -498,146 +489,155 @@ console.log(payload,"payload")
                     maxLength={8}
                   />
                 </Form.Item>
+
+                <Form.Item
+                  label="Delivery Instruction"
+                  name="delivery_instructions"
+                  className="col-span-1 md:col-span-5"
+                >
+                  <Input.TextArea rows={3} maxLength={200} />
+                </Form.Item>
+
+                {/* Order Status (Only in Edit Mode) */}
               </div>
-              <Card
-                title={<strong>Order</strong>}
-                style={{ marginBottom: 6 }}
-                extra={
-                  <Button
-                    type="dashed"
-                    icon={<PlusOutlined />}
-                    onClick={addRow}
-                  >
-                    Add Order
-                  </Button>
-                }
-              >
-                {ProductForms.map((item, idx) => (
-                  <div key={idx} className="grid grid-cols-10 gap-4 mb-4">
-                    <div className="col-span-1 flex justify-center items-center font-semibold">
-                      {idx + 1}.
-                    </div>
 
-                    <Form.Item
-                      name={["subs", idx, "product_id"]}
-                      label={
-                        <span>
-                          Product <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Please select a product" },
-                      ]}
-                      className={`${isEditMode ? "col-span-3" : "col-span-4"}`}
-                    >
-                      <Select
-                        placeholder="Select Product"
-                        allowClear
-                        showSearch
-                        value={item.product_id}
-                        filterOption={(input, option) =>
-                          option?.children
-                            ?.toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        onChange={(value) =>
-                          handleProductChange(idx, "product_id", value)
-                        }
+              <div className="flex justify-between items-center mb-4">
+                <strong>Order</strong>
+                <Button type="dashed" onClick={addRow} icon={<PlusOutlined />}>
+                  Add Order
+                </Button>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                {ProductForms.map((addr, idx) => (
+                  <Card
+                    key={idx}
+                    size="small"
+                    className="space-y-3"
+                    title={`Order ${idx + 1}`}
+                    extra={
+                      <Button
+                        danger
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        onClick={() => removeRow(idx)}
+                        disabled={ProductForms.length === 1}
                       >
-                        {ProductData.map((cat) => (
-                          <Select.Option key={cat.id} value={cat.id}>
-                            {cat.product_name}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                      name={["subs", idx, "product_qnty"]}
-                      label="Quantity"
-                      className={`${isEditMode ? "col-span-2" : "col-span-4"}`}
-                      rules={[
-                        {
-                          pattern: /^\d*\.?\d{0,2}$/,
-                          message: "Enter a valid quantity (e.g. 23.5)",
-                        },
-                      ]}
+                        Remove
+                      </Button>
+                    }
+                  >
+                    <div
+                      className={`grid grid-cols-1 md:grid-cols-2 ${
+                        isEditMode ? "lg:grid-cols-3" : "lg:grid-cols-2"
+                      } gap-4`}
                     >
-                      <Input
-                        maxLength={4}
-                        value={item.product_qnty}
-                        onChange={(e) =>
-                          handleProductChange(
-                            idx,
-                            "product_qnty",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </Form.Item>
-
-                    {isEditMode && (
                       <Form.Item
-                        name={["subs", idx, "order_sub_status"]}
-                        label="Status"
-                        className="col-span-3"
+                        name={["subs", idx, "product_id"]}
+                        label={
+                          <span>
+                            Product <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select a product",
+                          },
+                        ]}
                       >
                         <Select
-                          placeholder="Select Status"
-                          value={item.order_sub_status}
+                          placeholder="Select Product"
+                          allowClear
+                          showSearch
+                          filterOption={(input, option) =>
+                            option?.children
+                              ?.toLowerCase()
+                              .includes(input.toLowerCase())
+                          }
+                          value={addr.product_id}
                           onChange={(value) =>
-                            handleProductChange(idx, "order_sub_status", value)
+                            handleProductChange(idx, "product_id", value)
                           }
                         >
-                          <Select.Option value="pending">Pending</Select.Option>
-                          <Select.Option value="completed">
-                            Completed
-                          </Select.Option>
+                          {ProductData.map((cat) => (
+                            <Select.Option key={cat.id} value={cat.id}>
+                              {cat.product_name}
+                            </Select.Option>
+                          ))}
                         </Select>
                       </Form.Item>
-                    )}
 
-                    <div className="col-span-1 flex justify-center items-center h-full">
-                      {item.id ? (
-                        <Popconfirm
-                          title="Are you sure to delete this product?"
-                          onConfirm={() => handleDelete(item.id, idx)}
-                          okText="Yes"
-                          cancelText="No"
-                        >
-                          <Button
-                            danger
-                            size="small"
-                            icon={<DeleteOutlined />}
-                            disabled={ProductForms.length === 1}
-                          />
-                        </Popconfirm>
-                      ) : (
-                        <Button
-                          size="small"
-                          icon={<MinusOutlined />}
-                          onClick={() => {
-                            setProductForms((prev) => {
-                              const updated = [...prev];
-                              updated.splice(idx, 1);
-                              return updated;
-                            });
+                      <Form.Item
+                        label="Quantity"
+                        name={["subs", idx, "product_qnty"]}
+                        rules={[
+                          {
+                            pattern: /^\d*\.?\d{0,2}$/,
+                            message: "Enter a valid quantity (e.g. 23.5)",
+                          },
+                        ]}
+                      >
+                        <Input
+                          value={addr.product_qnty}
+                          onChange={(e) =>
+                            handleProductChange(
+                              idx,
+                              "product_qnty",
+                              e.target.value
+                            )
+                          }
+                          onKeyDown={(e) => {
+                            const allowedKeys = [
+                              "Backspace",
+                              "Tab",
+                              "ArrowLeft",
+                              "ArrowRight",
+                              "Delete",
+                              ".",
+                            ];
+                            const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                            if (
+                              allowedKeys.includes(e.key) ||
+                              isCtrlCombo ||
+                              /^[0-9]$/.test(e.key)
+                            ) {
+                              return;
+                            }
+
+                            e.preventDefault();
                           }}
-                          disabled={ProductForms.length === 1}
+                          maxLength={4}
                         />
+                      </Form.Item>
+                      {isEditMode && (
+                        <Form.Item label="Status">
+                          <Select
+                            placeholder="Select Status"
+                            allowClear
+                            value={addr.order_sub_status}
+                            onChange={(value) =>
+                              handleProductChange(
+                                idx,
+                                "order_sub_status",
+                                value
+                              )
+                            }
+                          >
+                            <Select.Option value="pending">
+                              Pending
+                            </Select.Option>
+                            <Select.Option value="completed">
+                              Completed
+                            </Select.Option>
+                          </Select>
+                        </Form.Item>
                       )}
                     </div>
-                  </div>
+                  </Card>
                 ))}
-              </Card>
-
-              <Form.Item
-                label="Delivery Instruction"
-                name="delivery_instructions"
-                className="col-span-1 md:col-span-5"
-              >
-                <Input.TextArea rows={3} maxLength={200} />
-              </Form.Item>
+              </div>
               <div className=" mt-6">
                 <Form.Item className="text-center">
                   <Button

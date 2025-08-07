@@ -9,7 +9,7 @@ import { useApiMutation } from "../../hooks/useApiMutation";
 
 const { Search } = Input;
 const { Option } = Select;
-const SecurityList = () => {
+const TeamList = () => {
   const { message } = App.useApp();
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,25 +51,24 @@ const SecurityList = () => {
   const handleEdit = (user) => {
     navigate(`/user-edit/${user.id}`, {
       state: {
-        user_type: 2,
-        title: "security",
-        navigatedata: "/security",
+        title: "Team",
+        navigatedata: "/team",
       },
     });
   };
   const handleAddUser = () => {
     navigate("/user-create", {
       state: {
-        user_type: 2,
-        title: "security",
-        navigatedata: "/security",
+        title: "Team",
+        navigatedata: "/team",
       },
     });
   };
 
   const filteredUsers = users
     .filter((user) => {
-      if (user.user_type !== 2) return false;
+      if (![2, 3, 4].includes(user.user_type)) return false;
+
       if (statusFilter === "active" && user.is_active !== "true") return false;
       if (statusFilter === "inactive" && user.is_active !== "false")
         return false;
@@ -120,7 +119,7 @@ const SecurityList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-[#006666]">Security List</h2>
+        <h2 className="text-2xl font-bold text-[#006666]">Team List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -145,7 +144,7 @@ const SecurityList = () => {
             onClick={handleAddUser}
             className="bg-[#006666]"
           >
-            Add Security
+            Add Team
           </Button>
         </div>
       </div>
@@ -169,4 +168,4 @@ const SecurityList = () => {
   );
 };
 
-export default SecurityList;
+export default TeamList;
