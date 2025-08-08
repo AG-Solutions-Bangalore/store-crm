@@ -17,7 +17,7 @@ const { Option } = Select;
 
 const ProductReport = () => {
   const token = useToken();
-const productRef = useRef(null);
+  const productRef = useRef(null);
   const [category, setCategory] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState([]);
 
@@ -58,11 +58,10 @@ const productRef = useRef(null);
     }
   };
 
-  
-   const handlePrint = useReactToPrint({
-       content: () => productRef.current, 
-       documentTitle: "product-report",
-       pageStyle: `
+  const handlePrint = useReactToPrint({
+    content: () => productRef.current,
+    documentTitle: "product-report",
+    pageStyle: `
          @page {
            size: auto;
            margin: 1mm;
@@ -86,7 +85,7 @@ const productRef = useRef(null);
 }
 
        `,
-     });
+  });
   return (
     <>
       <Card
@@ -138,7 +137,11 @@ const productRef = useRef(null);
         }
       >
         {/* Only this part will be printed */}
-        <div ref={productRef} id="printable-section" className="p-0 m-0 print:p-0 print:m-0">
+        <div
+          ref={productRef}
+          id="printable-section"
+          className="p-0 m-0 print:p-0 print:m-0"
+        >
           <h2 className="text-xl font-semibold">Product Report</h2>
 
           {isMutating ? (
@@ -168,13 +171,14 @@ const productRef = useRef(null);
                 {filteredCategory.map((item) => (
                   <tr
                     key={item.product_name}
-               
                     style={{
                       pageBreakInside: "avoid",
                       backgroundColor:
                         item.is_active === "false" ? "#ffe5e5" : "transparent",
                     }}
-                    className={`border-t ${item.is_active === "false" ? "inactive-row" : ""}`}
+                    className={`border-t ${
+                      item.is_active === "false" ? "inactive-row" : ""
+                    }`}
                   >
                     <td className="px-3 py-2 font-medium">
                       {item.product_name}

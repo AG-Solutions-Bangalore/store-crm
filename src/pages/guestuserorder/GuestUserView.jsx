@@ -12,7 +12,7 @@ import { useReactToPrint } from "react-to-print";
 import { FETCH_PRODUCTLIST, GUEST_USER_ORDER_BY_ID } from "../../api";
 import useToken from "../../api/usetoken";
 import CardHeader from "../../components/common/CardHeader";
-import useFinalUserImage from "../../components/common/Logo";
+import finalUserImage from "../../assets/logo.png";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { downloadPDF } from "../../components/pdfExport/pdfExport";
 
@@ -38,7 +38,6 @@ const GuestUserView = () => {
     },
   });
   const token = useToken();
-  const finalUserImage = useFinalUserImage();
   const companyDetails = useSelector((state) => state?.company?.companyDetails);
   const [companyData, setCompanyData] = useState(null);
   const [orderData, setOrderData] = useState(null);
@@ -180,11 +179,11 @@ const GuestUserView = () => {
               </div>
 
               <div className="flex gap-6 items-center border-b border-gray-400 rounded-bl-lg">
-                <div className="w-32 h-32 flex-shrink-0 border-t border-l border-r  border-gray-400 rounded-lg overflow-hidden">
+                <div className="w-32 h-32 flex justify-center items-center flex-shrink-0 border-t border-l border-r  border-gray-400 rounded-lg overflow-hidden">
                   <img
                     src={finalUserImage}
                     alt="User"
-                    className="object-contain w-full h-full p-2 bg-white"
+                    className="object-contain max-w-32 max-h-32 p-2 bg-white"
                   />
                 </div>
 

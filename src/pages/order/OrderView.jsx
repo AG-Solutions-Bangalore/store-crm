@@ -1,8 +1,4 @@
-import {
-  ArrowLeftOutlined,
-  FilePdfOutlined,
-  PrinterOutlined,
-} from "@ant-design/icons";
+import { FilePdfOutlined, PrinterOutlined } from "@ant-design/icons";
 import { Button, Card, Spin, Tooltip } from "antd";
 import { IdCard, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -15,11 +11,10 @@ import { useSelector } from "react-redux";
 import { useReactToPrint } from "react-to-print";
 import { ORDER_LIST } from "../../api";
 import useToken from "../../api/usetoken";
-import useFinalUserImage from "../../components/common/Logo";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import finalUserImage from "../../assets/logo.png";
 import CardHeader from "../../components/common/CardHeader";
 import { downloadPDF } from "../../components/pdfExport/pdfExport";
-
+import { useApiMutation } from "../../hooks/useApiMutation";
 const OrderView = () => {
   const { orderid: orderId } = useParams();
   const toWords = new ToWords({
@@ -42,7 +37,6 @@ const OrderView = () => {
     },
   });
   const token = useToken();
-  const finalUserImage = useFinalUserImage();
   const companyDetails = useSelector((state) => state?.company?.companyDetails);
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -151,11 +145,11 @@ const OrderView = () => {
               </div>
 
               <div className="flex gap-6 items-center border-b border-gray-400 rounded-bl-lg">
-                <div className="w-32 h-32 flex-shrink-0 border-t border-l border-r  border-gray-400 rounded-lg overflow-hidden">
+                <div className="w-32 h-32 flex justify-center items-center flex-shrink-0 border-t border-l border-r  border-gray-400 rounded-lg overflow-hidden">
                   <img
                     src={finalUserImage}
                     alt="User"
-                    className="object-contain w-full h-full p-2 bg-white"
+                    className="object-contain max-w-32 max-h-32 p-2 bg-white"
                   />
                 </div>
 
