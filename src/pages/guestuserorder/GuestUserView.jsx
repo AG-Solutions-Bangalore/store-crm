@@ -1,26 +1,22 @@
-import {
-  ArrowLeftOutlined,
-  FilePdfOutlined,
-  PrinterOutlined,
-} from "@ant-design/icons";
+import { FilePdfOutlined, PrinterOutlined } from "@ant-design/icons";
 import { Button, Card, Spin, Tooltip } from "antd";
 import { IdCard, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ToWords } from "to-words";
 
 import moment from "moment";
 import { useRef } from "react";
 import { useSelector } from "react-redux";
 import { useReactToPrint } from "react-to-print";
-import { ORDER_LIST } from "../../api";
+import { FETCH_PRODUCTLIST, GUEST_USER_ORDER_BY_ID } from "../../api";
 import useToken from "../../api/usetoken";
+import CardHeader from "../../components/common/CardHeader";
 import useFinalUserImage from "../../components/common/Logo";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import CardHeader from "../../components/common/CardHeader";
 import { downloadPDF } from "../../components/pdfExport/pdfExport";
 
-const OrderView = () => {
+const GuestUserView = () => {
   const { orderid: orderId } = useParams();
   const toWords = new ToWords({
     localeCode: "en-IN",
@@ -44,34 +40,68 @@ const OrderView = () => {
   const token = useToken();
   const finalUserImage = useFinalUserImage();
   const companyDetails = useSelector((state) => state?.company?.companyDetails);
+  const [companyData, setCompanyData] = useState(null);
   const [orderData, setOrderData] = useState(null);
+  const [orderDataSub, setOrderDataSub] = useState([]);
+  const [ProductData, setProductData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { trigger: FetchTrigger, loading: isMutatingorder } = useApiMutation();
   const orderRef = useRef(null);
-  const navigate = useNavigate();
+
+  const fetchData = async () => {
+    try {
+      const productRes = await FetchTrigger({
+        url: FETCH_PRODUCTLIST,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (productRes?.data) {
+        setProductData(productRes.data);
+      }
+    } catch (err) {
+      console.error("Error fetching product data:", err);
+    }
+  };
+
   const fetchOrderData = async () => {
     try {
       const response = await FetchTrigger({
-        url: `${ORDER_LIST}/${orderId}`,
+        url: `${GUEST_USER_ORDER_BY_ID}/${orderId}`,
         headers: { Authorization: `Bearer ${token}` },
       });
+      setCompanyData(response.data[0]);
+      setOrderData(response.order);
+      const enrichedOrderSub = response.orderSub.map((subItem) => {
+        const matchedProduct = ProductData.find(
+          (prod) => prod.id === subItem.product_id
+        );
+        return {
+          ...subItem,
+          product_names: matchedProduct || {},
+        };
+      });
 
-      setOrderData(response.data);
+      setOrderDataSub(enrichedOrderSub);
     } catch (err) {
-      console.log(err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
   useEffect(() => {
-    fetchOrderData();
-  }, [orderId]);
+    if (token) {
+      fetchData();
+    }
+  }, []);
 
+  useEffect(() => {
+    if (ProductData.length && orderId) {
+      fetchOrderData();
+    }
+  }, [ProductData, orderId]);
   const calculateTotal = () => {
-    if (!orderData?.subs) return 0;
-    return orderData.subs.reduce((sum, item) => {
+    if (!orderDataSub) return 0;
+    return orderDataSub.reduce((sum, item) => {
       return sum + parseFloat(item.product_price) * parseInt(item.product_qnty);
     }, 0);
   };
@@ -83,7 +113,7 @@ const OrderView = () => {
 
   const handleOrderCopy = useReactToPrint({
     content: () => orderRef.current,
-    documentTitle: "order-copy",
+    documentTitle: "guest-order-copy",
     pageStyle: `
       @page {
         size: auto;
@@ -109,12 +139,11 @@ const OrderView = () => {
       </div>
     );
   if (error) return <div>Error: {error}</div>;
-  if (!orderData) return <div>No order data found</div>;
-
+  if (!orderData) return <div>No guest order data found</div>;
   return (
     <>
       <Card
-        title={<CardHeader title="View Order" />}
+        title={<CardHeader title="Guest View Order" />}
         extra={
           <div className="flex items-center gap-2">
             <Tooltip title="Print">
@@ -132,7 +161,7 @@ const OrderView = () => {
                 shape="circle"
                 icon={<FilePdfOutlined />}
                 onClick={() =>
-                  downloadPDF("printable-section", "Order Report.pdf")
+                  downloadPDF("printable-section", "Guest User Report.pdf")
                 }
               />
             </Tooltip>
@@ -147,7 +176,7 @@ const OrderView = () => {
           <div ref={orderRef} id="printable-section">
             <div className="relative bg-white max-w-5xl mx-auto p-6 border print:border-none border-gray-400 rounded-none space-y-8">
               <div className="absolute right-4 top-4 bg-blue-100 text-blue-800 font-semibold text-xs px-3 py-1 rounded-lg  border border-blue-300">
-                Order Copy
+                Guest Order Copy
               </div>
 
               <div className="flex gap-6 items-center border-b border-gray-400 rounded-bl-lg">
@@ -195,17 +224,16 @@ const OrderView = () => {
                 </div>
               </div>
 
-              {/* Order info */}
               <div className="flex justify-between">
                 <div className="">
                   <div className="text-gray-700 ">
                     <p className="font-medium pb-0 ">
-                      {orderData.company_name}
+                      {companyData.firm_name || ""}
                     </p>
                     <p className="w-96 break-words">
-                      {orderData.delivery_address}
+                      {companyData.address || ""}
                     </p>
-                    <p> {orderData.mobile_no}</p>
+                    <p> {companyData.mobile || ""}</p>
                   </div>
                 </div>
 
@@ -219,7 +247,6 @@ const OrderView = () => {
                 </div>
               </div>
 
-              {/* Order items table */}
               <div className="border-b border-gray-400 pb-2">
                 <table className="w-full text-sm text-left text-gray-700">
                   <thead className="bg-gray-50 border-b border-gray-400">
@@ -231,7 +258,7 @@ const OrderView = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {orderData.subs.map((item) => (
+                    {orderDataSub.map((item) => (
                       <tr key={item.id} className="">
                         <td className="px-4 py-2">
                           <span className="capitalize">
@@ -262,7 +289,6 @@ const OrderView = () => {
                 </table>
               </div>
 
-              {/* Totals */}
               <div className="flex justify-between border-b border-gray-400 pb-1">
                 <div>
                   <p className="font-medium">Amount in words:</p>
@@ -295,7 +321,6 @@ const OrderView = () => {
                 </div>
               </div>
 
-              {/* Delivery and signature */}
               <div className="flex justify-between pt-4">
                 <div className="w-1/2">
                   <h3 className="font-semibold">Delivery Instructions:</h3>
@@ -318,4 +343,4 @@ const OrderView = () => {
   );
 };
 
-export default OrderView;
+export default GuestUserView;

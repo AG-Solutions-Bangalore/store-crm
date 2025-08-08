@@ -33,6 +33,7 @@ import OrderView from "./pages/order/OrderView";
 import Dashboard from "./pages/home/Dashbord";
 import Pos from "./pages/pos/Pos";
 import TeamList from "./pages/team/Team";
+import GuestUserView from "./pages/guestuserorder/GuestUserView";
 
 function App() {
   return (
@@ -51,7 +52,7 @@ function App() {
             <ProtectedLayout>
               <Routes>
                 <Route path="/home" element={<Dashboard />} />
-            
+
                 <Route path="/user-form" element={<UserPage />} />
                 <Route path="/user-create" element={<UserForm />} />
                 <Route path="/user-edit/:id" element={<UserForm />} />
@@ -70,6 +71,10 @@ function App() {
                 <Route
                   path="/guest-user-order"
                   element={<GuestUserOrderList />}
+                />
+                <Route
+                  path="/guest-user-view/:orderid"
+                  element={<GuestUserView />}
                 />
                 <Route
                   path="/guest-order-form"

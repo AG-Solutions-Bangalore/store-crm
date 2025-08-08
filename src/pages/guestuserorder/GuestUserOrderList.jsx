@@ -16,6 +16,9 @@ const GuestUserOrderList = () => {
   const { trigger, loading: isMutating } = useApiMutation();
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
+  const handleView = (user) => {
+    navigate(`/guest-user-view/${user.id}`);
+  };
   const fetchUser = async () => {
     const res = await trigger({
       url: GUEST_USER_ORDER_LIST,
@@ -93,7 +96,11 @@ const GuestUserOrderList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <GuestUserOrderTable users={filteredUsers} onEdit={handleEdit} />
+          <GuestUserOrderTable
+            users={filteredUsers}
+            onEdit={handleEdit}
+            handleView={handleView}
+          />
         ) : (
           <div className="text-center text-gray-500 py-20">No users found.</div>
         )}
