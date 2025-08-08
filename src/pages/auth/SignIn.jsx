@@ -94,7 +94,12 @@ const SignIn = () => {
                   { required: true, message: "Please enter your mobile no" },
                 ]}
               >
-                <Input size="large" placeholder="Enter  mobile no" autoFocus />
+                <Input
+                  size="large"
+                  placeholder="Enter  mobile no"
+                  autoFocus
+                  maxLength={10}
+                />
               </Form.Item>
 
               <Form.Item
@@ -108,7 +113,11 @@ const SignIn = () => {
                   { required: true, message: "Please enter your password" },
                 ]}
               >
-                <Input.Password size="large" placeholder="Enter password" />
+                <Input.Password
+                  size="large"
+                  placeholder="Enter password"
+                  maxLength={20}
+                />
               </Form.Item>
 
               <Form.Item>
