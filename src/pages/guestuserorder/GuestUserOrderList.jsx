@@ -65,14 +65,14 @@ const GuestUserOrderList = () => {
             <Option value="pending">Pending</Option>
             <Option value="completed">Completed</Option>
           </Select>
-          <Button
+          {/* <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={handleAddUser}
             className="bg-[#006666]"
           >
             Add Guest Order
-          </Button>
+          </Button> */}
         </div>
       </div>
       <div className="min-h-[26rem]">

@@ -301,32 +301,6 @@ const ProductForm = () => {
             </div>
           }
         >
-          <div className="flex justify-between items-center mb-4">
-            {/* <h2 className="text-2xl font-bold text-[#006666]">
-            {isEditMode ? "Edit" : "Create"} Product
-          </h2> */}
-            {/* <div className="flex items-center gap-3 mb-4 ">
-            <div
-              className="bg-[#e6f2f2] rounded-full p-2 cursor-pointer"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeftOutlined style={{ color: "#006666" }} />
-            </div>
-            <h2 className="text-2xl font-bold text-[#006666] mb-0">
-              {isEditMode ? "Edit" : "Create"} Product
-            </h2>
-          </div> */}
-          </div>
-          {/* {isEditMode && (
-          <Form.Item
-            name="is_active"
-            label="Active"
-            valuePropName="checked"
-            className="mb-0"
-          >
-            <Switch />
-          </Form.Item>
-        )} */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <Form.Item
               name="category_ids"
@@ -375,188 +349,191 @@ const ProductForm = () => {
             <Form.Item name="product_brand" label="Brand">
               <Input maxLength={100} />
             </Form.Item>
-            <Form.Item
-              name="product_unit_value"
-              label={
-                <span>
-                  Unit Value<span className="text-red-500">*</span>
-                </span>
-              }
-              rules={[
-                { required: true, message: "Unit value is required" },
-                {
-                  pattern: /^\d+(\.\d{1,2})?$/,
-                  message: "Enter a valid number (e.g. 34.4)",
-                },
-              ]}
-            >
-              <Input
-                inputMode="decimal"
-                onKeyDown={(e) => {
-                  const allowedKeys = [
-                    "Backspace",
-                    "Tab",
-                    "ArrowLeft",
-                    "ArrowRight",
-                    "Delete",
-                  ];
-                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+            <div className="grid grid-cols-2 gap-2 ">
+              <Form.Item
+                name="product_unit_value"
+                label={
+                  <span>
+                    Unit Value<span className="text-red-500">*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: "Unit value is required" },
+                  {
+                    pattern: /^\d+(\.\d{1,2})?$/,
+                    message: "Enter a valid number (e.g. 34.4)",
+                  },
+                ]}
+              >
+                <Input
+                  inputMode="decimal"
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
 
-                  if (
-                    allowedKeys.includes(e.key) ||
-                    isCtrlCombo ||
-                    /[0-9.]/.test(e.key)
-                  ) {
-                    return;
-                  }
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /[0-9.]/.test(e.key)
+                    ) {
+                      return;
+                    }
 
-                  e.preventDefault();
-                }}
-                maxLength={8}
-              />
-            </Form.Item>
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
+              </Form.Item>
 
-            <Form.Item
-              name="product_unit_id"
-              label={
-                <span>
-                  Unit<span className="text-red-500">*</span>
-                </span>
-              }
-              rules={[{ required: true, message: "Please select a unit" }]}
-            >
-              <Select placeholder="Select Unit">
-                {unitData.map((unit) => (
-                  <Select.Option key={unit.id} value={unit.id}>
-                    {unit.unit}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
+              <Form.Item
+                name="product_unit_id"
+                label={
+                  <span>
+                    Unit<span className="text-red-500">*</span>
+                  </span>
+                }
+                rules={[{ required: true, message: "Select a unit" }]}
+              >
+                <Select placeholder="Select Unit">
+                  {unitData.map((unit) => (
+                    <Select.Option key={unit.id} value={unit.id}>
+                      {unit.unit}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </div>
+            <div className="col-span-2 grid grid-cols-3 gap-4">
+              <Form.Item
+                name="product_mrp"
+                label={
+                  <span>
+                    MRP<span className="text-red-500">*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: "MRP is required" },
+                  {
+                    pattern: /^\d+(\.\d{1,2})?$/,
+                    message: "Enter a valid number (e.g. 34.4)",
+                  },
+                ]}
+              >
+                <Input
+                  inputMode="decimal"
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
 
-            <Form.Item
-              name="product_mrp"
-              label={
-                <span>
-                  MRP<span className="text-red-500">*</span>
-                </span>
-              }
-              rules={[
-                { required: true, message: "MRP is required" },
-                {
-                  pattern: /^\d+(\.\d{1,2})?$/,
-                  message: "Enter a valid number (e.g. 34.4)",
-                },
-              ]}
-            >
-              <Input
-                inputMode="decimal"
-                onKeyDown={(e) => {
-                  const allowedKeys = [
-                    "Backspace",
-                    "Tab",
-                    "ArrowLeft",
-                    "ArrowRight",
-                    "Delete",
-                  ];
-                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /[0-9.]/.test(e.key)
+                    ) {
+                      return;
+                    }
 
-                  if (
-                    allowedKeys.includes(e.key) ||
-                    isCtrlCombo ||
-                    /[0-9.]/.test(e.key)
-                  ) {
-                    return;
-                  }
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
+              </Form.Item>
 
-                  e.preventDefault();
-                }}
-                maxLength={8}
-              />
-            </Form.Item>
+              <Form.Item
+                name="product_selling_price"
+                label={
+                  <span>
+                    Selling Price<span className="text-red-500">*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: "Selling price is required" },
+                  {
+                    pattern: /^\d+(\.\d{1,2})?$/,
+                    message: "Enter a valid number (e.g. 34.4)",
+                  },
+                ]}
+              >
+                <Input
+                  inputMode="decimal"
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
 
-            <Form.Item
-              name="product_selling_price"
-              label={
-                <span>
-                  Selling Price<span className="text-red-500">*</span>
-                </span>
-              }
-              rules={[
-                { required: true, message: "Selling price is required" },
-                {
-                  pattern: /^\d+(\.\d{1,2})?$/,
-                  message: "Enter a valid number (e.g. 34.4)",
-                },
-              ]}
-            >
-              <Input
-                inputMode="decimal"
-                onKeyDown={(e) => {
-                  const allowedKeys = [
-                    "Backspace",
-                    "Tab",
-                    "ArrowLeft",
-                    "ArrowRight",
-                    "Delete",
-                  ];
-                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /[0-9.]/.test(e.key)
+                    ) {
+                      return;
+                    }
 
-                  if (
-                    allowedKeys.includes(e.key) ||
-                    isCtrlCombo ||
-                    /[0-9.]/.test(e.key)
-                  ) {
-                    return;
-                  }
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
+              </Form.Item>
 
-                  e.preventDefault();
-                }}
-                maxLength={8}
-              />
-            </Form.Item>
+              <Form.Item
+                name="product_spl_offer_price"
+                label="Offer Price"
+                rules={[
+                  {
+                    pattern: /^\d+(\.\d{1,2})?$/,
+                    message: "Enter a valid number (e.g. 34.4)",
+                  },
+                ]}
+              >
+                <Input
+                  inputMode="decimal"
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                    ];
+                    const isCtrlCombo = e.ctrlKey || e.metaKey;
 
-            <Form.Item
-              name="product_spl_offer_price"
-              label="Offer Price"
-              rules={[
-                {
-                  pattern: /^\d+(\.\d{1,2})?$/,
-                  message: "Enter a valid number (e.g. 34.4)",
-                },
-              ]}
-            >
-              <Input
-                inputMode="decimal"
-                onKeyDown={(e) => {
-                  const allowedKeys = [
-                    "Backspace",
-                    "Tab",
-                    "ArrowLeft",
-                    "ArrowRight",
-                    "Delete",
-                  ];
-                  const isCtrlCombo = e.ctrlKey || e.metaKey;
+                    if (
+                      allowedKeys.includes(e.key) ||
+                      isCtrlCombo ||
+                      /[0-9.]/.test(e.key)
+                    ) {
+                      return;
+                    }
 
-                  if (
-                    allowedKeys.includes(e.key) ||
-                    isCtrlCombo ||
-                    /[0-9.]/.test(e.key)
-                  ) {
-                    return;
-                  }
-
-                  e.preventDefault();
-                }}
-                maxLength={8}
-              />
-            </Form.Item>
+                    e.preventDefault();
+                  }}
+                  maxLength={8}
+                />
+              </Form.Item>
+            </div>
             <Form.Item
               name="product_short_description"
               label="Description"
-              className="md:col-span-4"
+              className="md:col-span-2"
             >
-              <Input.TextArea rows={3} />
+              <Input.TextArea rows={1} />
             </Form.Item>
           </div>
 
@@ -661,7 +638,7 @@ const ProductForm = () => {
                             onChange={(checked) =>
                               updateProductField(index, "is_default", checked)
                             }
-                            disabled={fields.length === 1}
+                            disabled={isEditMode ? fields.length === 1 : ""}
                           />
                         </Form.Item>
 
@@ -676,7 +653,7 @@ const ProductForm = () => {
                               onChange={(checked) =>
                                 updateProductField(index, "is_active", checked)
                               }
-                              disabled={fields.length === 1}
+                              disabled={isEditMode ? fields.length === 1 : ""}
                             />
                           </Form.Item>
                         )}
