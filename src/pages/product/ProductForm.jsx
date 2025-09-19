@@ -290,10 +290,10 @@ const ProductForm = () => {
           extra={
             <div className="flex items-center gap-2">
               {isEditMode && (
-                <Form.Item 
+                <Form.Item
                   name="is_active"
                   valuePropName="checked"
-                style={{marginBottom:"0px"}}
+                  style={{ marginBottom: "0px" }}
                 >
                   <Switch />
                 </Form.Item>
@@ -564,7 +564,7 @@ const ProductForm = () => {
             {(fields, { add, remove }) => (
               <>
                 <div className="flex justify-between items-center mb-4">
-                  <strong>Product Sub Variants</strong>
+                  <strong>Product Sub Images</strong>
                   <Button
                     type="dashed"
                     icon={<PlusOutlined />}
@@ -580,7 +580,7 @@ const ProductForm = () => {
                       add();
                     }}
                   >
-                    Add Product
+                    Add Images
                   </Button>
                 </div>
 
@@ -661,6 +661,7 @@ const ProductForm = () => {
                             onChange={(checked) =>
                               updateProductField(index, "is_default", checked)
                             }
+                            disabled={fields.length === 1}
                           />
                         </Form.Item>
 
@@ -675,6 +676,7 @@ const ProductForm = () => {
                               onChange={(checked) =>
                                 updateProductField(index, "is_active", checked)
                               }
+                              disabled={fields.length === 1}
                             />
                           </Form.Item>
                         )}

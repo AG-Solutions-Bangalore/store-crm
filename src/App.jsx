@@ -34,6 +34,7 @@ import Dashboard from "./pages/home/Dashbord";
 import Pos from "./pages/pos/Pos";
 import TeamList from "./pages/team/Team";
 import GuestUserView from "./pages/guestuserorder/GuestUserView";
+import SupplierList from "./pages/supplier/SupplierList";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
                 <Route path="/user-create" element={<UserForm />} />
                 <Route path="/user-edit/:id" element={<UserForm />} />
                 <Route path="/user" element={<UserList />} />
+                <Route path="/supplier" element={<SupplierList />} />
                 <Route path="/team" element={<TeamList />} />
                 <Route path="/security" element={<SecurityList />} />
                 <Route path="/staff" element={<StaffList />} />
@@ -101,8 +103,6 @@ function App() {
                   path="/report-product-category"
                   element={<ProductCategoryReport />}
                 />
-
-                {/* Add more protected routes here */}
               </Routes>
             </ProtectedLayout>
           }

@@ -6,6 +6,7 @@ import usetoken from "../../api/usetoken";
 import CategoryCard from "../../components/category/CategoryCard";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import CategoryForm from "./CategoryForm";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 const { Search } = Input;
 const CategoryList = () => {
   const { message } = App.useApp();
@@ -23,36 +24,36 @@ const CategoryList = () => {
     userImageBase: "",
     noImage: "",
   });
-  const fetchUser = async () => {
-    const queryParams = new URLSearchParams();
-    const term = searchTerm.trim().toLowerCase();
+  const queryParams = new URLSearchParams();
+  const term = searchTerm.trim().toLowerCase();
 
-    if ("inactive".startsWith(term) && term.length >= 4) {
-      queryParams.append("search", "false");
-    } else if ("active".startsWith(term) && term.length >= 4) {
-      queryParams.append("search", "true");
-    } else {
-      if (term) queryParams.append("search", term);
-    }
+  if ("inactive".startsWith(term) && term.length >= 4) {
+    queryParams.append("search", "false");
+  } else if ("active".startsWith(term) && term.length >= 4) {
+    queryParams.append("search", "true");
+  } else {
+    if (term) queryParams.append("search", term);
+  }
 
-    queryParams.append("page", pageno);
+  queryParams.append("page", pageno);
+  const {
+    data,
+    isLoading: loading,
+    refetch,
+  } = useGetApiMutation({
+    url: `${CATEGORY_LIST}?${queryParams.toString()}`,
+    queryKey: ["users", pageno, term],
+  });
+  useEffect(() => {
+    if (data?.data?.data) {
+      setUsers(data?.data?.data || []);
+      setTotalPages(data.last_page || 1);
+      setPageSize(data.per_page || 10);
 
-    const res = await trigger({
-      url: `${CATEGORY_LIST}?${queryParams.toString()}`,
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res) {
-      const responseData = res.data;
-
-      setUsers(responseData?.data || []);
-      setTotalPages(responseData?.last_page || 1);
-      setPageSize(responseData?.per_page || 10);
-
-      const userImageObj = res.image_url?.find(
+      const userImageObj = data.image_url?.find(
         (img) => img.image_for === "Category"
       );
-      const noImageObj = res.image_url?.find(
+      const noImageObj = data.image_url?.find(
         (img) => img.image_for === "No Image"
       );
 
@@ -61,11 +62,7 @@ const CategoryList = () => {
         noImage: noImageObj?.image_url || "",
       });
     }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, [pageno, searchTerm]);
+  }, [pageno, searchTerm, data]);
 
   const handleToggleStatus = async (user) => {
     try {
@@ -141,11 +138,11 @@ const CategoryList = () => {
           </div>
         </div>
 
-        {isMutating ? (
+        {isMutating || loading ? (
           <div className="flex justify-center py-20">
             <Spin size="large" />
           </div>
-        ) : users.length > 0 ? (
+        ) : data?.data?.data?.length > 0 ? (
           <>
             <div className="min-h-[22rem]">
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
@@ -167,7 +164,7 @@ const CategoryList = () => {
           </div>
         )}
         <div className="flex justify-center mt-8">
-          {!isMutating && users.length > 0 && (
+          {!isMutating && data?.data?.data?.length > 0 && (
             <div className="flex justify-center mt-8">
               <Pagination
                 current={pageno}
@@ -185,7 +182,7 @@ const CategoryList = () => {
           open={open}
           setOpenDialog={setopenDialog}
           userId={selectedId}
-          fetchUser={fetchUser}
+          fetchUser={refetch}
         />
       )}
     </>

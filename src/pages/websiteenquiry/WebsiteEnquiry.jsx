@@ -1,34 +1,18 @@
 import { Card, Input, Spin } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { WEBSITE_ENQUIRY } from "../../api";
-import usetoken from "../../api/usetoken";
 import WebsiteTable from "../../components/websiteenquiry/WebsiteTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 const WebsiteEnquiry = () => {
-  const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
-  const { trigger, loading: isMutating } = useApiMutation();
-  const [website, setWebsite] = useState([]);
-
-  const fetchUser = async () => {
-    const res = await trigger({
-      url: WEBSITE_ENQUIRY,
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (Array.isArray(res.data)) {
-      setWebsite(res.data);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const filteredUsers = website
-    .map((user) => {
+  const { data, isLoading: isMutating } = useGetApiMutation({
+    url: WEBSITE_ENQUIRY,
+    queryKey: ["websitelist"],
+  });
+  const filteredUsers = data?.data
+    ?.map((user) => {
       const flatString = Object.values(user)
         .filter((v) => typeof v === "string" || typeof v === "number")
         .join(" ")

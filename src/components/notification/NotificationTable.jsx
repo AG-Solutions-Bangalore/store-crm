@@ -3,7 +3,7 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { Button, Image, Space, Tag, Tooltip } from "antd";
+import { Button, Image, Skeleton, Space, Tag, Tooltip } from "antd";
 import STTable from "../STTable/STTable";
 
 const NotificationTable = ({ users, onEdit, imageUrls }) => {
@@ -42,6 +42,13 @@ const NotificationTable = ({ users, onEdit, imageUrls }) => {
             }
             alt="Slider"
             className="object-cover"
+            wrapperClassName="w-full h-full"
+            placeholder={
+              <Skeleton.Image
+                active
+                className="!w-full !h-full !flex !items-center !justify-center rounded-lg"
+              />
+            }
           />
         </div>
       ),
@@ -71,9 +78,7 @@ const NotificationTable = ({ users, onEdit, imageUrls }) => {
         const isActive = user.is_active === "true" || user.is_active === true;
         return (
           <div className="flex justify-center">
-            <Tag
-              color={isActive ? "green" : "red"}
-            >
+            <Tag color={isActive ? "green" : "red"}>
               {isActive ? "Active" : "Inactive"}
             </Tag>
           </div>

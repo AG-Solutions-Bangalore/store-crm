@@ -5,33 +5,32 @@ import { useNavigate } from "react-router-dom";
 import { UPDATE_STATUS, USER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import UserTable from "../../components/user/UserTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
 import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 const { Option } = Select;
-const TeamList = () => {
+const SupplierList = () => {
   const { message } = App.useApp();
   const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
-  const { trigger, loading: isMutating } = useApiMutation();
+  const [users, setUsers] = useState([]);
   const [imageUrls, setImageUrls] = useState({
     userImageBase: "",
     noImage: "",
   });
   const navigate = useNavigate();
-  const {
-    data,
-    isLoading: loading,
-    refetch,
-  } = useGetApiMutation({
+
+
+  const { data, isLoading: isMutating } = useGetApiMutation({
     url: USER_LIST,
-    queryKey: ["teamlist"],
+    queryKey: ["supplierlist"],
   });
 
   useEffect(() => {
     if (data?.data) {
+      setUsers(data?.data || []);
+
       const userImageObj = data.image_url?.find(
         (img) => img.image_for == "User"
       );
@@ -48,27 +47,30 @@ const TeamList = () => {
   const handleEdit = (user) => {
     navigate(`/user-edit/${user.id}`, {
       state: {
-        title: "Team",
-        navigatedata: "/team",
+        title: "Supplier",
+        navigatedata: "/supplier",
+        user_type: 7,
       },
     });
   };
   const handleAddUser = () => {
     navigate("/user-create", {
       state: {
-        title: "Team",
-        navigatedata: "/team",
+        title: "Supplier",
+        navigatedata: "/supplier",
+        user_type: 7,
       },
     });
   };
 
-  const filteredUsers = data?.data
-    ?.filter((user) => {
-      if (![2, 3, 4].includes(user.user_type)) return false;
+  const filteredUsers = users
+    .filter((user) => {
+      if (user.user_type !== 7) return false;
 
       if (statusFilter === "active" && user.is_active !== "true") return false;
       if (statusFilter === "inactive" && user.is_active !== "false")
         return false;
+
       return true;
     })
     .map((user) => {
@@ -98,7 +100,10 @@ const TeamList = () => {
       });
 
       if (res?.code === 200 || res?.code === 201) {
-        refetch();
+        const updatedUsers = users.map((u) =>
+          u.id === user.id ? { ...u, is_active: newStatus } : u
+        );
+        setUsers(updatedUsers);
         message.success(
           `User marked as ${newStatus === "true" ? "Active" : "Inactive"}`
         );
@@ -113,7 +118,7 @@ const TeamList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-[#006666]">Team List</h2>
+        <h2 className="text-2xl font-bold text-[#006666]">Supplier List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -138,12 +143,12 @@ const TeamList = () => {
             onClick={handleAddUser}
             className="bg-[#006666]"
           >
-            Add Team
+            Add Supplier
           </Button>
         </div>
       </div>
       <div className="min-h-[26rem]">
-        {isMutating || loading ? (
+        {isMutating ? (
           <div className="flex justify-center py-20">
             <Spin size="large" />
           </div>
@@ -162,4 +167,4 @@ const TeamList = () => {
   );
 };
 
-export default TeamList;
+export default SupplierList;

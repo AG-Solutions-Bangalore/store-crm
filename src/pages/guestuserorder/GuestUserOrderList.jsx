@@ -1,39 +1,24 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Input, Select, Spin } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GUEST_USER_ORDER_LIST } from "../../api";
-import usetoken from "../../api/usetoken";
 import GuestUserOrderTable from "../../components/guestuserorderTable/GuestUserOrderTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 const { Option } = Select;
 const GuestUserOrderList = () => {
-  const token = usetoken();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
-  const { trigger, loading: isMutating } = useApiMutation();
-  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
   const handleView = (user) => {
     navigate(`/guest-user-view/${user.id}`);
   };
-  const fetchUser = async () => {
-    const res = await trigger({
-      url: GUEST_USER_ORDER_LIST,
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (Array.isArray(res.data)) {
-      setUsers(res.data);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
+  const { data, isLoading: isMutating } = useGetApiMutation({
+    url: GUEST_USER_ORDER_LIST,
+    queryKey: ["guestorderlist"],
+  });
   const handleEdit = (user) => {
     navigate(`/guest-order-form/${user.id}`);
   };
@@ -42,7 +27,7 @@ const GuestUserOrderList = () => {
     navigate("/guest-order-form");
   };
 
-  const filteredUsers = users
+  const filteredUsers = data?.data
     .filter((user) => {
       if (!statusFilter) return true; // No filter = show all
       return user.order_status === statusFilter;

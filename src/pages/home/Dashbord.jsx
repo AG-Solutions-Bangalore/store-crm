@@ -1,6 +1,6 @@
 import { Card, Spin, Table, Typography } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -10,31 +10,17 @@ import {
   YAxis,
 } from "recharts";
 import { DASHBOARD } from "../../api";
-import useToken from "../../api/usetoken";
 import OrderStatusTag from "../../components/common/OrderStatusTag";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 const { Title } = Typography;
-import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const [data, setData] = useState(null);
-  const { trigger, loading: isMutating } = useApiMutation();
-  const token = useToken();
+
   const navigate = useNavigate();
-  const fetchDashboard = async () => {
-    const res = await trigger({
-      url: DASHBOARD,
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res?.code === 201) {
-      setData(res);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
+  const { data: data, isMutating } = useGetApiMutation({
+    url: DASHBOARD,
+    queryKey: ["dashboard"],
+  });
   const monthlyData = data?.monthly || [];
 
   const cardItems = [

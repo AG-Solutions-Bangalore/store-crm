@@ -5,7 +5,7 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Image, Popconfirm, Tag } from "antd";
+import { Button, Card, Image, Popconfirm, Skeleton, Tag } from "antd";
 
 const CategoryCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const {
@@ -37,7 +37,14 @@ const CategoryCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
           src={avatarSrc}
           alt="Category"
           className="w-full h-full object-cover"
+          wrapperClassName="w-full h-full"
           fallback={imageUrls.noImage}
+          placeholder={
+            <Skeleton.Image
+              active
+              className="!w-full !h-full !flex !items-center !justify-center rounded-lg"
+            />
+          }
         />
       </div>
 
