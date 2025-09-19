@@ -1,36 +1,26 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { App, Button, Card, Input, Spin } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DELETE_SUB_LIST, ORDER_LIST } from "../../api";
+import { ORDER_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import OrderTable from "../../components/order/OrderTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 const OrderList = () => {
   const token = usetoken();
   const { message } = App.useApp();
   const [searchTerm, setSearchTerm] = useState("");
-  const { trigger, loading: isMutating } = useApiMutation();
-  const { trigger: DeleteTrigger, loading: deleteloading } = useApiMutation();
-  const [users, setUsers] = useState([]);
+  const { trigger: DeleteTrigger } = useApiMutation();
   const navigate = useNavigate();
-  const fetchOrders = async () => {
-    const res = await trigger({
-      url: ORDER_LIST,
-      headers: { Authorization: `Bearer ${token}` },
-    });
 
-    if (Array.isArray(res.data)) {
-      setUsers(res.data);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
+  const { data, isLoading: isMutating } = useGetApiMutation({
+    url: ORDER_LIST,
+    queryKey: ["orderlist"],
+  });
+  console.log(data);
   const handleView = (user) => {
     navigate(`/order-view/${user.id}`);
   };
@@ -42,7 +32,7 @@ const OrderList = () => {
     navigate("/order-form");
   };
 
-  const filteredUsers = users
+  const filteredUsers = data?.data
 
     .map((user) => {
       const flatString = Object.values(user)

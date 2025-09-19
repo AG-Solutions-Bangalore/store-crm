@@ -7,15 +7,13 @@ import { COMPANY_DATA, DOT_ENV, PANEL_CHECK } from "../api";
 import usetoken from "../api/usetoken";
 import { useApiMutation } from "../hooks/useApiMutation";
 import { logout } from "../store/auth/authSlice";
+import { setCompanyDetails, setCompanyImage } from "../store/auth/companySlice";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import { persistor } from "../store/store";
-import useLogout from "../hooks/useLogout";
-import { setCompanyDetails, setCompanyImage } from "../store/auth/companySlice";
 
 const secretKey = import.meta.env.VITE_SECRET_KEY;
 const validationKey = import.meta.env.VITE_SECRET_VALIDATION;
 const AppInitializer = ({ children }) => {
-  const Logout = useLogout();
 
   const { trigger } = useApiMutation();
   const { message } = App.useApp();
@@ -65,7 +63,7 @@ const AppInitializer = ({ children }) => {
       } catch (error) {
         console.error("❌ App Initialization Error:", error.message);
 
-        Logout();
+        // Logout();
         dispatch(logout());
         setTimeout(() => persistor.purge(), 1000);
 

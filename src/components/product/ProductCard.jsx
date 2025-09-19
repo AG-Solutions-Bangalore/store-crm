@@ -5,7 +5,7 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Carousel, Image, Popconfirm, Tag } from "antd";
+import { Button, Card, Carousel, Image, Popconfirm, Tag, Skeleton } from "antd";
 
 const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
   const {
@@ -14,7 +14,6 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
     product_unit_value,
     unit_name,
     is_active,
-    _match,
     product_mrp,
     product_selling_price,
     product_spl_offer_price,
@@ -23,19 +22,13 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
 
   const isActive = is_active == "true";
   const offerPrice = parseFloat(product_spl_offer_price);
-  const sellingPrice = parseFloat(product_selling_price);
 
-  // const discount =
-  //   offerPrice > 0 && sellingPrice > offerPrice
-  //     ? (sellingPrice - offerPrice).toFixed(2)
-  //     : null;
   return (
     <Card
       hoverable
       className="relative rounded-xl shadow border border-gray-100 transition-all duration-200 hover:shadow-lg"
       styles={{ body: { padding: "0rem" } }}
     >
-  
       {offerPrice > 0 && (
         <div className="absolute left-0 top-5 rotate-[-45deg] bg-gradient-to-r from-red-600 to-red-400 text-white px-4 py-1 text-xs font-bold shadow-lg tracking-wider z-10 rounded-sm">
           OFFER
@@ -69,8 +62,15 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
                   <Image
                     src={src}
                     alt={`Product image ${index + 1}`}
-                    className="object-cover w-full h-full"
-                    // preview={false}
+                    preview={true}
+                    className="w-full h-full object-cover rounded-lg"
+                    wrapperClassName="w-full h-full"
+                    placeholder={
+                      <Skeleton.Image
+                        active
+                        className="!w-full !h-full !flex !items-center !justify-center rounded-lg"
+                      />
+                    }
                   />
                 </div>
               );

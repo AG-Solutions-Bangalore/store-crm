@@ -1,15 +1,12 @@
 import {
   CheckCircleTwoTone,
   CloseCircleTwoTone,
-  EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
+  EditOutlined
 } from "@ant-design/icons";
-import { Button, Card, Image, Popconfirm, Tag } from "antd";
+import { Button, Image, Skeleton, Tag } from "antd";
 
 const SliderCard = ({ users, onEdit, imageUrls }) => {
-  const { id, slider_image, slider_sort, is_active, _match } =
-    users;
+  const { id, slider_image, slider_sort, is_active, _match } = users;
 
   const isActive = is_active === "true";
 
@@ -69,6 +66,13 @@ const SliderCard = ({ users, onEdit, imageUrls }) => {
           alt="Category"
           className="w-full h-full object-cover"
           fallback={imageUrls.noImage}
+          wrapperClassName="w-full h-full"
+          placeholder={
+            <Skeleton.Image
+              active
+              className="!w-full !h-full !flex !items-center !justify-center rounded-lg"
+            />
+          }
         />
       </div>
     </div>

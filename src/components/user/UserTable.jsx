@@ -4,7 +4,15 @@ import {
   EyeOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Popconfirm, Space, Tag, Tooltip } from "antd";
+import {
+  Avatar,
+  Button,
+  Popconfirm,
+  Skeleton,
+  Space,
+  Tag,
+  Tooltip,
+} from "antd";
 import STTable from "../STTable/STTable";
 
 const UserTable = ({ users, onToggleStatus, onEdit, imageUrls, type }) => {
@@ -100,6 +108,7 @@ const UserTable = ({ users, onToggleStatus, onEdit, imageUrls, type }) => {
                 2: { label: "Security", color: "volcano" },
                 3: { label: "Staff", color: "purple" },
                 4: { label: "Delivery", color: "green" },
+                7: { label: "Supplier", color: "volcano" },
               };
 
               const tagInfo = userTypeMap[user_type] || {

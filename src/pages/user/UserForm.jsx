@@ -16,7 +16,8 @@ const UserForm = () => {
   const token = usetoken();
   const { id } = useParams();
   const location = useLocation();
-  const { title, navigatedata } = location.state;
+  const { title, navigatedata, user_type } = location.state;
+  console.log(user_type);
   const isEditMode = Boolean(id);
   const { trigger: FetchTrigger, loading: fetchloading } = useApiMutation();
   const { trigger: SubmitTrigger, loading: submitloading } = useApiMutation();
@@ -146,7 +147,9 @@ const UserForm = () => {
       formData.append("email", values.email);
       formData.append("mobile", values.mobile);
       formData.append("whatsapp", values.whatsapp || "");
-      // formData.append("user_type", String(user_type));
+      if (user_type == 7) {
+        formData.append("user_type", user_type);
+      }
       if (isEditMode) {
         formData.append("is_active", values.is_active ? "true" : "false");
       }

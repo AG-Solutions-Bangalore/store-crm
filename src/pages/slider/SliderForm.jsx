@@ -7,6 +7,7 @@ import {
   Image,
   Input,
   Modal,
+  Skeleton,
   Space,
   Spin,
   Switch,
@@ -158,48 +159,45 @@ const SliderForm = ({ open, setOpenDialog, userId, fetchUser }) => {
             requiredMark={false}
             className="mt-4"
           >
-            <Space
-              className="mb-4 w-full justify-between"
-              direction="horizontal"
-            >
+            <div className="mb-4 flex w-full justify-between shadow-md rounded-md border border-lime-300">
               {isEditMode && (
-                <>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="relative w-full h-[200px] border rounded-md overflow-hidden">
-                      <Image
-                        // src={
-                        //   sliderImageData.preview ||
-                        //   (initialData.slider_image
-                        //     ? initialData.slider_image.startsWith("data:image")
-                        //       ? initialData.slider_image
-                        //       : `${imageBaseUrl}${initialData.slider_image}`
-                        //     : noImageUrl)
-                        // }
-                        src={
-                          sliderImageData.preview ||
-                          (initialData.slider_image
-                            ? initialData.slider_image.startsWith("data:image")
-                              ? initialData.slider_image
-                              : `${imageBaseUrl}${
-                                  initialData.slider_image
-                                }?v=${Math.random()}`
-                            : noImageUrl)
-                        }
-                        alt="Slider"
-                        className="w-full h-full object-cover"
-                      />
+                <div className="flex flex-col gap-2 w-full">
+                  <div className="relative w-full h-[200px] rounded-md overflow-hidden">
+                    <Image
+                      src={
+                        sliderImageData.preview ||
+                        (initialData.slider_image
+                          ? initialData.slider_image.startsWith("data:image")
+                            ? initialData.slider_image
+                            : `${imageBaseUrl}${
+                                initialData.slider_image
+                              }?v=${Math.random()}`
+                          : noImageUrl)
+                      }
+                      alt="Slider"
+                      className="w-full h-full object-cover"
+                      wrapperClassName="w-full h-full"
+                      placeholder={
+                        <Skeleton.Image
+                          active
+                          className="!w-full !h-full !flex !items-center !justify-center rounded-lg"
+                        />
+                      }
+                    />
+
+                    <div className="absolute top-2 right-2 bg-white/70 p-1 rounded">
+                      <Form.Item
+                        name="is_active"
+                        valuePropName="checked"
+                        noStyle
+                      >
+                        <Switch />
+                      </Form.Item>
                     </div>
                   </div>
-                  <Form.Item
-                    label="Active"
-                    name="is_active"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                </>
+                </div>
               )}
-            </Space>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Form.Item

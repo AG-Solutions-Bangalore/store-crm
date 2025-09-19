@@ -106,3 +106,42 @@ body {
 .scrollbar-custom::-webkit-scrollbar-track {
   background: transparent;
 }
+.ant-menu-light.ant-menu-root.ant-menu-inline,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-inline,
+.ant-menu-light.ant-menu-root.ant-menu-vertical,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: none !important;
+}
+:where(.css-dev-only-do-not-override-3uoqww).ant-menu-inline .ant-menu-item,
+:where(.css-dev-only-do-not-override-3uoqww).ant-menu-vertical .ant-menu-item,
+:where(.css-dev-only-do-not-override-3uoqww).ant-menu-inline
+  .ant-menu-submenu-title,
+:where(.css-dev-only-do-not-override-3uoqww).ant-menu-vertical
+  .ant-menu-submenu-title {
+  height: 35px !important;
+  line-height: 35px !important;
+}
+
+/* :where(.css-dev-only-do-not-override-3uoqww).ant-menu-sub.ant-menu-inline
+  .ant-menu-item,
+:where(.css-dev-only-do-not-override-3uoqww).ant-menu-sub.ant-menu-vertical
+  .ant-menu-item {
+  height: 35px !important;
+  line-height: 35px !important;
+} */
+:where(.css-dev-only-do-not-override-3uoqww).ant-menu-light.ant-menu-inline
+  .ant-menu-sub.ant-menu-inline,
+:where(.css-dev-only-do-not-override-3uoqww).ant-menu-light
+  > .ant-menu.ant-menu-inline
+  .ant-menu-sub.ant-menu-inline {
+  background-color: transparent !important;
+}
+.ant-menu-submenu-popup .ant-menu-item,
+.ant-menu-submenu-popup .ant-menu-item:hover,
+.ant-menu-submenu-popup .ant-menu-item-selected {
+  height: 35px !important;
+  line-height: 35px !important;
+  padding: 0 16px !important; 
+  min-height: 35px !important;
+  box-sizing: border-box;
+}

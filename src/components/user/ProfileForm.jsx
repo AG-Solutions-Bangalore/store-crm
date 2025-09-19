@@ -289,6 +289,7 @@ const ProfileForm = ({
                     onChange={(checked) =>
                       onAddressChange(idx, "is_default", checked)
                     }
+                    disabled={addressForms.length === 1}
                   />
                 </Form.Item>
               </div>

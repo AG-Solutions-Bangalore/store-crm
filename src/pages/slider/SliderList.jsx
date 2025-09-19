@@ -2,38 +2,37 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { SLIDER_LIST } from "../../api";
-import usetoken from "../../api/usetoken";
 import SliderCard from "../../components/sliders/SliderCard";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 import SliderForm from "./SliderForm";
 
 const { Option } = Select;
 const SliderList = () => {
-  const token = usetoken();
   const [selectedId, setSelecetdId] = useState(false);
   const [open, setopenDialog] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState(null);
-  const { trigger, loading: isMutating } = useApiMutation();
-  const [slider, setSliders] = useState([]);
   const [imageUrls, setImageUrls] = useState({
     userImageBase: "",
     noImage: "",
   });
-  const fetchUser = async () => {
-    const res = await trigger({
-      url: SLIDER_LIST,
-      headers: { Authorization: `Bearer ${token}` },
-    });
 
-    if (Array.isArray(res.data)) {
-      setSliders(res.data);
+  const {
+    data,
+    isLoading: isMutating,
+    refetch,
+  } = useGetApiMutation({
+    url: SLIDER_LIST,
+    queryKey: ["sliderlist"],
+  });
 
-      const userImageObj = res.image_url?.find(
-        (img) => img.image_for === "Slider"
+  useEffect(() => {
+    if (data?.data) {
+      const userImageObj = data.image_url?.find(
+        (img) => img.image_for == "Slider"
       );
-      const noImageObj = res.image_url?.find(
-        (img) => img.image_for === "No Image"
+      const noImageObj = data.image_url?.find(
+        (img) => img.image_for == "No Image"
       );
 
       setImageUrls({
@@ -41,11 +40,7 @@ const SliderList = () => {
         noImage: noImageObj?.image_url || "",
       });
     }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  }, [data]);
 
   const handleEdit = (id) => {
     setSelecetdId(null);
@@ -60,8 +55,8 @@ const SliderList = () => {
     setSelecetdId(null);
   };
 
-  const filteredUsers = slider
-    .filter((user) => {
+  const filteredUsers = data?.data
+    ?.filter((user) => {
       if (statusFilter === "active" && user.is_active !== "true") return false;
       if (statusFilter === "inactive" && user.is_active !== "false")
         return false;
@@ -80,7 +75,6 @@ const SliderList = () => {
             placeholder="Filter by status"
             onChange={(value) => setStatusFilter(value)}
             className="w-40"
-      
           >
             <Option value="active">Active</Option>
             <Option value="inactive">Inactive</Option>
@@ -120,7 +114,7 @@ const SliderList = () => {
           open={open}
           setOpenDialog={setopenDialog}
           userId={selectedId}
-          fetchUser={fetchUser}
+          fetchUser={refetch}
         />
       )}
     </Card>

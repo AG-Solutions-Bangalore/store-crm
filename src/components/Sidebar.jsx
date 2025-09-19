@@ -11,7 +11,7 @@ import {
   ShoppingOutlined,
   SolutionOutlined,
   TagsOutlined,
-  UserOutlined
+  UserOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -39,26 +39,25 @@ const getMenuItems = (collapsed) => {
           { key: "/guest-user", icon: <UserOutlined />, label: "Guest User" },
         ]
       : []),
-    { key: "/order", icon: <ShoppingCartOutlined />, label: "Order" },
+    { key: "/order", icon: <ShoppingCartOutlined />, label: "App Order" },
     {
       key: "/guest-user-order",
       icon: <ShoppingCartOutlined />,
-      label: "Guest Order",
+      label: "Web Order",
+    },
+  ];
+
+  const otherItems = [
+    {
+      key: "/supplier",
+      icon: <SolutionOutlined />,
+      label: "Supplier",
     },
     {
       key: "/team",
       icon: <SolutionOutlined />,
       label: "Team",
     },
-  ];
-
-  // const managementChildren = [
-  //   { key: "/security", icon: <LockOutlined />, label: "Security" },
-  //   { key: "/staff", icon: <SolutionOutlined />, label: "Staff" },
-  //   { key: "/delivery", icon: <CarOutlined />, label: "Delivery" },
-  // ];
-
-  const otherItems = [
     { key: "/slider", icon: <PictureOutlined />, label: "Slider" },
     { key: "/notification", icon: <BellOutlined />, label: "Notification" },
     {
@@ -101,13 +100,14 @@ const getMenuItems = (collapsed) => {
       //   label: "Management",
       //   children: managementChildren,
       // },
-      ...otherItems,
+
       {
         key: "sub2",
         icon: <BarChartOutlined />,
         label: <span id="report-scroll-anchor">Report</span>,
         children: reportItemsChildren,
       },
+      ...otherItems,
     ];
   }
 
@@ -137,11 +137,6 @@ const getMenuItems = (collapsed) => {
 
     {
       type: "group",
-      label: "Others",
-      children: otherItems,
-    },
-    {
-      type: "group",
       label: "Report",
       children: [
         {
@@ -152,6 +147,11 @@ const getMenuItems = (collapsed) => {
           children: reportItemsChildren,
         },
       ],
+    },
+    {
+      type: "group",
+      label: "Others",
+      children: otherItems,
     },
   ];
 };

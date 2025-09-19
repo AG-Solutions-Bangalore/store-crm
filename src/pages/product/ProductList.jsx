@@ -6,6 +6,7 @@ import { PRODUCT_LIST } from "../../api";
 import usetoken from "../../api/usetoken";
 import ProductCard from "../../components/product/ProductCard";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 const { Search } = Input;
 const ProductList = () => {
   const { message } = App.useApp();
@@ -22,33 +23,31 @@ const ProductList = () => {
     userImageBase: "",
     noImage: "",
   });
-  const fetchUser = async () => {
-    const queryParams = new URLSearchParams();
-    const term = searchTerm.trim().toLowerCase();
+  const queryParams = new URLSearchParams();
+  const term = searchTerm.trim().toLowerCase();
 
-    if ("inactive".startsWith(term) && term.length >= 4) {
-      queryParams.append("search", "false");
-    } else if ("active".startsWith(term) && term.length >= 4) {
-      queryParams.append("search", "true");
-    } else {
-      if (term) queryParams.append("search", term);
-    }
+  if ("inactive".startsWith(term) && term.length >= 4) {
+    queryParams.append("search", "false");
+  } else if ("active".startsWith(term) && term.length >= 4) {
+    queryParams.append("search", "true");
+  } else {
+    if (term) queryParams.append("search", term);
+  }
+  queryParams.append("page", pageno);
 
-    queryParams.append("page", pageno);
-
-    const res = await trigger({
-      url: `${PRODUCT_LIST}?${queryParams.toString()}`,
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res) {
-      setUsers(res.data.data);
-      setTotalPages(res.data?.last_page || 1);
-      setPageSize(res.data?.per_page || 10);
-      const userImageObj = res.image_url?.find(
+  const { data, isLoading: loading } = useGetApiMutation({
+    url: `${PRODUCT_LIST}?${queryParams.toString()}`,
+    queryKey: ["productlist", pageno, term],
+  });
+  useEffect(() => {
+    if (data?.data?.data) {
+      setUsers(data?.data?.data || []);
+      setTotalPages(data.data?.last_page || 1);
+      setPageSize(data.data?.per_page || 10);
+      const userImageObj = data.image_url?.find(
         (img) => img.image_for == "Product"
       );
-      const noImageObj = res.image_url?.find(
+      const noImageObj = data.image_url?.find(
         (img) => img.image_for == "No Image"
       );
 
@@ -57,11 +56,7 @@ const ProductList = () => {
         noImage: noImageObj?.image_url || "",
       });
     }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, [pageno, searchTerm]);
+  }, [pageno, searchTerm, data]);
 
   const handleToggleStatus = async (user) => {
     try {
@@ -133,11 +128,11 @@ const ProductList = () => {
           </div>
         </div>
 
-        {isMutating ? (
+        {loading || isMutating ? (
           <div className="flex justify-center py-20">
             <Spin size="large" />
           </div>
-        ) : users.length > 0 ? (
+        ) : data?.data?.data?.length > 0 ? (
           <div className="min-h-[22rem]">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {users.map((user) => (
@@ -157,7 +152,7 @@ const ProductList = () => {
           </div>
         )}
         <div className="flex justify-center mt-8">
-          {!isMutating && users.length > 0 && (
+          {!loading && data?.data?.data?.length > 0 && (
             <div className="flex justify-center mt-8">
               <Pagination
                 current={pageno}
