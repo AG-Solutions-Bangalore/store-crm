@@ -28,7 +28,7 @@ export function useGetApiMutation({
       });
       return response;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes default
+    // staleTime: 5 * 60 * 1000, 
     ...options,
   });
 

@@ -16,14 +16,22 @@ import {
   Switch,
   Upload,
   App,
+  Popconfirm,
+  Tooltip,
 } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { CATEGORY_ACTIVE, FETCH_UNIT, PRODUCT_LIST } from "../../api";
+import {
+  CATEGORY_ACTIVE,
+  FETCH_UNIT,
+  PRODUCT_LIST,
+  PRODUCT_SUB,
+} from "../../api";
 import usetoken from "../../api/usetoken";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import CropImageModal from "../../components/common/CropImageModal";
 import CardHeader from "../../components/common/CardHeader";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const ProductForm = () => {
   const { message } = App.useApp();
@@ -36,6 +44,7 @@ const ProductForm = () => {
 
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
+  const { trigger: DeleteTrigger } = useApiMutation();
   const [form] = Form.useForm();
   const [categoryData, setCategoryData] = useState([]);
   const [unitData, setUnitData] = useState([]);
@@ -264,7 +273,26 @@ const ProductForm = () => {
       }
     }
   };
-
+  const handleDelete = async (id) => {
+    try {
+      if (id) {
+        const res = await DeleteTrigger({
+          url: `${PRODUCT_SUB}/${id}`,
+          method: "delete",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.code == 201) {
+          message.success(res.message || "Product removed successfully");
+          fetchProduct();
+        }
+      }
+    } catch (error) {
+      console.error("Delete failed", error);
+      message.error("Failed to delete product");
+    }
+  };
   return fetchLoading ? (
     <div className="flex justify-center py-20">
       <Spin size="large" />
@@ -563,6 +591,10 @@ const ProductForm = () => {
 
                 {fields.map(({ key, name, ...restField }, index) => {
                   const current = productForms[index] || {};
+
+                  const isDefault = current.is_default;
+                  const isActive = current.is_active;
+
                   return (
                     <Card
                       key={key}
@@ -570,23 +602,53 @@ const ProductForm = () => {
                       style={{ marginBottom: "10px" }}
                       title={`Image ${index + 1}`}
                       extra={
-                        <Button
-                          danger
-                          size="small"
-                          icon={<DeleteOutlined />}
-                          onClick={() => {
-                            const updated = [...productForms];
-                            updated.splice(index, 1);
-                            setProductForms(updated);
-                            remove(name);
-                          }}
-                          disabled={fields.length === 1}
-                        >
-                          Remove
-                        </Button>
+                        isEditMode && isDefault ? (
+                          // 🚫 In edit mode → Default image cannot be deleted
+                          <Tooltip title="Default image cannot be deleted">
+                            <Button
+                              danger
+                              size="small"
+                              icon={<DeleteOutlined />}
+                              disabled
+                            >
+                              Delete
+                            </Button>
+                          </Tooltip>
+                        ) : current.id ? (
+                          <Popconfirm
+                            title="Are you sure you want to delete this image?"
+                            onConfirm={() => handleDelete(current.id)}
+                            okText="Yes"
+                            cancelText="No"
+                            disabled={fields.length === 1}
+                          >
+                            <Button
+                              danger
+                              size="small"
+                              icon={<DeleteOutlined />}
+                              disabled={fields.length === 1}
+                            >
+                              Delete
+                            </Button>
+                          </Popconfirm>
+                        ) : (
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              const updated = [...productForms];
+                              updated.splice(index, 1);
+                              setProductForms(updated);
+                              remove(name);
+                            }}
+                            disabled={fields.length === 1}
+                          >
+                            Remove
+                          </Button>
+                        )
                       }
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Upload */}
                         <Form.Item
                           {...restField}
                           name={[name, "product_images"]}
@@ -596,29 +658,14 @@ const ProductForm = () => {
                             <Avatar
                               size={36}
                               src={current.preview}
-                              // src={
-                              //   current.preview
-                              //     ? `${current.preview}?v=${Math.random()}`
-                              //     : ""
-                              // }
                               icon={<UserOutlined />}
                             />
-                            {/* <Upload
-                            showUploadList={false}
-                            accept="image/*"
-                            beforeUpload={(file) =>
-                              handleImageUpload(index, file)
-                            }
-                          > */}
                             <Upload
                               showUploadList={false}
                               accept="image/*"
                               beforeUpload={(file) => {
-                                // setCategoryFile(file);
                                 handleImageUpload(index, file);
                                 const reader = new FileReader();
-                                // reader.onload = () =>
-                                //   setCategoryFilePreview(reader.result);
                                 reader.readAsDataURL(file);
                                 return false;
                               }}
@@ -628,18 +675,43 @@ const ProductForm = () => {
                           </div>
                         </Form.Item>
 
+                        {/* Default Switch */}
                         <Form.Item
                           name={[name, "is_default"]}
                           label="Default"
                           valuePropName="checked"
                         >
-                          <Switch
-                            checked={current.is_default}
-                            onChange={(checked) =>
-                              updateProductField(index, "is_default", checked)
+                          <Tooltip
+                            title={
+                              isEditMode
+                                ? !isActive
+                                  ? "Inactive cannot make Default"
+                                  : isDefault &&
+                                    productForms.filter((i) => i.is_default)
+                                      .length === 1
+                                  ? "At least one sub must remain default"
+                                  : ""
+                                : ""
                             }
-                            disabled={isEditMode ? fields.length === 1 : ""}
-                          />
+                          >
+                            <Switch
+                              checked={isDefault}
+                              onChange={(checked) => {
+                                updateProductField(
+                                  index,
+                                  "is_default",
+                                  checked
+                                );
+                              }}
+                              disabled={
+                                isEditMode &&
+                                (!isActive ||
+                                  (isDefault &&
+                                    productForms.filter((i) => i.is_default)
+                                      .length === 1))
+                              }
+                            />
+                          </Tooltip>
                         </Form.Item>
 
                         {isEditMode && (
@@ -648,19 +720,41 @@ const ProductForm = () => {
                             label="Active"
                             valuePropName="checked"
                           >
-                            <Switch
-                              checked={current.is_active}
-                              onChange={(checked) =>
-                                updateProductField(index, "is_active", checked)
+                            <Tooltip
+                              title={
+                                isDefault
+                                  ? "Default  cannot be Inactive"
+                                  : isActive &&
+                                    productForms.filter((i) => i.is_active)
+                                      .length === 1
+                                  ? "At least one must remain Active"
+                                  : ""
                               }
-                              disabled={isEditMode ? fields.length === 1 : ""}
-                            />
+                            >
+                              <Switch
+                                checked={isActive}
+                                onChange={(checked) => {
+                                  updateProductField(
+                                    index,
+                                    "is_active",
+                                    checked
+                                  );
+                                }}
+                                disabled={
+                                  isDefault ||
+                                  (isActive &&
+                                    productForms.filter((i) => i.is_active)
+                                      .length === 1)
+                                }
+                              />
+                            </Tooltip>
                           </Form.Item>
                         )}
                       </div>
                     </Card>
                   );
                 })}
+
                 <Form.Item name="is_default_error" style={{ display: "none" }}>
                   <div />
                 </Form.Item>
@@ -691,7 +785,7 @@ const ProductForm = () => {
         imageSrc={cropImageSrc}
         onCancel={() => setCropModalOpen(false)}
         onCropComplete={handleCropComplete}
-        maxCropSize={{ width: 600, height: 800 }}
+        maxCropSize={{ width: 700, height: 800 }}
         // maxCropSize={{ width: 700, height: 1000 }}
         title="Crop Product Image"
         cropstucture={false}
