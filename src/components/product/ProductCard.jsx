@@ -19,7 +19,6 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
     product_spl_offer_price,
     subs,
   } = user;
-
   const isActive = is_active == "true";
   const offerPrice = parseFloat(product_spl_offer_price);
 
@@ -39,45 +38,40 @@ const ProductCard = ({ user, onToggleStatus, onEdit, imageUrls }) => {
         className="w-full mb-4 relative overflow-hidden rounded-lg"
         style={{ height: "180px" }}
       >
-        <Carousel
-          autoplay
-          autoplaySpeed={2500}
-          // dots={false}
-          className="w-full h-full"
-        >
-          {(Array.isArray(subs) && subs.length > 0 ? subs : [null]).map(
-            (item, index) => {
-              const img =
-                typeof item === "string" ? item : item?.product_images ?? null;
+        <Carousel autoplay autoplaySpeed={2500} className="w-full h-full">
+          {(Array.isArray(subs)
+            ? subs.filter((item) => item.is_active === "true")
+            : [null]
+          ).map((item, index) => {
+            const img = item?.product_images ?? null;
+            const src = img
+              ? `${imageUrls.userImageBase + img}?v=${Math.random()}`
+              : imageUrls.noImage;
 
-              const src = img
-                ? `${imageUrls.userImageBase + img}?v=${Math.random()}`
-                : imageUrls.noImage;
-
-              return (
-                <div
-                  key={index}
-                  className="w-full h-[180px] flex items-center justify-center bg-white"
-                >
-                  <Image
-                    src={src}
-                    alt={`Product image ${index + 1}`}
-                    preview={true}
-                    className="w-full h-full object-cover rounded-lg"
-                    wrapperClassName="w-full h-full"
-                    placeholder={
-                      <Skeleton.Image
-                        active
-                        className="!w-full !h-full !flex !items-center !justify-center rounded-lg"
-                      />
-                    }
-                  />
-                </div>
-              );
-            }
-          )}
+            return (
+              <div
+                key={index}
+                className="w-full h-[180px] flex items-center justify-center bg-white"
+              >
+                <Image
+                  src={src}
+                  alt={`Product image ${index + 1}`}
+                  preview={true}
+                  className="w-full h-full object-cover rounded-lg"
+                  wrapperClassName="w-full h-full"
+                  placeholder={
+                    <Skeleton.Image
+                      active
+                      className="!w-full !h-full !flex !items-center !justify-center rounded-lg"
+                    />
+                  }
+                />
+              </div>
+            );
+          })}
         </Carousel>
       </div>
+
       <div className="px-2 mb-2">
         <h3 className="text-base font-semibold mb-2 text-[#333] leading-tight">
           {product_name || ""}

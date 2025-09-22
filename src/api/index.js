@@ -37,6 +37,8 @@ export const CATEGORY_ACTIVE = `/categorys/active`;
 export const FETCH_UNIT = `/panel-fetch-unit`;
 //PRODUCT_LIST
 export const PRODUCT_LIST = `/product`;
+//PRODUCT_SUB
+export const PRODUCT_SUB = `/product-sub`;
 //PRODUCT_LIST
 export const FETCH_PRODUCTLIST = `/products/active`;
 //CUSTOMER_LIST

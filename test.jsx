@@ -17,7 +17,6 @@ import {
   Upload,
   App,
   Popconfirm,
-  Tooltip,
 } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -591,10 +590,6 @@ const ProductForm = () => {
 
                 {fields.map(({ key, name, ...restField }, index) => {
                   const current = productForms[index] || {};
-
-                  const isDefault = current.is_default;
-                  const isActive = current.is_active;
-
                   return (
                     <Card
                       key={key}
@@ -602,22 +597,12 @@ const ProductForm = () => {
                       style={{ marginBottom: "10px" }}
                       title={`Image ${index + 1}`}
                       extra={
-                        isEditMode && isDefault ? (
-                          // 🚫 In edit mode → Default image cannot be deleted
-                          <Tooltip title="Default image cannot be deleted">
-                            <Button
-                              danger
-                              size="small"
-                              icon={<DeleteOutlined />}
-                              disabled
-                            >
-                              Delete
-                            </Button>
-                          </Tooltip>
-                        ) : current.id ? (
+                        productForms[index]?.id ? (
                           <Popconfirm
                             title="Are you sure you want to delete this image?"
-                            onConfirm={() => handleDelete(current.id)}
+                            onConfirm={() =>
+                              handleDelete(productForms[index].id)
+                            }
                             okText="Yes"
                             cancelText="No"
                             disabled={fields.length === 1}
@@ -648,7 +633,6 @@ const ProductForm = () => {
                       }
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Upload */}
                         <Form.Item
                           {...restField}
                           name={[name, "product_images"]}
@@ -658,14 +642,29 @@ const ProductForm = () => {
                             <Avatar
                               size={36}
                               src={current.preview}
+                              // src={
+                              //   current.preview
+                              //     ? `${current.preview}?v=${Math.random()}`
+                              //     : ""
+                              // }
                               icon={<UserOutlined />}
                             />
+                            {/* <Upload
+                            showUploadList={false}
+                            accept="image/*"
+                            beforeUpload={(file) =>
+                              handleImageUpload(index, file)
+                            }
+                          > */}
                             <Upload
                               showUploadList={false}
                               accept="image/*"
                               beforeUpload={(file) => {
+                                // setCategoryFile(file);
                                 handleImageUpload(index, file);
                                 const reader = new FileReader();
+                                // reader.onload = () =>
+                                //   setCategoryFilePreview(reader.result);
                                 reader.readAsDataURL(file);
                                 return false;
                               }}
@@ -675,43 +674,22 @@ const ProductForm = () => {
                           </div>
                         </Form.Item>
 
-                        {/* Default Switch */}
                         <Form.Item
                           name={[name, "is_default"]}
                           label="Default"
                           valuePropName="checked"
                         >
-                          <Tooltip
-                            title={
-                              isEditMode
-                                ? !isActive
-                                  ? "Inactive cannot make Default"
-                                  : isDefault &&
-                                    productForms.filter((i) => i.is_default)
-                                      .length === 1
-                                  ? "At least one sub must remain default"
-                                  : ""
-                                : ""
+                          <Switch
+                            checked={current.is_default}
+                            onChange={(checked) =>
+                              updateProductField(index, "is_default", checked)
                             }
-                          >
-                            <Switch
-                              checked={isDefault}
-                              onChange={(checked) => {
-                                updateProductField(
-                                  index,
-                                  "is_default",
-                                  checked
-                                );
-                              }}
-                              disabled={
-                                isEditMode &&
-                                (!isActive ||
-                                  (isDefault &&
-                                    productForms.filter((i) => i.is_default)
-                                      .length === 1))
-                              }
-                            />
-                          </Tooltip>
+                            disabled={
+                              current.is_default &&
+                              productForms.filter((i) => i.is_default)
+                                .length === 1
+                            }
+                          />
                         </Form.Item>
 
                         {isEditMode && (
@@ -720,41 +698,23 @@ const ProductForm = () => {
                             label="Active"
                             valuePropName="checked"
                           >
-                            <Tooltip
-                              title={
-                                isDefault
-                                  ? "Default  cannot be Inactive"
-                                  : isActive &&
-                                    productForms.filter((i) => i.is_active)
-                                      .length === 1
-                                  ? "At least one must remain Active"
-                                  : ""
+                            <Switch
+                              checked={current.is_active}
+                              onChange={(checked) =>
+                                updateProductField(index, "is_active", checked)
                               }
-                            >
-                              <Switch
-                                checked={isActive}
-                                onChange={(checked) => {
-                                  updateProductField(
-                                    index,
-                                    "is_active",
-                                    checked
-                                  );
-                                }}
-                                disabled={
-                                  isDefault ||
-                                  (isActive &&
-                                    productForms.filter((i) => i.is_active)
-                                      .length === 1)
-                                }
-                              />
-                            </Tooltip>
+                              disabled={
+                                current.is_active &&
+                                productForms.filter((i) => i.is_active)
+                                  .length === 1
+                              }
+                            />
                           </Form.Item>
                         )}
                       </div>
                     </Card>
                   );
                 })}
-
                 <Form.Item name="is_default_error" style={{ display: "none" }}>
                   <div />
                 </Form.Item>
@@ -785,7 +745,7 @@ const ProductForm = () => {
         imageSrc={cropImageSrc}
         onCancel={() => setCropModalOpen(false)}
         onCropComplete={handleCropComplete}
-        maxCropSize={{ width: 700, height: 800 }}
+        maxCropSize={{ width: 600, height: 800 }}
         // maxCropSize={{ width: 700, height: 1000 }}
         title="Crop Product Image"
         cropstucture={false}
